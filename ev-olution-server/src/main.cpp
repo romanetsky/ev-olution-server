@@ -22,13 +22,16 @@ typedef struct {
   byte prefix[sizeof(PREFIX)]; // "CAFECAFE"
   byte opCode;    // opcode: 0x01...0xFF
   int  data_size; // message leng in bytes, excluding this header
-  byte sufix[sizeof(MAGICWORD)]; // "BADABADA"
+  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
 } SerialHeader;
-
+typedef struct {
+  int nof_data_elements;
+  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
+} BatchHeader;
 typedef struct {
   int nof_elements;
-} BatchHeader;
-
+  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
+} DataHeader;
 typedef struct {
   byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
 } SerialFooter;
@@ -70,7 +73,6 @@ void loop() {
   SerialHeader* hdr = nullptr;
   byte* data = nullptr;
   unsigned int data_size = 0;
-  byte msg_opcode = 0;
   bool header_found = false;
   int n = 0;
   int k;
@@ -83,12 +85,11 @@ void loop() {
     if (n == (int)sizeof(PREFIX))
     {
       hdr = (SerialHeader*)&msg_buffer[k + 1 - (int)sizeof(PREFIX)];
-      if (hdr->sufix[0] == MAGICWORD[0] && hdr->sufix[1] == MAGICWORD[1] &&
-          hdr->sufix[2] == MAGICWORD[2] && hdr->sufix[3] == MAGICWORD[3])
+      if (hdr->magic_word[0] == MAGICWORD[0] && hdr->magic_word[1] == MAGICWORD[1] &&
+          hdr->magic_word[2] == MAGICWORD[2] && hdr->magic_word[3] == MAGICWORD[3])
       {
         data = &msg_buffer[k + sizeof(SerialHeader) + 1];
         data_size = hdr->data_size - sizeof(MAGICWORD); // size includes the MAGICWORD
-        msg_opcode = hdr->opCode;
         header_found = true;
         break;
       }
@@ -112,12 +113,12 @@ void loop() {
   else
   {
     // error
-    send_report(msg_opcode, 0, out_buffer, 0);
+    send_report(hdr->opCode, 0, out_buffer, 0);
     return;
   }
 
   int out_size = 0;
-  switch (msg_opcode)
+  switch (hdr->opCode)
   {
   case 0xEA:
     // SPI read
@@ -140,7 +141,7 @@ void loop() {
   auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
 
   // write back to HOST
-  send_report(msg_opcode, difference, out_buffer, out_size);
+  send_report(hdr->opCode, difference, out_buffer, out_size);
   // msg_size = out_size + sizeof(MAGICWORD); // includes size of the magic word
   // Serial.write((byte*)PREFIX, sizeof(PREFIX));
   // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));

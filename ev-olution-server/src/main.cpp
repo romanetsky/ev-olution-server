@@ -9,7 +9,7 @@ static const int spiClk = 1000000; // 1 MHz
 SPIClass* vspi = NULL;
 void spiWrite(SPIClass *spi, byte* data, uint32_t len);
 int  spiRead (SPIClass *spi, byte*  out, uint32_t len);
-void send_report(int msg_opcode, int64_t elapsed_time, byte* data, int data_size);
+void send_report(byte* data, int data_size);
 
 byte msg_buffer[2048];
 byte out_buffer[2048];
@@ -18,23 +18,20 @@ static const byte PREFIX[] = { 0xCA, 0xFE, 0xCA, 0xFE };
 static const byte MAGICWORD[] = { 0xBA, 0xDA, 0xBA, 0xDA };
 
 #pragma pack(push,1)
-typedef struct {
+typedef struct _serialHeader {
   byte prefix[sizeof(PREFIX)]; // "CAFECAFE"
   byte opCode;    // opcode: 0x01...0xFF
   int  data_size; // message leng in bytes, excluding this header
   byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
 } SerialHeader;
-typedef struct {
+typedef struct _batchHeader {
   int nof_data_elements;
   byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
 } BatchHeader;
-typedef struct {
+typedef struct _dataHeader {
   int nof_elements;
   byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
 } DataHeader;
-typedef struct {
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
-} SerialFooter;
 #pragma pack(pop)
 
 void setup() {
@@ -70,7 +67,11 @@ void loop() {
   auto start = std::chrono::system_clock::now();
 
   // search for the prefix "CAFECAFE"
-  SerialHeader* hdr = nullptr;
+  SerialHeader* serial_header = nullptr;
+  BatchHeader* batch_header = nullptr;
+  DataHeader* data_header = nullptr;
+  int nof_batch_elements = 0;
+
   byte* data = nullptr;
   unsigned int data_size = 0;
   bool header_found = false;
@@ -84,12 +85,11 @@ void loop() {
       n = 0;
     if (n == (int)sizeof(PREFIX))
     {
-      hdr = (SerialHeader*)&msg_buffer[k + 1 - (int)sizeof(PREFIX)];
-      if (hdr->magic_word[0] == MAGICWORD[0] && hdr->magic_word[1] == MAGICWORD[1] &&
-          hdr->magic_word[2] == MAGICWORD[2] && hdr->magic_word[3] == MAGICWORD[3])
+      serial_header = (SerialHeader*)&msg_buffer[k + 1 - (int)sizeof(PREFIX)];
+      if (serial_header->magic_word[0] == MAGICWORD[0] && serial_header->magic_word[1] == MAGICWORD[1] &&
+          serial_header->magic_word[2] == MAGICWORD[2] && serial_header->magic_word[3] == MAGICWORD[3])
       {
-        data = &msg_buffer[k + sizeof(SerialHeader) + 1];
-        data_size = hdr->data_size - sizeof(MAGICWORD); // size includes the MAGICWORD
+        data = (byte*)(serial_header) + sizeof(*serial_header);
         header_found = true;
         break;
       }
@@ -101,47 +101,87 @@ void loop() {
     }
   }
 
-  // DEBUG: write back to HOST
+  // get batch header and check it
   if (header_found)
   {
-    // Serial.write((byte*)hdr->prefix, sizeof(hdr->prefix));
-    // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));
-    // Serial.write((byte*)&data_size, sizeof(data_size));
-    // Serial.write((char*)hdr->sufix, sizeof(hdr->sufix));
-    // Serial.flush();
+    batch_header = (BatchHeader*)data;
+    if (batch_header->magic_word[0] == MAGICWORD[0] && batch_header->magic_word[1] == MAGICWORD[1] &&
+        batch_header->magic_word[2] == MAGICWORD[2] && batch_header->magic_word[3] == MAGICWORD[3])
+    {
+      nof_batch_elements = batch_header->nof_data_elements;
+    }
+    if (nof_batch_elements > 0)
+    {
+      data_header = (DataHeader*)(data + sizeof(*batch_header));
+      data = (byte*)(data_header) + sizeof(*data_header);
+    }
+
+//    // DEBUG: write back to HOST
+//    Serial.write((byte*)serial_header, sizeof(*serial_header));
+//    Serial.write((byte*)batch_header, sizeof(*batch_header));
+//    Serial.write((byte*)data_header, sizeof(*data_header));
+//    Serial.flush();
   }
   else
   {
     // error
-    send_report(hdr->opCode, 0, out_buffer, 0);
+    SerialHeader* serial_header_out = (SerialHeader*)out_buffer;
+    memcpy(serial_header_out, serial_header, sizeof(*serial_header_out));
+    serial_header_out->data_size = sizeof(BatchHeader);
+    BatchHeader* batch_header_out = (BatchHeader*)((byte*)serial_header_out + sizeof(*serial_header_out));
+    batch_header_out->nof_data_elements = 0;
+    memcpy(batch_header_out, MAGICWORD, sizeof(batch_header_out));
+    send_report(out_buffer, sizeof(*serial_header_out) + sizeof(*batch_header_out));
     return;
   }
 
+  SerialHeader* serial_header_out = (SerialHeader*)&out_buffer[0];
+  memcpy(serial_header_out, serial_header, sizeof(*serial_header_out));
+  serial_header_out->data_size = sizeof(BatchHeader);
+  BatchHeader* batch_header_out = (BatchHeader*)((byte*)serial_header_out + sizeof(*serial_header_out));
+  memcpy(batch_header_out, batch_header, sizeof(*batch_header_out));
+  DataHeader* data_header_out = (DataHeader*)((byte*)batch_header_out + sizeof(*batch_header_out));
+  memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+  byte* data_out = (byte*)data_header_out + sizeof(*data_header_out);
   int out_size = 0;
-  switch (hdr->opCode)
-  {
-  case 0xEA:
-    // SPI read
-    spiRead(vspi, out_buffer, data_size);
-    break;
-  case 0x1E:
-    // SPI write
-    spiWrite(vspi, data, data_size);
-    break;
-  case 0xEE:
-    // SPI write and read
-    spiWrite(vspi, data, data_size);
-    out_size = spiRead(vspi, out_buffer, data_size);
-    break;
-  default:
-    break;
-  }
 
-  auto stop = std::chrono::system_clock::now();
-  auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
+  for (k = 0; k < nof_batch_elements; k++)
+  {
+    switch (serial_header->opCode)
+    {
+    case 0xEA:
+      // SPI read
+      spiRead(vspi, out_buffer, data_header->nof_elements);
+      break;
+    case 0x1E:
+      // SPI write
+      spiWrite(vspi, data, data_header->nof_elements);
+      break;
+    case 0xEE:
+      // SPI write and read
+      spiWrite(vspi, data, data_header->nof_elements);
+      out_size = spiRead(vspi, data_out, data_header->nof_elements);
+      break;
+    default:
+      break;
+    }
+    data_header = (DataHeader*)(data + data_header->nof_elements);
+    data = (byte*)(data_header) + sizeof(*data_header);
+
+    // update num of output elements
+    data_header_out->nof_elements = out_size;
+
+    data_header_out = (DataHeader*)(data_out + out_size);
+    memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+    data_out += sizeof(*data_header_out);
+
+    serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+  }
+//  auto stop = std::chrono::system_clock::now();
+//  auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
 
   // write back to HOST
-  send_report(hdr->opCode, difference, out_buffer, out_size);
+  send_report(out_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
   // msg_size = out_size + sizeof(MAGICWORD); // includes size of the magic word
   // Serial.write((byte*)PREFIX, sizeof(PREFIX));
   // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));
@@ -155,16 +195,16 @@ void loop() {
   // log_i("end main loop (elapsed time %f)...", difference);
 }
 
-void send_report(int msg_opcode, int64_t elapsed_time, byte* data, int data_size)
+void send_report(byte* data, int data_size)
 {
-  int msg_size = data_size + sizeof(MAGICWORD); // includes size of the magic word
-  Serial.write((byte*)PREFIX, sizeof(PREFIX));
-  Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));
-  Serial.write((byte*)&msg_size, sizeof(msg_size));
-  Serial.write((byte*)&elapsed_time, sizeof(elapsed_time));
-  Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
+  // int msg_size = data_size + sizeof(MAGICWORD); // includes size of the magic word
+  // Serial.write((byte*)PREFIX, sizeof(PREFIX));
+  // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));
+  // Serial.write((byte*)&msg_size, sizeof(msg_size));
+  // Serial.write((byte*)&elapsed_time, sizeof(elapsed_time));
+  // Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
   Serial.write(data, data_size);
-  Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
+  //Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
   Serial.flush();
 }
 

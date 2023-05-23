@@ -5,6 +5,11 @@
 //#include <Wire.h>
 #include <SPI.h>
 
+#define VSPI_CLK  SCK
+#define VSPI_MISO MISO
+#define VSPI_MOSI MOSI
+#define VSPI_SS   SS
+
 static const int spiClk = 1000000; // 1 MHz
 SPIClass* vspi = NULL;
 void spiWrite(SPIClass *spi, byte* data, uint32_t len);
@@ -51,8 +56,9 @@ void setup() {
   // esp_err_t err = i2c_param_config(I2C_NUM_0, &conf);
   // //Wire
 
- vspi = new SPIClass(VSPI);
- vspi->begin();
+  vspi = new SPIClass(VSPI);
+  vspi->begin(VSPI_CLK, VSPI_MISO, VSPI_MOSI, VSPI_SS);
+  pinMode(VSPI_SS, OUTPUT);
 
 //  log_d("setup done...");
 }

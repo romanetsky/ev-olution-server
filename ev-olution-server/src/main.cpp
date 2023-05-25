@@ -19,23 +19,23 @@ void send_report(byte* data, int data_size);
 byte msg_buffer[2048];
 byte out_buffer[2048];
 
-static const byte PREFIX[] = { 0xCA, 0xFE, 0xCA, 0xFE };
-static const byte MAGICWORD[] = { 0xBA, 0xDA, 0xBA, 0xDA };
+static const byte PREFIX[] = { 0xCA, 0xFE };
+static const byte MAGICWORD[] = { 0xBA, 0xDA };
 
 #pragma pack(push,1)
 typedef struct _serialHeader {
-  byte prefix[sizeof(PREFIX)]; // "CAFECAFE"
+  byte prefix[sizeof(PREFIX)]; // "CAFE"
   byte opCode;    // opcode: 0x01...0xFF
   int  data_size; // message leng in bytes, excluding this header
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
+  byte magic_word[sizeof(MAGICWORD)]; // "BADA"
 } SerialHeader;
 typedef struct _batchHeader {
   int nof_data_elements;
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
+  byte magic_word[sizeof(MAGICWORD)]; // "BADA"
 } BatchHeader;
 typedef struct _dataHeader {
   int nof_elements;
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
+  byte magic_word[sizeof(MAGICWORD)]; // "BADA"
 } DataHeader;
 #pragma pack(pop)
 
@@ -125,7 +125,7 @@ void loop() {
 
   auto start = std::chrono::system_clock::now();
 
-  // search for the prefix "CAFECAFE"
+  // search for the prefix "CAFE"
   SerialHeader* serial_header = nullptr;
   BatchHeader* batch_header = nullptr;
   DataHeader* data_header = nullptr;
@@ -145,8 +145,7 @@ void loop() {
     if (n == (int)sizeof(PREFIX))
     {
       serial_header = (SerialHeader*)&msg_buffer[k + 1 - (int)sizeof(PREFIX)];
-      if (serial_header->magic_word[0] == MAGICWORD[0] && serial_header->magic_word[1] == MAGICWORD[1] &&
-          serial_header->magic_word[2] == MAGICWORD[2] && serial_header->magic_word[3] == MAGICWORD[3])
+      if (serial_header->magic_word[0] == MAGICWORD[0] && serial_header->magic_word[1] == MAGICWORD[1])
       {
         data = (byte*)(serial_header) + sizeof(*serial_header);
         header_found = true;
@@ -164,8 +163,7 @@ void loop() {
   if (header_found)
   {
     batch_header = (BatchHeader*)data;
-    if (batch_header->magic_word[0] == MAGICWORD[0] && batch_header->magic_word[1] == MAGICWORD[1] &&
-        batch_header->magic_word[2] == MAGICWORD[2] && batch_header->magic_word[3] == MAGICWORD[3])
+    if (batch_header->magic_word[0] == MAGICWORD[0] && batch_header->magic_word[1] == MAGICWORD[1])
     {
       nof_batch_elements = batch_header->nof_data_elements;
     }
@@ -204,7 +202,7 @@ void loop() {
   byte* data_out = (byte*)data_header_out + sizeof(*data_header_out);
   int out_size = 0;
 
-  for (k = 0; k < 1/*nof_batch_elements*/; k++)
+  for (k = 0; k < nof_batch_elements; k++)
   {
     switch (serial_header->opCode)
     {
@@ -226,24 +224,24 @@ void loop() {
     default:
       break;
     }
-    // data_header = (DataHeader*)(data + data_header->nof_elements);
-    // data = (byte*)(data_header) + sizeof(*data_header);
+    data_header = (DataHeader*)(data + data_header->nof_elements);
+    data = (byte*)(data_header) + sizeof(*data_header);
 
-    // // update num of output elements
-    // data_header_out->nof_elements = out_size;
+    // update num of output elements
+    data_header_out->nof_elements = out_size;
 
-    // data_header_out = (DataHeader*)(data_out + out_size);
-    // memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
-    // data_out += sizeof(*data_header_out);
+    data_header_out = (DataHeader*)(data_out + out_size);
+    memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+    data_out += sizeof(*data_header_out);
 
-    // serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+    serial_header_out->data_size += sizeof(*data_header_out) + out_size;
   }
   
 //  auto stop = std::chrono::system_clock::now();
 //  auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
 
   // write back to HOST
-//  send_report(out_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
+  send_report(out_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
   // msg_size = out_size + sizeof(MAGICWORD); // includes size of the magic word
   // Serial.write((byte*)PREFIX, sizeof(PREFIX));
   // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));

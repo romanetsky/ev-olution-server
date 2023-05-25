@@ -15,7 +15,7 @@ import time
 #     data = arduino.read_all()
 #     return data
 
-arduino = serial.Serial(port='COM9', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM5', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
 
@@ -30,9 +30,9 @@ data1 = np.array([0x44,0x03,0x44,0x03,0x44,0x03], dtype='uint8').tobytes()
 # data8 = np.array([4,1,4,1,4,1], dtype='uint8').tobytes()
 nof_batch_elements = np.array(1, dtype='uint32').tobytes()
 nof_elements = np.array(len(data1), dtype='uint32').tobytes()
-prefix = np.array([0xCA,0xFE,0xCA,0xFE], dtype='uint8').tobytes()
+prefix = np.array([0xCA,0xFE], dtype='uint8').tobytes()
 opcode = np.array([0x1E], dtype='uint8').tobytes()
-magic_word = np.array([0xBA,0xDA,0xBA,0xDA], dtype='uint8').tobytes()
+magic_word = np.array([0xBA,0xDA], dtype='uint8').tobytes()
 data_size = np.array(
     [len(nof_batch_elements) + len(magic_word) + # batch header
      len(nof_elements) + len(magic_word) + # data header 1
@@ -106,16 +106,23 @@ packet = packet + data1
 
 start_time = time.time_ns()
 arduino.write(packet)
-time.sleep(0.005)
+while arduino.in_waiting < 7:
+    None
+data_out_hdr = arduino.read(7) # read the header
+in_data_size = struct.unpack('<I', data_out_hdr[3:7])[0]
+while arduino.in_waiting < in_data_size:
+    None
 data_out = arduino.read_all()
 stop_time = time.time_ns()
+print('header: ', data_out_hdr.hex(':'))
+print('data  : ', data_out.hex(':'))
+
 # while len(data) == 0:
 #     data = arduino.read_all()
-print(data_out)
-# in_prefix = struct.unpack('<4s', data[0:4])[0]
-# in_opcode = struct.unpack('<c', data[4:5])[0]
-# in_data_size = struct.unpack('<I', data[5:9])[0]
-# in_magic_word = struct.unpack('<4s', data[9:13])[0]
+# in_prefix = struct.unpack('<2s', data[0:2])[0]
+# in_opcode = struct.unpack('<c', data[2:3])[0]
+# in_data_size = struct.unpack('<I', data[3:7])[0]
+# in_magic_word = struct.unpack('<2s', data[7:9])[0]
 # print('hdr.prefix\t\t: ', in_prefix)
 # print('hdr.opcode\t\t: ', in_opcode)
 # print('hdr.data_size\t: ', in_data_size)

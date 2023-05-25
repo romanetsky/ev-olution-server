@@ -1,0 +1,8 @@
+{
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
+    }
+}

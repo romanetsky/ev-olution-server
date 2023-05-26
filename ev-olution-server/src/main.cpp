@@ -4,6 +4,9 @@
 //#include "driver/i2c.h"
 //#include <Wire.h>
 #include <SPI.h>
+#include "BluetoothSerial.h"
+
+BluetoothSerial SerialBT;
 
 #define SPI_SCK 18    // SPI clock pin
 #define SPI_MISO 19   // SPI MISO (Master-In Slave-Out) pin
@@ -16,16 +19,17 @@ void spiWrite(SPIClass *spi, byte* data, uint32_t len);
 int  spiRead (SPIClass *spi, byte*  out, uint32_t len);
 void send_report(byte* data, int data_size);
 
-byte msg_buffer[2048];
-byte out_buffer[2048];
+byte msg_buffer[512];
+byte out_buffer[512];
 
 static const byte PREFIX[] = { 0xCA, 0xFE };
 static const byte MAGICWORD[] = { 0xBA, 0xDA };
+static const byte ERROR_OPCODE = 0xEF;
 
 #pragma pack(push,1)
 typedef struct _serialHeader {
   byte prefix[sizeof(PREFIX)]; // "CAFE"
-  byte opCode;    // opcode: 0x01...0xFF
+  byte opCode;    // opcode: 0x01...0xEF
   int  data_size; // message leng in bytes, excluding this header
   byte magic_word[sizeof(MAGICWORD)]; // "BADA"
 } SerialHeader;
@@ -45,6 +49,10 @@ void setup() {
 
   Serial.begin(115200);
   Serial.setTimeout(1);
+
+  SerialBT.begin(115200);
+  SerialBT.setPin("1234");
+
   // i2c_config_t conf = {
   //   .mode = I2C_MODE_MASTER,
   //   .sda_io_num = 21,
@@ -120,8 +128,26 @@ void loop() {
   // put your main code here, to run repeatedly:
 //  log_i("start main loop...");
 
-  while (!Serial.available());
-  int msg_size = (int)Serial.readBytes(msg_buffer, sizeof(msg_buffer));
+  int msg_size = 0;
+  if (SerialBT.available())
+  {
+    msg_size = (int)SerialBT.readBytes(msg_buffer, sizeof(msg_buffer));
+  }
+  else if (Serial.available())
+  {
+    msg_size = (int)Serial.readBytes(msg_buffer, sizeof(msg_buffer));
+  }
+  else
+  {
+    // no connections available, return
+    return;
+  }
+
+  if (msg_size < sizeof(SerialHeader))
+  {
+    // not enough data
+    return;
+  }
 
   auto start = std::chrono::system_clock::now();
 
@@ -183,12 +209,11 @@ void loop() {
   {
     // error
     SerialHeader* serial_header_out = (SerialHeader*)out_buffer;
-    memcpy(serial_header_out, serial_header, sizeof(*serial_header_out));
-    serial_header_out->data_size = sizeof(BatchHeader);
-    BatchHeader* batch_header_out = (BatchHeader*)((byte*)serial_header_out + sizeof(*serial_header_out));
-    batch_header_out->nof_data_elements = 0;
-    memcpy(batch_header_out, MAGICWORD, sizeof(batch_header_out));
-    send_report(out_buffer, sizeof(*serial_header_out) + sizeof(*batch_header_out));
+    memcpy(serial_header_out->prefix, PREFIX, sizeof(PREFIX));
+    serial_header_out->data_size = 0;
+    serial_header_out->opCode = ERROR_OPCODE; // error
+    memcpy(serial_header_out, MAGICWORD, sizeof(MAGICWORD)); 
+    send_report(out_buffer, sizeof(SerialHeader));
     return;
   }
 
@@ -263,9 +288,9 @@ void send_report(byte* data, int data_size)
   // Serial.write((byte*)&msg_size, sizeof(msg_size));
   // Serial.write((byte*)&elapsed_time, sizeof(elapsed_time));
   // Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
-  Serial.write(data, data_size);
+  SerialBT.write(data, data_size);
   //Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
-  Serial.flush();
+  SerialBT.flush();
 }
 
 void spiWrite(SPIClass *spi, byte* data, uint32_t len) {

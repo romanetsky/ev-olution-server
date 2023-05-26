@@ -18,6 +18,7 @@ import time
 arduino = serial.Serial(port='COM5', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
+print(data)
 
 data1 = np.array([0x44,0x03,0x44,0x03,0x44,0x03], dtype='uint8').tobytes()
 # data1 = np.array([9,165,9,85,9,85], dtype='uint8').tobytes()

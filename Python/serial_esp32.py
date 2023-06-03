@@ -18,40 +18,29 @@ import time
 arduino = serial.Serial(port='COM5', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
-print(data)
+arduino.flushInput()
 
-data1 = np.array([0x44,0x03,0x44,0x03,0x44,0x03], dtype='uint8').tobytes()
-# data1 = np.array([9,165,9,85,9,85], dtype='uint8').tobytes()
-# data2 = np.array([10,90,10,85,10,85], dtype='uint8').tobytes()
-# data3 = np.array([11,90,11,85,11,85], dtype='uint8').tobytes()
-# data4 = np.array([12,85,12,85,12,85], dtype='uint8').tobytes()
-# data5 = np.array([13,170,13,85,13,85], dtype='uint8').tobytes()
-# data6 = np.array([14,85,14,85,14,85], dtype='uint8').tobytes()
-# data7 = np.array([15,90,15,85,15,85], dtype='uint8').tobytes()
-# data8 = np.array([4,1,4,1,4,1], dtype='uint8').tobytes()
-nof_batch_elements = np.array(1, dtype='uint32').tobytes()
-nof_elements = np.array(len(data1), dtype='uint32').tobytes()
+# data1 = np.array([[4,1,4,1,4,1],
+#                  [0,1,2,3,4,5]], dtype='uint8')
+data1 = np.array([[68,1,68,0,68,2],
+                  [76,0,76,0,76,80],
+                  [84,0,84,0,84,0],
+                  [92,0,92,0,92,0]], dtype='uint8')
+
+data1 = np.array([[68,1,68,0,68,132],
+                  [76,0,76,0,76,64],
+                  [84,0,84,0,84,0],
+                  [92,0,92,0,92,0]], dtype='uint8')
+nx, ny = data1.shape;
+nof_batch_elements = np.array(nx, dtype='uint32').tobytes()
+nof_elements = np.array(ny, dtype='uint32').tobytes()
 prefix = np.array([0xCA,0xFE], dtype='uint8').tobytes()
-opcode = np.array([0x1E], dtype='uint8').tobytes()
+opcode = np.array([0x2E], dtype='uint8').tobytes()
 magic_word = np.array([0xBA,0xDA], dtype='uint8').tobytes()
 data_size = np.array(
-    [len(nof_batch_elements) + len(magic_word) + # batch header
-     len(nof_elements) + len(magic_word) + # data header 1
-     len(data1) + len(magic_word)  # data 1
-     # len(nof_elements) + len(magic_word) +  # data header 2
-     # len(data2) + len(magic_word) + # data 2
-     # len(nof_elements) + len(magic_word) + # data header 3
-     # len(data3) + len(magic_word) + # data 3
-     # len(nof_elements) + len(magic_word) + # data header 4
-     # len(data4) + len(magic_word) + # data 4
-     # len(nof_elements) + len(magic_word) + # data header 5
-     # len(data5) + len(magic_word) + # data 5
-     # len(nof_elements) + len(magic_word) + # data header 6
-     # len(data6) + len(magic_word) + # data 6
-     # len(nof_elements) + len(magic_word) + # data header 7
-     # len(data7) + len(magic_word) + # data 7
-     # len(nof_elements) + len(magic_word) + # data header 8
-     # len(data8) + len(magic_word) # data 8
+    [len(nof_batch_elements) + len(magic_word) +    # batch header
+     nx*(len(nof_elements) + len(magic_word) +      # data headers
+     len(data1) + len(magic_word))                  # datum
     ],
     dtype='uint32').tobytes()
 
@@ -63,60 +52,30 @@ packet = packet + magic_word
 # batch header
 packet = packet + nof_batch_elements
 packet = packet + magic_word
-# data header 1
-packet = packet + nof_elements
-packet = packet + magic_word
-# data 1
-packet = packet + data1
-# # data header 2
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 2
-# packet = packet + data2
-# # data header 3
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 3
-# packet = packet + data3
-# # data header 4
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 4
-# packet = packet + data4
-# # data header 5
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 5
-# packet = packet + data5
-# # data header 6
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 6
-# packet = packet + data6
-# # data header 7
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 7
-# packet = packet + data7
-# # data header 8
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 8
-# packet = packet + data8
- 
+for k in range(0, nx):
+    # data header
+    packet = packet + magic_word
+    packet = packet + nof_elements
+    # data
+    packet = packet + data1[k,:].tobytes()
 
+arduino.flushInput()
 start_time = time.time_ns()
 arduino.write(packet)
-while arduino.in_waiting < 7:
+while arduino.in_waiting < 9:
     None
-data_out_hdr = arduino.read(7) # read the header
+data_out_hdr = arduino.read(9) # read the header
 in_data_size = struct.unpack('<I', data_out_hdr[3:7])[0]
 while arduino.in_waiting < in_data_size:
     None
 data_out = arduino.read_all()
 stop_time = time.time_ns()
-print('header: ', data_out_hdr.hex(':'))
-print('data  : ', data_out.hex(':'))
+print('header      : ', data_out_hdr.hex(':'))
+print('batch header: ', data_out[0:6].hex(':'))
+print('data        : ', data_out[6:].hex(':'))
+print('overall command time: ', (stop_time - start_time)/1000000, ' msec')
+
+arduino.close()
 
 # while len(data) == 0:
 #     data = arduino.read_all()
@@ -148,8 +107,6 @@ print('data  : ', data_out.hex(':'))
 #     print('\t\tdata_hdr.magic_word\t\t: ', in_magic_word)
 #     print('\t\tdata_hdr.data\t\t\t: ', in_data)
 
-print('overall command time: ', (stop_time - start_time)/1000000, ' msec')
-arduino.close()
 
 # time.sleep(1)
 # data = arduino.read_all()

@@ -1,13 +1,12 @@
 #include <Arduino.h>
 #include <chrono>
 #include <esp32-hal-log.h>
-//#include "driver/i2c.h"
 //#include <Wire.h>>
 #include "idd.h"
 #include "spi_lib.h"
-//#include "serial_rxtx.h"
+#include "i2c_lib.h"
 
-#define LED_POWER_ON        4
+#define POWER_ON_PIN        4
 #define LED_STATUS          27
 #define SerialBaudRate      115200
 #define SerialTimeOutMS     1
@@ -17,7 +16,7 @@ byte rx_buffer[RCV_BUFFER_SIZE];
 byte tx_buffer[RCV_BUFFER_SIZE];
 
 SpiLib spi_lib;
-SPIClass* m_spi;
+I2CLib i2c_lib;
 
 void setup() {
   // put your setup code here, to run once:
@@ -26,21 +25,14 @@ void setup() {
   Serial.begin(SerialBaudRate);
   Serial.setTimeout(SerialTimeOutMS);
 
-  // i2c_config_t conf = {
-  //   .mode = I2C_MODE_MASTER,
-  //   .sda_io_num = 21,
-  //   .scl_io_num = 22,
-  //   .sda_pullup_en = GPIO_PULLUP_ENABLE,
-  //   .scl_pullup_en = GPIO_PULLUP_ENABLE,
-  //   .master.clk_speed = 100000,
-  // };
-  // esp_err_t err = i2c_param_config(I2C_NUM_0, &conf);
-  // //Wire
-
-  pinMode(LED_POWER_ON, OUTPUT);
-  digitalWrite(LED_POWER_ON, HIGH);
+  // power ON
+  pinMode(POWER_ON_PIN, OUTPUT);
+  digitalWrite(POWER_ON_PIN, HIGH);
   delay(1);
 
+  // I2C library init
+//  i2c_lib.Init();
+  // SPI library init
   spi_lib.Init();
 
 // m_spi = new SPIClass(VSPI);
@@ -158,7 +150,7 @@ void setup() {
   pinMode(LED_STATUS, OUTPUT);
   digitalWrite(LED_STATUS, HIGH);
 
-//  log_d("setup done...");
+  //  log_d("setup done...");
 }
 
 void loop() {
@@ -166,12 +158,13 @@ void loop() {
 
   auto start = std::chrono::system_clock::now();
 
-  while (!Serial.available());
+  // wait for the serial header
+  while (Serial.available() < sizeof(SerialHeader)) delay(1);
 
   int msg_size = (int)Serial.readBytes(rx_buffer, RCV_BUFFER_SIZE);
-  if (msg_size < sizeof(SerialHeader) || rx_buffer == nullptr)
+  // if not enough data, return 
+  if (rx_buffer == nullptr || msg_size < sizeof(SerialHeader))
   {
-    // not enough data, return 
     return;
   }
 
@@ -181,19 +174,15 @@ void loop() {
   DataHeader *data_header = nullptr;
 
   // sync on serial header
-  bool synched = idd_decode(IN rx_buffer, IN msg_size,
-                       OUT &serial_header, OUT &batch_header, OUT &data_header);
+  byte error_code = idd_decode(
+    IN rx_buffer, IN msg_size,
+    OUT &serial_header, OUT &batch_header, OUT &data_header
+  );
 
-  if (synched == false)
+  if (error_code != OPCODE_ERROR_OK)
   {
-    // error
-    SerialHeader* serial_header_out = (SerialHeader*)tx_buffer;
-    memcpy(serial_header_out->prefix, PREFIX, sizeof(PREFIX));
-    serial_header_out->data_size = 0;
-    serial_header_out->opCode = ERROR_OPCODE; // error
-    memcpy(serial_header_out, MAGICWORD, sizeof(MAGICWORD)); 
-    Serial.write(tx_buffer, sizeof(SerialHeader));
-    Serial.flush();
+    // send error
+    send_error(tx_buffer, error_code);
     return;
   }
 
@@ -202,6 +191,7 @@ void loop() {
   serial_header_out->data_size = sizeof(BatchHeader);
   BatchHeader* batch_header_out = (BatchHeader*)((byte*)serial_header_out + sizeof(*serial_header_out));
   memcpy(batch_header_out, batch_header, sizeof(*batch_header_out));
+  batch_header_out->nof_data_elements = 0; // it will be updated lated, in accordance with message type 
   DataHeader* data_header_out = (DataHeader*)((byte*)batch_header_out + sizeof(*batch_header_out));
   memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
   byte* data_out = (byte*)data_header_out + sizeof(*data_header_out);
@@ -212,28 +202,33 @@ void loop() {
   {
     switch (serial_header->opCode)
     {
-    case 0x1E:
+    case OPCODE_SPI_READ:
+      // SPI read
+      out_size = spi_lib.read(data, data_out, data_header->nof_elements);
+
+      // increment nof batch elements
+      batch_header_out->nof_data_elements += 1;
+
+      // update num of output elements
+      data_header_out->nof_elements = out_size;
+      // advance data header ptr
+      data_header_out = (DataHeader *)(data_out + out_size);
+      memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+      data_out += sizeof(*data_header_out) + out_size;
+      // update total size
+      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+      break;
+    case OPCODE_SPI_WRITE:
       // SPI write
       spi_lib.write(data, data_header->nof_elements);
-      break;
-    case 0x2E:
-      // SPI write and read
-      out_size = spi_lib.writeRead(data, data_out, data_header->nof_elements);
       break;
     default:
       break;
     }
+
+    //
     data_header = (DataHeader*)(data + data_header->nof_elements);
     data = (byte*)(data_header) + sizeof(*data_header);
-
-    // update num of output elements
-    data_header_out->nof_elements = out_size;
-
-    data_header_out = (DataHeader*)(data_out + out_size);
-    memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
-    data_out += sizeof(*data_header_out) + out_size;
-
-    serial_header_out->data_size += sizeof(*data_header_out) + out_size;
   }
 
   auto stop = std::chrono::system_clock::now();

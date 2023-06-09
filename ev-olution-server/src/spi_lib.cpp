@@ -101,13 +101,14 @@ void SpiLib::write(byte *data_in, uint32_t len)
     spiDisable_();
 }
 
-int SpiLib::writeRead(byte *data_in, byte *data_out, uint32_t len)
+int SpiLib::read(byte *data_in, byte *data_out, uint32_t len)
 {
     int out_size = 0;
     spiEnable_();
     for (int k = 0; k < len; k++)
     {
-        data_out[out_size++] = m_spi->transfer(data_in[k]);
+        // rise last bit (0x80) to indicate reading
+        data_out[out_size++] = m_spi->transfer(data_in[k] /*| 0x80*/);
     }
     spiDisable_();
 

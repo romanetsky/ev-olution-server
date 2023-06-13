@@ -1,13 +1,13 @@
 #include <Arduino.h>
 #include <chrono>
 #include <esp32-hal-log.h>
-//#include <Wire.h>>
 #include "idd.h"
 #include "spi_lib.h"
 #include "i2c_lib.h"
 
 #define POWER_ON_PIN        4
 #define LED_STATUS          27
+#define PAC_POWER_PIN       25
 #define SerialBaudRate      115200
 #define SerialTimeOutMS     1
 #define RCV_BUFFER_SIZE     512
@@ -19,7 +19,6 @@ SpiLib spi_lib;
 I2CLib i2c_lib;
 
 void setup() {
-  // put your setup code here, to run once:
 //  log_d("begin setup...");
 
   Serial.begin(SerialBaudRate);
@@ -27,124 +26,28 @@ void setup() {
 
   // power ON
   pinMode(POWER_ON_PIN, OUTPUT);
+  digitalWrite(POWER_ON_PIN, LOW);
+  delay(1);
   digitalWrite(POWER_ON_PIN, HIGH);
   delay(1);
 
-  // I2C library init
-//  i2c_lib.Init();
-  // SPI library init
-  spi_lib.Init();
+  // PAC power ON
+  pinMode(PAC_POWER_PIN, OUTPUT);
+  digitalWrite(PAC_POWER_PIN, LOW);
+  delay(1);
+  digitalWrite(PAC_POWER_PIN, HIGH);
+  delay(1);
 
-// m_spi = new SPIClass(VSPI);
-// m_spi->begin();
-// pinMode(5, OUTPUT);
-//     byte data[6];
-//     int len = sizeof(data);
-//     data[0] = 0x09;
-//     data[1] = 0xA5;
-//     data[2] = 0x09;
-//     data[3] = 0x55;
-//     data[4] = 0x09;
-//     data[5] = 0x55;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
-//     data[0] = 11;
-//     data[1] = 90;
-//     data[2] = 11;
-//     data[3] = 85;
-//     data[4] = 11;
-//     data[5] = 85;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
-//     data[0] = 12;
-//     data[1] = 85;
-//     data[2] = 12;
-//     data[3] = 85;
-//     data[4] = 12;
-//     data[5] = 85;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
-//     data[0] = 13;
-//     data[1] = 170;
-//     data[2] = 13;
-//     data[3] = 85;
-//     data[4] = 13;
-//     data[5] = 85;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
-//     data[0] = 14;
-//     data[1] = 85;
-//     data[2] = 14;
-//     data[3] = 85;
-//     data[4] = 14;
-//     data[5] = 85;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
-//     data[0] = 15;
-//     data[1] = 90;
-//     data[2] = 15;
-//     data[3] = 85;
-//     data[4] = 11;
-//     data[5] = 85;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
-//     data[0] = 4;
-//     data[1] = 1;
-//     data[2] = 4;
-//     data[3] = 1;
-//     data[4] = 4;
-//     data[5] = 1;
-//     m_spi->beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-//     digitalWrite(5, LOW); // pull SS low to prep other end for transfer
-//     for (int k = 0; k < len; k++)
-//     {
-//         m_spi->transfer(data[k]);
-//     }
-//     digitalWrite(5, HIGH); // pull ss high to signify end of data transfer
-//     m_spi->endTransaction();
-//     delay(10);
+  // SPI library init
+  if (spi_lib.Init() == false)
+  {
+    send_error(tx_buffer, OPCODE_ERROR_SPI);
+  }
+  // I2C library init
+  if (i2c_lib.Init() == false)
+  {
+    send_error(tx_buffer, OPCODE_ERROR_I2C);
+  }
 
   // light the led
   pinMode(LED_STATUS, OUTPUT);
@@ -196,12 +99,29 @@ void loop() {
   memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
   byte* data_out = (byte*)data_header_out + sizeof(*data_header_out);
 
+  bool rc;
   int out_size = 0;
   byte* data = (byte*)(data_header) + sizeof(*data_header);
   for (int k = 0; k < batch_header->nof_data_elements; k++)
   {
     switch (serial_header->opCode)
     {
+    case OPCODE_I2C_WRITE:
+      rc = i2c_lib.write(data[0], &data[1], data_header->nof_elements - 1);
+      if (rc == false)
+      {
+        send_error(tx_buffer, OPCODE_ERROR_I2C);
+        return;
+      }
+      break;
+    case OPCODE_I2C_READ:
+      out_size = i2c_lib.read(data[0], data_out, data_header->nof_elements - 1);
+      // update total size
+      data_header_out->nof_elements = out_size;
+      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+      // increment nof batch elements
+      batch_header_out->nof_data_elements += 1;
+      break;
     case OPCODE_SPI_READ:
       // SPI read
       out_size = spi_lib.read(data, data_out, data_header->nof_elements);

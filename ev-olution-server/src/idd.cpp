@@ -80,9 +80,7 @@ byte idd_decode(IN byte *msg, IN int msg_len,
     return synched;
 }
 
-void send_error(
-    byte* tx_buffer,
-    byte error_code)
+void send_error(byte* tx_buffer, byte error_code)
 {
     SerialHeader* serial_header_out = (SerialHeader*)tx_buffer;
     memcpy(serial_header_out->prefix, PREFIX, sizeof(PREFIX));

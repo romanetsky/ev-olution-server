@@ -9,6 +9,23 @@ import struct
 import numpy as np
 import time
 
+# matlab code
+# function crc = crc16(data)
+#     crc = uint16(hex2dec('FFFF'));
+#     for i = 1:length(data)
+#         crc = bitxor(crc, bitshift(data(i), 8));
+#         for bit = 1:8
+#             if bitand(crc, hex2dec('8000'))
+#                 crc = bitxor(bitshift(crc, 1), hex2dec('1021'));
+#             else
+#                 crc = bitshift(crc, 1);
+#             end
+#             crc = bitand(crc, hex2dec('FFFF'));
+#         end
+#     end
+# 
+#     crc = bitand(crc, hex2dec('FFFF'));
+# end
 def crc16(data):
     crc = 0xFFFF
 
@@ -38,8 +55,8 @@ data1 = [[68,0,68,0,68,0],
          [84,0,84,0,84,0],
          [92,0,92,0,92,0]]
 
-for i in range(0,255):
-    for j in range(0,255):
+for i in range(0,1):
+    for j in range(0,1):
         for x in range(0, len(data1)):
             for y in range(1,len(data1[x]),2):
                 data1[x][y] = j

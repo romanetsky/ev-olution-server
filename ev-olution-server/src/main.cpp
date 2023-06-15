@@ -155,6 +155,9 @@ void loop() {
   auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
 
   // write back to HOST
+  // calculate and update header crc
+  serial_header_out->crc = crc16((byte*)serial_header_out, sizeof(*serial_header_out) -
+    sizeof(serial_header_out->crc));
   Serial.write(tx_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
   Serial.flush();
 

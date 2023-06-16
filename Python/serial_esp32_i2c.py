@@ -23,13 +23,28 @@ def crc16(data):
 
     return crc & 0xFFFF
 
-arduino = serial.Serial(port='COM11', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM9', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
-print(data)
 arduino.flushInput()
 
-data1 = [[7,0,0,0,0]]
+data1 = [
+         # [0,0,0,0,0],
+         # [1,0,0,0,0],
+         # [2,0,0,0,0],
+         # [3,0,0,0,0],
+         # [4,0,0,0,0],
+         # [5,0,0,0,0],
+         # [6,0,0,0,0],
+         # [7,0,0,0,0],
+          [8,0,0,0,0],
+          [9,0,0,0,0],
+          [10,0,0,0,0],
+          [11,0,0,0,0],
+          [12,0,0,0,0],
+          [13,0,0,0,0],
+          [14,0,0,0,0],
+          [15,0,0,0,0]]
 
 data_bytes = np.array(data1, dtype='uint8')
 nx, ny = data_bytes.shape;
@@ -84,15 +99,16 @@ stop_time = time.time_ns()
 print('==== READ REQUEST DATA ====')
 print('header        : ', data_out_hdr.hex(':'))
 print('batch header  : ', data_out[0:6].hex(':'))
-if len(data_out) > 6 + 6:
+if len(data_out) >= 6 + 6:
     nelem = struct.unpack('<I', data_out[0:4])[0]
     print('data          : ');
     offset = 6
     for n in range(0,nelem):
         print('  data hdr    : ', data_out[offset:offset+6].hex(':'))
+        data_size = struct.unpack('<I', data_out[offset+2:offset+6])[0]
         offset = offset + 6
-        print('  data payload: ', data_out[offset:offset+6].hex(':'))
-        offset = offset + 6
+        print('  data payload: ', data_out[offset:offset+data_size].hex(':'))
+        offset = offset + data_size
 else:
     print('data          : ', data_out.hex(':'));
 print('overall command time: ', (stop_time - start_time)/1000000, ' msec')

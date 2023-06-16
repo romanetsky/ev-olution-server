@@ -116,11 +116,18 @@ void loop() {
       break;
     case OPCODE_I2C_READ:
       out_size = i2c_lib.read(data[0], data_out, data_header->nof_elements - 1);
-      // update total size
-      data_header_out->nof_elements = out_size;
-      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+      
       // increment nof batch elements
       batch_header_out->nof_data_elements += 1;
+      // update num of output elements
+      data_header_out->nof_elements = out_size;
+      // advance data header ptr
+      data_header_out = (DataHeader *)(data_out + out_size);
+      memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+      data_out += sizeof(*data_header_out) + out_size;
+      // update total size
+      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+
       break;
     case OPCODE_SPI_READ:
       // SPI read

@@ -9,23 +9,6 @@ import struct
 import numpy as np
 import time
 
-# matlab code
-# function crc = crc16(data)
-#     crc = uint16(hex2dec('FFFF'));
-#     for i = 1:length(data)
-#         crc = bitxor(crc, bitshift(data(i), 8));
-#         for bit = 1:8
-#             if bitand(crc, hex2dec('8000'))
-#                 crc = bitxor(bitshift(crc, 1), hex2dec('1021'));
-#             else
-#                 crc = bitshift(crc, 1);
-#             end
-#             crc = bitand(crc, hex2dec('FFFF'));
-#         end
-#     end
-# 
-#     crc = bitand(crc, hex2dec('FFFF'));
-# end
 def crc16(data):
     crc = 0xFFFF
 
@@ -40,7 +23,7 @@ def crc16(data):
 
     return crc & 0xFFFF
 
-arduino = serial.Serial(port='COM11', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM9', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
 arduino.flushInput()

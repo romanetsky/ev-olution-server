@@ -13,11 +13,14 @@ bool I2CLib::Init()
     for (i2c_address = 1; i2c_address < 127; i2c_address++)
     {
         Wire.beginTransmission(i2c_address);
+        delay(1);
         error = Wire.endTransmission();
         if (error == 0)
         {
-//Serial.print("found channel @ address 0x");
-//Serial.println(i2c_address, HEX);
+// Serial.print("found ");
+// Serial.print(channel);
+// Serial.print(" channel at address 0x");
+// Serial.println(i2c_address, HEX);
             m_i2c_channels[channel++] = std::pair<byte,byte>(i2c_address, 1);
             m_i2c_channels[channel++] = std::pair<byte,byte>(i2c_address, 2);
         }
@@ -106,12 +109,14 @@ int I2CLib::read(byte channel, byte *data_out, uint32_t data_len)
 
     if (i2c_iter->second.second == 1)
     {
-        out_len += read_(i2c_iter, PAC194X5X_VBUS1_AVG_ADDR, &data_out[0], 2);
+//        out_len += read_(i2c_iter, PAC194X5X_VBUS1_AVG_ADDR, &data_out[0], 2);
+        out_len += read_(i2c_iter,     PAC194X5X_VBUS1_ADDR, &data_out[0], 2);
         out_len += read_(i2c_iter,   PAC194X5X_VSENSE1_ADDR, &data_out[2], 2);
     }
     else if (i2c_iter->second.second == 2)
     {
-        out_len += read_(i2c_iter, PAC194X5X_VBUS2_AVG_ADDR, &data_out[0], 2);
+//        out_len += read_(i2c_iter, PAC194X5X_VBUS2_AVG_ADDR, &data_out[0], 2);
+        out_len += read_(i2c_iter,     PAC194X5X_VBUS2_ADDR, &data_out[0], 2);
         out_len += read_(i2c_iter,   PAC194X5X_VSENSE2_ADDR, &data_out[2], 2);
     }
 
@@ -147,7 +152,7 @@ int I2CLib::read_(I2C_MAP_ITERATOR i2c_iter, byte register_addr, byte *data_out,
         return 0;
     }
     // must wait before read
-    delay(3);
+    delay(1);
     // send the register address to read from
     if (write(i2c_iter->first, &register_addr, 1) == true)
     {

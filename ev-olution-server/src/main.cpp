@@ -4,6 +4,7 @@
 #include "idd.h"
 #include "spi_lib.h"
 #include "i2c_lib.h"
+#include "wifi_lib.h"
 
 #define POWER_ON_PIN        4
 #define LED_STATUS          27
@@ -12,17 +13,37 @@
 #define SerialTimeOutMS     1
 #define RCV_BUFFER_SIZE     512
 
+const char* wifi_ssid = "EVONET";
+const char* wifi_password = "12345678";
+const char* wifi_hostname = "my-evo-host";
+const uint16_t wifi_port = 4556;
+
+// create a instance of the server
+WiFiServer wifi_server(wifi_port);
+
 byte rx_buffer[RCV_BUFFER_SIZE];
 byte tx_buffer[RCV_BUFFER_SIZE];
 
 SpiLib spi_lib;
 I2CLib i2c_lib;
 
+// timeout in secs, used to monitor communication 'keep-a-live'
+// if no communication received within that period of time, restart will occure
+int timeout_restart_sec = 15; // default value, may be changed by command
+std::chrono::system_clock::time_point last_communication_time;
+
 void setup() {
 //  log_d("begin setup...");
 
+  // serial communication setup
   Serial.begin(SerialBaudRate);
   Serial.setTimeout(SerialTimeOutMS);
+
+  // wifi setup
+  WiFi.onEvent(onWiFiEvent);
+  WiFi.softAP(wifi_ssid, wifi_password);
+  WiFi.setHostname(wifi_hostname);
+  IPAddress apIP = WiFi.softAPIP();
 
   // power ON
   pinMode(POWER_ON_PIN, OUTPUT);
@@ -53,6 +74,8 @@ void setup() {
   pinMode(LED_STATUS, OUTPUT);
   digitalWrite(LED_STATUS, HIGH);
 
+  last_communication_time = std::chrono::system_clock::now();
+
   //  log_d("setup done...");
 }
 
@@ -60,6 +83,32 @@ void loop() {
 //  log_d("start main loop...");
 
   auto start = std::chrono::system_clock::now();
+// Serial.print("timeout sec: ");
+// Serial.println(timeout_restart_sec);
+  // wait for the serial data
+  //while (Serial.available() < sizeof(SerialHeader)) delay(1);
+  while (!Serial.available())
+  {
+    // timeout?
+    if (Serial.available() == 0)
+    {
+      // check for timeout
+      auto duration = std::chrono::duration_cast<std::chrono::seconds>(start - last_communication_time).count();
+      if (duration > timeout_restart_sec)
+      {
+        // connection lost for too long, restart
+        digitalWrite(LED_STATUS, LOW); // Turn off built-in LED
+        delay(1000); // Delay for LED to turn off
+
+        esp_restart();
+      }
+      else
+        return;
+    }
+  }
+
+  // save last communication time
+  last_communication_time = std::chrono::system_clock::now();
 
   // wait for the serial header
   while (Serial.available() < sizeof(SerialHeader)) delay(1);
@@ -86,6 +135,19 @@ void loop() {
   {
     // send error
     send_error(tx_buffer, error_code);
+    return;
+  }
+
+  // treat the 'timeout' update message
+  if (serial_header->opCode == OPCODE_TIMEOUT_UPDATE)
+  {
+    // instead of batch header there is a timeout value in seconds
+    int new_timeout_sec = *reinterpret_cast<int*>(data_header);
+    timeout_restart_sec = new_timeout_sec;
+
+// Serial.print("timeout sec: ");
+// Serial.println(timeout_restart_sec);
+
     return;
   }
 

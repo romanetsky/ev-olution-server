@@ -5,6 +5,7 @@ Created on Mon Jun 19 22:42:30 2023
 @author: roman
 """
 import serial
+import struct
 import numpy as np
 import time
 
@@ -22,12 +23,12 @@ def crc16(data):
 
     return crc & 0xFFFF
 
-arduino = serial.Serial(port='COM5', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM12', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
 arduino.flushInput()
 
-timeout_sec = 6
+timeout_sec = 60*60
 data_bytes = np.array(timeout_sec, dtype='uint32').tobytes()
 prefix = np.array([0xCA,0xFE], dtype='uint8').tobytes()
 # opcode = 0xDA - set timeout value in secs
@@ -52,5 +53,17 @@ packet = packet + data_bytes
 
 # send write request
 arduino.write(packet)
+# read the status
+while arduino.in_waiting < 11:
+    None
+data_out_hdr = arduino.read(11) # read the header
+in_data_size = struct.unpack('<I', data_out_hdr[3:7])[0]
+while arduino.in_waiting < in_data_size:
+    None
+data_out = arduino.read_all()
+print('==== STATUS MESSAGE ====')
+print('header        : ', data_out_hdr.hex(':'))
+print('batch header  : ', data_out[0:6].hex(':'))
+print('data          : ', data_out[6:].hex(':'))
 
 # arduino.close()

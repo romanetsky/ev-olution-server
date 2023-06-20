@@ -97,9 +97,11 @@ void loop() {
       if (duration > timeout_restart_sec)
       {
         // connection lost for too long, restart
-        digitalWrite(LED_STATUS, LOW); // Turn off built-in LED
-        delay(1000); // Delay for LED to turn off
-
+        for (int k = 0; k < 3; k++)
+        {
+          digitalWrite(LED_STATUS, LOW); // Turn off built-in LED
+          delay(1000);                   // Delay for LED to turn off
+        }
         esp_restart();
       }
       else
@@ -145,9 +147,10 @@ void loop() {
     int new_timeout_sec = *reinterpret_cast<int*>(data_header);
     timeout_restart_sec = new_timeout_sec;
 
-// Serial.print("timeout sec: ");
-// Serial.println(timeout_restart_sec);
-
+    // loopback the message as ACK
+    memcpy(tx_buffer, serial_header, sizeof(*serial_header) + serial_header->data_size);
+    Serial.write(tx_buffer, sizeof(*serial_header) + serial_header->data_size);
+    Serial.flush();
     return;
   }
 

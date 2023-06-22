@@ -29,7 +29,7 @@ I2CLib i2c_lib;
 
 // timeout in secs, used to monitor communication 'keep-a-live'
 // if no communication received within that period of time, restart will occure
-int timeout_restart_sec = 15; // default value, may be changed by command
+int timeout_restart_sec = 5 * 60; // default value, may be changed by command
 std::chrono::system_clock::time_point last_communication_time;
 
 void setup() {
@@ -143,11 +143,25 @@ void loop() {
   // treat the 'timeout' update message
   if (serial_header->opCode == OPCODE_TIMEOUT_UPDATE)
   {
-    // instead of batch header there is a timeout value in seconds
-    int new_timeout_sec = *reinterpret_cast<int*>(data_header);
-    timeout_restart_sec = new_timeout_sec;
-
-    // loopback the message as ACK
+    // if no data, just return the current timeout value
+    if (data_header->nof_elements > 0)
+    {
+      // get the timeout value in seconds
+      int new_timeout_sec = *reinterpret_cast<int*>((byte*)(data_header) + sizeof(*data_header));
+      timeout_restart_sec = new_timeout_sec;
+    }
+    // update some params, if only read requested 
+    if (data_header->nof_elements == 0)
+    {
+      byte* data = ((byte*)data_header) + sizeof(*data_header);
+      memcpy(data, &timeout_restart_sec, sizeof(timeout_restart_sec));
+      data_header->nof_elements = sizeof(timeout_restart_sec);
+      serial_header->data_size += sizeof(timeout_restart_sec);
+      // update the crc
+      serial_header->crc = crc16((byte*)serial_header, sizeof(*serial_header) - 
+          sizeof(serial_header->crc));
+    }
+    // loopback the message as ACK, or add the current value of the timeout
     memcpy(tx_buffer, serial_header, sizeof(*serial_header) + serial_header->data_size);
     Serial.write(tx_buffer, sizeof(*serial_header) + serial_header->data_size);
     Serial.flush();

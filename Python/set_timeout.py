@@ -23,20 +23,22 @@ def crc16(data):
 
     return crc & 0xFFFF
 
-arduino = serial.Serial(port='COM12', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM5', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
 arduino.flushInput()
 
-timeout_sec = 60*60
+timeout_sec = 10*60 # [] - is for reading only
 data_bytes = np.array(timeout_sec, dtype='uint32').tobytes()
 prefix = np.array([0xCA,0xFE], dtype='uint8').tobytes()
 # opcode = 0xDA - set timeout value in secs
 opcode = np.array([0xDA], dtype='uint8').tobytes()
 magic_word = np.array([0xBA,0xDA], dtype='uint8').tobytes()
 nof_batch_elements = np.array(1, dtype='uint32').tobytes()
+nof_data_elements = np.array(len(data_bytes), dtype='uint32').tobytes()
 data_size = np.array(
     [len(nof_batch_elements) + len(magic_word) +
+     len(nof_data_elements) + len(magic_word) +
      len(data_bytes)], dtype='uint32').tobytes()
 
 # serial header
@@ -48,6 +50,9 @@ packet = packet + np.array([crc16(packet)], dtype='uint16').tobytes()
 # batch header
 packet = packet + nof_batch_elements
 packet = packet + magic_word
+# data header
+packet = packet + magic_word
+packet = packet + nof_data_elements
 # data
 packet = packet + data_bytes
 
@@ -64,6 +69,8 @@ data_out = arduino.read_all()
 print('==== STATUS MESSAGE ====')
 print('header        : ', data_out_hdr.hex(':'))
 print('batch header  : ', data_out[0:6].hex(':'))
-print('data          : ', data_out[6:].hex(':'))
+print('data          : ');
+print('  data hdr    : ', data_out[6:12].hex(':'))
+print('  data        : ', data_out[12:].hex(':'))
 
-# arduino.close()
+arduino.close()

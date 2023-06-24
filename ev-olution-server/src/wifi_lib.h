@@ -1,6 +1,6 @@
-#include <WiFi.h>
-
 #pragma once
+#include <WiFi.h>
+#include <ESPmDNS.h>
 
 void onWiFiEvent(WiFiEvent_t event)
 {

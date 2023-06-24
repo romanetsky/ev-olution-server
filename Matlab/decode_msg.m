@@ -54,8 +54,10 @@ switch opcode
         opcode_str = 'SPI write';
     case '9A'
         opcode_str = 'I2C read';
-    case '0x95'
+    case '95'
         opcode_str = 'I2C write';
+    case 'DA'
+        opcode_str = 'Timeout';
     otherwise
         opcode_str = 'unknown opcode';
         return;

@@ -41,9 +41,15 @@ void setup() {
 
   // wifi setup
   WiFi.onEvent(onWiFiEvent);
+  WiFi.mode(WIFI_AP);
   WiFi.softAP(wifi_ssid, wifi_password);
+
+MDNS.begin(wifi_hostname);
+MDNS.addService("http", "tcp", 80);
+
   WiFi.setHostname(wifi_hostname);
-  IPAddress apIP = WiFi.softAPIP();
+//  IPAddress apIP = WiFi.softAPIP();
+  wifi_server.begin(wifi_port);
 
   // power ON
   pinMode(POWER_ON_PIN, OUTPUT);
@@ -81,12 +87,24 @@ void setup() {
 
 void loop() {
 //  log_d("start main loop...");
+WiFiClient client = wifi_server.available();
+if (client)
+{
+    Serial.println("New client connected");
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-type:text/html");
+    client.println();
+    client.println("<html><body>");
+    client.println("<h1>Hello from ESP32 in AP mode!</h1>");
+    client.println("</body></html>");
+    delay(10);
+    client.stop();
+    Serial.println("Client disconnected");
+  return;
+}
 
   auto start = std::chrono::system_clock::now();
-// Serial.print("timeout sec: ");
-// Serial.println(timeout_restart_sec);
-  // wait for the serial data
-  //while (Serial.available() < sizeof(SerialHeader)) delay(1);
+
   while (!Serial.available())
   {
     // timeout?
@@ -97,11 +115,6 @@ void loop() {
       if (duration > timeout_restart_sec)
       {
         // connection lost for too long, restart
-        for (int k = 0; k < 3; k++)
-        {
-          digitalWrite(LED_STATUS, LOW); // Turn off built-in LED
-          delay(1000);                   // Delay for LED to turn off
-        }
         esp_restart();
       }
       else

@@ -15,6 +15,6 @@ msg = esp_transmit(a, bytes);
 if msg.crc.pass == false
 	error(['Header crc failed: ', msg.crc.desc]);
 end
-if isfield(msg, 'payload')
-	disp(reshape([msg.payload.data], [], msg.batch_nelements).')
-end
+% if isfield(msg, 'payload')
+% 	disp(reshape([msg.payload.data], [], msg.batch_nelements).')
+% end

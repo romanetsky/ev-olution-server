@@ -1,6 +1,7 @@
 function msg = esp_transmit(a, bytes)
 % write/read to/from esp32
 
+msg = [];
 if ~isempty(bytes)
 	write(a, bytes, 'uint8');
 	% wait for data

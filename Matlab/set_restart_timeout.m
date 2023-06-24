@@ -1,16 +1,12 @@
-function msg = SPI_write(a, data)
-% SPI write
+function msg = set_restart_timeout(a, timeout)
+% set Timeout for restart
 %
 % a - serial connection object to esp
-% data format example:
-%	data = [68,0,68,0,68,0;...
-%   	    72,0,72,0,72,0;...
-%       	81,0,81,0,81,0;...
-%        	94,0,94,0,94,0];
+% timeout - in seconds
 %
 
-data = uint8(data);
-bytes = encode_msg('SPIwrite', data);
+timeout = typecast(uint32(timeout), 'uint8');
+bytes = encode_msg('TO', timeout);
 msg = esp_transmit(a, bytes);
 if msg.crc.pass == false
 	error(['Header crc failed: ', msg.crc.desc]);

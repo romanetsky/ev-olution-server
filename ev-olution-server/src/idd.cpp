@@ -80,7 +80,7 @@ byte idd_decode(IN byte *msg, IN int msg_len,
     return synched;
 }
 
-void send_error(byte* tx_buffer, byte error_code)
+void send_error(BaseCommunicator* comm, byte* tx_buffer, byte error_code)
 {
     SerialHeader* serial_header_out = (SerialHeader*)tx_buffer;
     memcpy(serial_header_out->prefix, PREFIX, sizeof(PREFIX));
@@ -88,11 +88,11 @@ void send_error(byte* tx_buffer, byte error_code)
     serial_header_out->data_size = 0;
     memcpy(serial_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
     serial_header_out->crc = crc16(tx_buffer, sizeof(SerialHeader) - sizeof(SerialHeader::crc));
-    Serial.write(tx_buffer, sizeof(SerialHeader));
-    Serial.flush();
+    comm->write(tx_buffer, sizeof(SerialHeader));
 }
 
-uint16_t crc16(const uint8_t *data, size_t length) {
+uint16_t crc16(const uint8_t *data, size_t length)
+{
     uint16_t crc = 0xFFFF;
 
     for (size_t i = 0; i < length; ++i) {

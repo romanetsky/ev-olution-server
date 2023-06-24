@@ -4,28 +4,28 @@
 #include "idd.h"
 #include "spi_lib.h"
 #include "i2c_lib.h"
-#include "wifi_lib.h"
+//#include "wifi_lib.h"
+#include "CommunicatorFactory.h"
 
 #define POWER_ON_PIN        4
 #define LED_STATUS          27
 #define PAC_POWER_PIN       25
-#define SerialBaudRate      115200
-#define SerialTimeOutMS     1
 #define RCV_BUFFER_SIZE     512
 
-const char* wifi_ssid = "EVONET";
-const char* wifi_password = "12345678";
-const char* wifi_hostname = "my-evo-host";
-const uint16_t wifi_port = 4556;
+// const char* wifi_ssid = "EVONET";
+// const char* wifi_password = "12345678";
+// const char* wifi_hostname = "my-evo-host";
+// const uint16_t wifi_port = 4556;
 
 // create a instance of the server
-WiFiServer wifi_server(wifi_port);
+// WiFiServer wifi_server(wifi_port);
 
 byte rx_buffer[RCV_BUFFER_SIZE];
 byte tx_buffer[RCV_BUFFER_SIZE];
 
 SpiLib spi_lib;
 I2CLib i2c_lib;
+BaseCommunicator* communicator = nullptr;
 
 // timeout in secs, used to monitor communication 'keep-a-live'
 // if no communication received within that period of time, restart will occure
@@ -34,22 +34,26 @@ std::chrono::system_clock::time_point last_communication_time;
 
 void setup() {
 //  log_d("begin setup...");
+//Serial.begin(115200);
+  communicator = CommunicatorFactory::createCommunicator(DEF_COMMUNICATOR_WIFI);
+  if (communicator == nullptr)
+    while(1);
 
   // serial communication setup
-  Serial.begin(SerialBaudRate);
-  Serial.setTimeout(SerialTimeOutMS);
+  // Serial.begin(SerialBaudRate);
+  // Serial.setTimeout(SerialTimeOutMS);
 
-  // wifi setup
-  WiFi.onEvent(onWiFiEvent);
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(wifi_ssid, wifi_password);
+  // // wifi setup
+  // WiFi.onEvent(onWiFiEvent);
+  // WiFi.mode(WIFI_AP);
+  // WiFi.softAP(wifi_ssid, wifi_password);
 
-MDNS.begin(wifi_hostname);
-MDNS.addService("http", "tcp", 80);
+  // // multicast DNS
+  // MDNS.begin(wifi_hostname);
+  // MDNS.addService("http", "tcp", 80);
 
-  WiFi.setHostname(wifi_hostname);
-//  IPAddress apIP = WiFi.softAPIP();
-  wifi_server.begin(wifi_port);
+  // WiFi.setHostname(wifi_hostname);
+  // wifi_server.begin(wifi_port);
 
   // power ON
   pinMode(POWER_ON_PIN, OUTPUT);
@@ -68,12 +72,12 @@ MDNS.addService("http", "tcp", 80);
   // SPI library init
   if (spi_lib.Init() == false)
   {
-    send_error(tx_buffer, OPCODE_ERROR_SPI);
+    send_error(communicator, tx_buffer, OPCODE_ERROR_SPI);
   }
   // I2C library init
   if (i2c_lib.Init() == false)
   {
-    send_error(tx_buffer, OPCODE_ERROR_I2C);
+    send_error(communicator, tx_buffer, OPCODE_ERROR_I2C);
   }
 
   // light the led
@@ -87,48 +91,47 @@ MDNS.addService("http", "tcp", 80);
 
 void loop() {
 //  log_d("start main loop...");
-WiFiClient client = wifi_server.available();
-if (client)
-{
-    Serial.println("New client connected");
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-type:text/html");
-    client.println();
-    client.println("<html><body>");
-    client.println("<h1>Hello from ESP32 in AP mode!</h1>");
-    client.println("</body></html>");
-    delay(10);
-    client.stop();
-    Serial.println("Client disconnected");
-  return;
-}
+  if (communicator == nullptr)
+    return;
+
+// WiFiClient client = wifi_server.available();
+// if (client)
+// {
+//     Serial.println("New client connected");
+//     client.println("HTTP/1.1 200 OK");
+//     client.println("Content-type:text/html");
+//     client.println();
+//     client.println("<html><body>");
+//     client.println("<h1>Hello from ESP32 in AP mode!</h1>");
+//     client.println("</body></html>");
+//     delay(10);
+//     client.stop();
+//     Serial.println("Client disconnected");
+//   return;
+// }
 
   auto start = std::chrono::system_clock::now();
 
-  while (!Serial.available())
+  while (communicator->available() == 0)
   {
-    // timeout?
-    if (Serial.available() == 0)
+    // check for timeout
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(start - last_communication_time).count();
+    if (duration > timeout_restart_sec)
     {
-      // check for timeout
-      auto duration = std::chrono::duration_cast<std::chrono::seconds>(start - last_communication_time).count();
-      if (duration > timeout_restart_sec)
-      {
-        // connection lost for too long, restart
-        esp_restart();
-      }
-      else
-        return;
+      // connection lost for too long, restart
+      esp_restart();
     }
+    else
+      return;
   }
 
   // save last communication time
   last_communication_time = std::chrono::system_clock::now();
 
   // wait for the serial header
-  while (Serial.available() < sizeof(SerialHeader)) delay(1);
+  while (communicator->available() < sizeof(SerialHeader)) delay(1);
 
-  int msg_size = (int)Serial.readBytes(rx_buffer, RCV_BUFFER_SIZE);
+  int msg_size = communicator->read(rx_buffer, RCV_BUFFER_SIZE);
   // if not enough data, return 
   if (rx_buffer == nullptr || msg_size < sizeof(SerialHeader))
   {
@@ -149,7 +152,7 @@ if (client)
   if (error_code != OPCODE_ERROR_OK)
   {
     // send error
-    send_error(tx_buffer, error_code);
+    send_error(communicator, tx_buffer, error_code);
     return;
   }
 
@@ -176,8 +179,9 @@ if (client)
     }
     // loopback the message as ACK, or add the current value of the timeout
     memcpy(tx_buffer, serial_header, sizeof(*serial_header) + serial_header->data_size);
-    Serial.write(tx_buffer, sizeof(*serial_header) + serial_header->data_size);
-    Serial.flush();
+    communicator->write(tx_buffer, sizeof(*serial_header) + serial_header->data_size);
+    // Serial.write(tx_buffer, sizeof(*serial_header) + serial_header->data_size);
+    // Serial.flush();
     return;
   }
 
@@ -202,7 +206,7 @@ if (client)
       rc = i2c_lib.write(data[0], &data[1], data_header->nof_elements - 1);
       if (rc == false)
       {
-        send_error(tx_buffer, OPCODE_ERROR_I2C);
+        send_error(communicator, tx_buffer, OPCODE_ERROR_I2C);
         return;
       }
       break;
@@ -257,8 +261,9 @@ if (client)
   // calculate and update header crc
   serial_header_out->crc = crc16((byte*)serial_header_out, sizeof(*serial_header_out) -
     sizeof(serial_header_out->crc));
-  Serial.write(tx_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
-  Serial.flush();
+  communicator->write(tx_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
+  // Serial.write(tx_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
+  // Serial.flush();
 
 //  log_d("end main loop (elapsed time %f)...", difference);
 }

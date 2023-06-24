@@ -1,6 +1,7 @@
-#include <Arduino.h>
-
 #pragma once
+#include <Arduino.h>
+#include "BaseCommunicator.h"
+
 #pragma pack(push,1)
 
 #define IN
@@ -50,4 +51,4 @@ byte idd_decode(byte *msg, int msg_len,
 
 uint16_t crc16(const uint8_t *data, size_t length);
 
-void send_error(byte* tx_buffer, byte error_code);
+void send_error(BaseCommunicator* comm, byte* tx_buffer, byte error_code);

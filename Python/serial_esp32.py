@@ -9,143 +9,126 @@ import struct
 import numpy as np
 import time
 
-# def write_read(x):
-#     arduino.write(bytes(x, 'utf-8'))
-#     arduino.flush()
-#     data = arduino.read_all()
-#     return data
+def crc16(data):
+    crc = 0xFFFF
+
+    for byte in data:
+        crc ^= (byte << 8)
+        for _ in range(8):
+            if crc & 0x8000:
+                crc = (crc << 1) ^ 0x1021
+            else:
+                crc <<= 1
+            crc &= 0xFFFF
+
+    return crc & 0xFFFF
 
 arduino = serial.Serial(port='COM9', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
+arduino.flushInput()
 
-data1 = np.array([0x44,0x03,0x44,0x03,0x44,0x03], dtype='uint8').tobytes()
-# data1 = np.array([9,165,9,85,9,85], dtype='uint8').tobytes()
-# data2 = np.array([10,90,10,85,10,85], dtype='uint8').tobytes()
-# data3 = np.array([11,90,11,85,11,85], dtype='uint8').tobytes()
-# data4 = np.array([12,85,12,85,12,85], dtype='uint8').tobytes()
-# data5 = np.array([13,170,13,85,13,85], dtype='uint8').tobytes()
-# data6 = np.array([14,85,14,85,14,85], dtype='uint8').tobytes()
-# data7 = np.array([15,90,15,85,15,85], dtype='uint8').tobytes()
-# data8 = np.array([4,1,4,1,4,1], dtype='uint8').tobytes()
-nof_batch_elements = np.array(1, dtype='uint32').tobytes()
-nof_elements = np.array(len(data1), dtype='uint32').tobytes()
-prefix = np.array([0xCA,0xFE,0xCA,0xFE], dtype='uint8').tobytes()
-opcode = np.array([0x1E], dtype='uint8').tobytes()
-magic_word = np.array([0xBA,0xDA,0xBA,0xDA], dtype='uint8').tobytes()
-data_size = np.array(
-    [len(nof_batch_elements) + len(magic_word) + # batch header
-     len(nof_elements) + len(magic_word) + # data header 1
-     len(data1) + len(magic_word)  # data 1
-     # len(nof_elements) + len(magic_word) +  # data header 2
-     # len(data2) + len(magic_word) + # data 2
-     # len(nof_elements) + len(magic_word) + # data header 3
-     # len(data3) + len(magic_word) + # data 3
-     # len(nof_elements) + len(magic_word) + # data header 4
-     # len(data4) + len(magic_word) + # data 4
-     # len(nof_elements) + len(magic_word) + # data header 5
-     # len(data5) + len(magic_word) + # data 5
-     # len(nof_elements) + len(magic_word) + # data header 6
-     # len(data6) + len(magic_word) + # data 6
-     # len(nof_elements) + len(magic_word) + # data header 7
-     # len(data7) + len(magic_word) + # data 7
-     # len(nof_elements) + len(magic_word) + # data header 8
-     # len(data8) + len(magic_word) # data 8
-    ],
-    dtype='uint32').tobytes()
+# data1 = [[68,1,68,0,68,132],
+#             [76,0,76,0,76,64],
+#             [84,0,84,0,84,0],
+#             [92,0,92,0,92,0]]
 
-# serial header
-packet = prefix
-packet = packet + opcode
-packet = packet + data_size
-packet = packet + magic_word
-# batch header
-packet = packet + nof_batch_elements
-packet = packet + magic_word
-# data header 1
-packet = packet + nof_elements
-packet = packet + magic_word
-# data 1
-packet = packet + data1
-# # data header 2
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 2
-# packet = packet + data2
-# # data header 3
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 3
-# packet = packet + data3
-# # data header 4
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 4
-# packet = packet + data4
-# # data header 5
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 5
-# packet = packet + data5
-# # data header 6
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 6
-# packet = packet + data6
-# # data header 7
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 7
-# packet = packet + data7
-# # data header 8
-# packet = packet + nof_elements
-# packet = packet + magic_word
-# # data 8
-# packet = packet + data8
- 
+data1 = [[68,0,68,0,68,0],
+         [76,0,76,0,76,0],
+         [84,0,84,0,84,0],
+         [92,0,92,0,92,0]]
 
-start_time = time.time_ns()
-arduino.write(packet)
-time.sleep(0.005)
-data_out = arduino.read_all()
-stop_time = time.time_ns()
-# while len(data) == 0:
-#     data = arduino.read_all()
-print(data_out)
-# in_prefix = struct.unpack('<4s', data[0:4])[0]
-# in_opcode = struct.unpack('<c', data[4:5])[0]
-# in_data_size = struct.unpack('<I', data[5:9])[0]
-# in_magic_word = struct.unpack('<4s', data[9:13])[0]
-# print('hdr.prefix\t\t: ', in_prefix)
-# print('hdr.opcode\t\t: ', in_opcode)
-# print('hdr.data_size\t: ', in_data_size)
-# print('hdr.magic_word\t: ', in_magic_word)
+# data1 = [[68,3,68,3,68,3],
+#          [76,3,76,3,76,3],
+#          [84,3,84,3,84,3],
+#          [92,3,92,3,92,3]]
 
-# in_batch_elements = struct.unpack('<I', data[13:17])[0]
-# in_magic_word = struct.unpack('<4s', data[17:21])[0]
-# print('\tbtch_hdr.batch_elements\t: ', in_batch_elements)
-# print('\tbtch_hdr.magic_word\t\t: ', in_magic_word)
-# offset = 21
-# for k in range(0,in_batch_elements):
-#     in_data_elements = struct.unpack('<I', data[offset:offset+4])[0]
-#     offset = offset + 4
-#     in_magic_word = struct.unpack('<4s', data[offset:offset+4])[0]
-#     offset = offset + 4
-#     if in_data_elements > 0:
-#         in_data = struct.unpack('<4s', data[offset:offset+in_data_elements])[0]
-#         offset = offset + in_data_elements
-#     else:
-#         in_data = None
-#     print('\t\tdata_hdr.data_elements\t: ', in_data_elements)
-#     print('\t\tdata_hdr.magic_word\t\t: ', in_magic_word)
-#     print('\t\tdata_hdr.data\t\t\t: ', in_data)
+for i in range(0,1):
+    for j in range(0,1):
+        for x in range(0, len(data1)):
+            for y in range(1,len(data1[x]),2):
+                data1[x][y] = j
+        
+        data_bytes = np.array(data1, dtype='uint8')
+        nx, ny = data_bytes.shape;
+        nof_batch_elements = np.array(nx, dtype='uint32').tobytes()
+        nof_elements = np.array(ny, dtype='uint32').tobytes()
+        prefix = np.array([0xCA,0xFE], dtype='uint8').tobytes()
+        # opcode = 0x6A - read; 0x65 - write
+        opcode = np.array([0x6A], dtype='uint8').tobytes()
+        magic_word = np.array([0xBA,0xDA], dtype='uint8').tobytes()
+        data_size = np.array(
+            [len(nof_batch_elements) + len(magic_word) +    # batch header
+             nx * (len(nof_elements) + len(magic_word) +    # data headers
+             len(data_bytes[0]))                            # datum
+            ],
+            dtype='uint32').tobytes()
+        
+        # serial header
+        packet = prefix
+        packet = packet + opcode
+        packet = packet + data_size
+        packet = packet + magic_word
+        packet = packet + np.array([crc16(packet)], dtype='uint16').tobytes()
+        # batch header
+        packet = packet + nof_batch_elements
+        packet = packet + magic_word
+        for k in range(0, nx):
+            # data header
+            packet = packet + magic_word
+            packet = packet + nof_elements
+            # data
+            packet = packet + data_bytes[k,:].tobytes()
+        
+        # insert opcode for writing
+        packet_write = packet[0:2] + np.array([0x65], dtype='uint8').tobytes() + packet[3:]
+        # recalculate the crc
+        packet_write = packet_write[0:9] + np.array([crc16(packet_write[0:9])], dtype='uint16').tobytes() + packet_write[11:]
+    
+        start_time = time.time_ns()
+        # send write request
+        arduino.write(packet_write)
+        # read the write status
+        while arduino.in_waiting < 11:
+            None
+        data_out_hdr = arduino.read(11) # read the header
+        in_data_size = struct.unpack('<I', data_out_hdr[3:7])[0]
+        while arduino.in_waiting < in_data_size:
+            None
+        data_out = arduino.read_all()
+        stop_time = time.time_ns()
+        print('==== WRITE REQUEST STATUS ====')
+        print('header        : ', data_out_hdr.hex(':'))
+        print('batch header  : ', data_out[0:6].hex(':'))
+        print('data          : ', data_out[6:].hex(':'))
+        print('overall command time: ', (stop_time - start_time)/1000000, ' msec')
+    
+        start_time = time.time_ns()
+        # send read request
+        arduino.write(packet)
+        # read the data
+        while arduino.in_waiting < 11:
+            None
+        data_out_hdr = arduino.read(11) # read the header
+        in_data_size = struct.unpack('<I', data_out_hdr[3:7])[0]
+        while arduino.in_waiting < in_data_size:
+            None
+        data_out = arduino.read_all()
+        stop_time = time.time_ns()
+        print('==== READ REQUEST DATA ====')
+        print('header        : ', data_out_hdr.hex(':'))
+        print('batch header  : ', data_out[0:6].hex(':'))
+        if len(data_out) > 6 + 6:
+            nelem = struct.unpack('<I', data_out[0:4])[0]
+            print('data          : ');
+            offset = 6
+            for n in range(0,nelem):
+                print('  data hdr    : ', data_out[offset:offset+6].hex(':'))
+                offset = offset + 6
+                print('  data payload: ', data_out[offset:offset+6].hex(':'))
+                offset = offset + 6
+        else:
+            print('data          : ', data_out.hex(':'));
+        print('overall command time: ', (stop_time - start_time)/1000000, ' msec')
 
-print('overall command time: ', (stop_time - start_time)/1000000, ' msec')
 arduino.close()
-
-# time.sleep(1)
-# data = arduino.read_all()
-# print(data)
-# data = arduino.read_all()
-# print(data)
-# arduino.close()

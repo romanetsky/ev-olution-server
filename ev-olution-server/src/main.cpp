@@ -1,298 +1,264 @@
 #include <Arduino.h>
 #include <chrono>
 #include <esp32-hal-log.h>
-//#include "driver/i2c.h"
-//#include <Wire.h>
-#include <SPI.h>
+#include "idd.h"
+#include "spi_lib.h"
+#include "i2c_lib.h"
+#include "wifi_lib.h"
 
-#define SPI_SCK 18    // SPI clock pin
-#define SPI_MISO 19   // SPI MISO (Master-In Slave-Out) pin
-#define SPI_MOSI 23   // SPI MOSI (Master-Out Slave-In) pin
-#define SPI_CS 5      // SPI chip select pin
+#define POWER_ON_PIN        4
+#define LED_STATUS          27
+#define PAC_POWER_PIN       25
+#define SerialBaudRate      115200
+#define SerialTimeOutMS     1
+#define RCV_BUFFER_SIZE     512
 
-static const int spiClk = 1000000; // 1 MHz
-SPIClass* vspi = NULL;
-void spiWrite(SPIClass *spi, byte* data, uint32_t len);
-int  spiRead (SPIClass *spi, byte*  out, uint32_t len);
-void send_report(byte* data, int data_size);
+const char* wifi_ssid = "EVONET";
+const char* wifi_password = "12345678";
+const char* wifi_hostname = "my-evo-host";
+const uint16_t wifi_port = 4556;
 
-byte msg_buffer[2048];
-byte out_buffer[2048];
+// create a instance of the server
+WiFiServer wifi_server(wifi_port);
 
-static const byte PREFIX[] = { 0xCA, 0xFE, 0xCA, 0xFE };
-static const byte MAGICWORD[] = { 0xBA, 0xDA, 0xBA, 0xDA };
+byte rx_buffer[RCV_BUFFER_SIZE];
+byte tx_buffer[RCV_BUFFER_SIZE];
 
-#pragma pack(push,1)
-typedef struct _serialHeader {
-  byte prefix[sizeof(PREFIX)]; // "CAFECAFE"
-  byte opCode;    // opcode: 0x01...0xFF
-  int  data_size; // message leng in bytes, excluding this header
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
-} SerialHeader;
-typedef struct _batchHeader {
-  int nof_data_elements;
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
-} BatchHeader;
-typedef struct _dataHeader {
-  int nof_elements;
-  byte magic_word[sizeof(MAGICWORD)]; // "BADABADA"
-} DataHeader;
-#pragma pack(pop)
+SpiLib spi_lib;
+I2CLib i2c_lib;
+
+// timeout in secs, used to monitor communication 'keep-a-live'
+// if no communication received within that period of time, restart will occure
+int timeout_restart_sec = 5 * 60; // default value, may be changed by command
+std::chrono::system_clock::time_point last_communication_time;
 
 void setup() {
-  // put your setup code here, to run once:
-  log_d("begin setup...");
+//  log_d("begin setup...");
 
-  Serial.begin(115200);
-  Serial.setTimeout(1);
-  // i2c_config_t conf = {
-  //   .mode = I2C_MODE_MASTER,
-  //   .sda_io_num = 21,
-  //   .scl_io_num = 22,
-  //   .sda_pullup_en = GPIO_PULLUP_ENABLE,
-  //   .scl_pullup_en = GPIO_PULLUP_ENABLE,
-  //   .master.clk_speed = 100000,
-  // };
-  // esp_err_t err = i2c_param_config(I2C_NUM_0, &conf);
-  // //Wire
+  // serial communication setup
+  Serial.begin(SerialBaudRate);
+  Serial.setTimeout(SerialTimeOutMS);
 
- //vspi = new SPIClass(VSPI);
-  vspi = new SPIClass(VSPI);
-  vspi->begin(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_CS);
+  // wifi setup
+  WiFi.onEvent(onWiFiEvent);
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(wifi_ssid, wifi_password);
 
-  pinMode(4, OUTPUT);
-  pinMode(vspi->pinSS(), OUTPUT);
+MDNS.begin(wifi_hostname);
+MDNS.addService("http", "tcp", 80);
 
-  digitalWrite(4, HIGH);
-  delay(3);
-  digitalWrite(vspi->pinSS(), HIGH);
+  WiFi.setHostname(wifi_hostname);
+//  IPAddress apIP = WiFi.softAPIP();
+  wifi_server.begin(wifi_port);
 
-  byte data[6];
-  int data_len = sizeof(data);
-  data[0] = 0x09; data[1] = 0xA5; data[2] = 0x09; data[3] = 0x55; data[4] = 0x09; data[5] = 0x55;
-  spiWrite(vspi, data, data_len);
-  data[0] = 10; data[1] = 90; data[2] = 10; data[3] = 85; data[4] = 10; data[5] = 85;
-  spiWrite(vspi, data, data_len);
-  data[0] = 11; data[1] = 90; data[2] = 11; data[3] = 85; data[4] = 11; data[5] = 85;
-  spiWrite(vspi, data, data_len);
-  data[0] = 12; data[1] = 85; data[2] = 12; data[3] = 85; data[4] = 12; data[5] = 85;
-  spiWrite(vspi, data, data_len);
-  data[0] = 13; data[1] = 170; data[2] = 13; data[3] = 85; data[4] = 13; data[5] = 85;
-  spiWrite(vspi, data, data_len);
-  data[0] = 14; data[1] = 85; data[2] = 14; data[3] = 85; data[4] = 14; data[5] = 85;
-  spiWrite(vspi, data, data_len);
-  data[0] = 15; data[1] = 90; data[2] = 15; data[3] = 85; data[4] = 11; data[5] = 85;
-  spiWrite(vspi, data, data_len);
-  data[0] = 4; data[1] = 1; data[2] = 4; data[3] = 1; data[4] = 4; data[5] = 1;
-  spiWrite(vspi, data, data_len);
+  // power ON
+  pinMode(POWER_ON_PIN, OUTPUT);
+  digitalWrite(POWER_ON_PIN, LOW);
+  delay(1);
+  digitalWrite(POWER_ON_PIN, HIGH);
+  delay(1);
+
+  // PAC power ON
+  pinMode(PAC_POWER_PIN, OUTPUT);
+  digitalWrite(PAC_POWER_PIN, LOW);
+  delay(1);
+  digitalWrite(PAC_POWER_PIN, HIGH);
+  delay(1);
+
+  // SPI library init
+  if (spi_lib.Init() == false)
+  {
+    send_error(tx_buffer, OPCODE_ERROR_SPI);
+  }
+  // I2C library init
+  if (i2c_lib.Init() == false)
+  {
+    send_error(tx_buffer, OPCODE_ERROR_I2C);
+  }
 
   // light the led
-  pinMode(27, OUTPUT);
-  digitalWrite(27, HIGH);
+  pinMode(LED_STATUS, OUTPUT);
+  digitalWrite(LED_STATUS, HIGH);
 
-  log_d("setup done...");
+  last_communication_time = std::chrono::system_clock::now();
+
+  //  log_d("setup done...");
 }
 
 void loop() {
-  //log_d("start main loop...");
-
-  // byte data1[6];
-  // data1[0] = 0x44;
-  // data1[1] = 0x03;
-  // data1[2] = 0x44;
-  // data1[3] = 0x03;
-  // data1[4] = 0x44;
-  // data1[5] = 0x03;
-  // spiWrite(vspi, data1, 6);
-  // sleep(3);
-  //
-  // data1[0] = 0x44;
-  // data1[1] = 0x00;
-  // data1[2] = 0x44;
-  // data1[3] = 0x00;
-  // data1[4] = 0x44;
-  // data1[5] = 0x00;
-  // spiWrite(vspi, data1, 6);
-
-  // sleep(3);
-  // log_d("end main loop...");
-  // return;
-  // put your main code here, to run repeatedly:
-//  log_i("start main loop...");
-
-  while (!Serial.available());
-  int msg_size = (int)Serial.readBytes(msg_buffer, sizeof(msg_buffer));
+//  log_d("start main loop...");
+WiFiClient client = wifi_server.available();
+if (client)
+{
+    Serial.println("New client connected");
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-type:text/html");
+    client.println();
+    client.println("<html><body>");
+    client.println("<h1>Hello from ESP32 in AP mode!</h1>");
+    client.println("</body></html>");
+    delay(10);
+    client.stop();
+    Serial.println("Client disconnected");
+  return;
+}
 
   auto start = std::chrono::system_clock::now();
 
-  // search for the prefix "CAFECAFE"
-  SerialHeader* serial_header = nullptr;
-  BatchHeader* batch_header = nullptr;
-  DataHeader* data_header = nullptr;
-  int nof_batch_elements = 0;
-
-  byte* data = nullptr;
-  unsigned int data_size = 0;
-  bool header_found = false;
-  int n = 0;
-  int k;
-  for (k = 0; k < msg_size; k++)
+  while (!Serial.available())
   {
-    if (msg_buffer[k] == PREFIX[n])
-      ++n;
-    else
-      n = 0;
-    if (n == (int)sizeof(PREFIX))
+    // timeout?
+    if (Serial.available() == 0)
     {
-      serial_header = (SerialHeader*)&msg_buffer[k + 1 - (int)sizeof(PREFIX)];
-      if (serial_header->magic_word[0] == MAGICWORD[0] && serial_header->magic_word[1] == MAGICWORD[1] &&
-          serial_header->magic_word[2] == MAGICWORD[2] && serial_header->magic_word[3] == MAGICWORD[3])
+      // check for timeout
+      auto duration = std::chrono::duration_cast<std::chrono::seconds>(start - last_communication_time).count();
+      if (duration > timeout_restart_sec)
       {
-        data = (byte*)(serial_header) + sizeof(*serial_header);
-        header_found = true;
-        break;
+        // connection lost for too long, restart
+        esp_restart();
       }
       else
-      {
-        // bad magic word
-        n = 0;
-      }
+        return;
     }
   }
 
-  // get batch header and check it
-  if (header_found)
-  {
-    batch_header = (BatchHeader*)data;
-    if (batch_header->magic_word[0] == MAGICWORD[0] && batch_header->magic_word[1] == MAGICWORD[1] &&
-        batch_header->magic_word[2] == MAGICWORD[2] && batch_header->magic_word[3] == MAGICWORD[3])
-    {
-      nof_batch_elements = batch_header->nof_data_elements;
-    }
-    if (nof_batch_elements > 0)
-    {
-      data_header = (DataHeader*)(data + sizeof(*batch_header));
-      data = (byte*)(data_header) + sizeof(*data_header);
-    }
+  // save last communication time
+  last_communication_time = std::chrono::system_clock::now();
 
-//    // DEBUG: write back to HOST
-//    Serial.write((byte*)serial_header, sizeof(*serial_header));
-//    Serial.write((byte*)batch_header, sizeof(*batch_header));
-//    Serial.write((byte*)data_header, sizeof(*data_header));
-//    Serial.flush();
-  }
-  else
+  // wait for the serial header
+  while (Serial.available() < sizeof(SerialHeader)) delay(1);
+
+  int msg_size = (int)Serial.readBytes(rx_buffer, RCV_BUFFER_SIZE);
+  // if not enough data, return 
+  if (rx_buffer == nullptr || msg_size < sizeof(SerialHeader))
   {
-    // error
-    SerialHeader* serial_header_out = (SerialHeader*)out_buffer;
-    memcpy(serial_header_out, serial_header, sizeof(*serial_header_out));
-    serial_header_out->data_size = sizeof(BatchHeader);
-    BatchHeader* batch_header_out = (BatchHeader*)((byte*)serial_header_out + sizeof(*serial_header_out));
-    batch_header_out->nof_data_elements = 0;
-    memcpy(batch_header_out, MAGICWORD, sizeof(batch_header_out));
-    send_report(out_buffer, sizeof(*serial_header_out) + sizeof(*batch_header_out));
     return;
   }
 
-  SerialHeader* serial_header_out = (SerialHeader*)&out_buffer[0];
+  // search for the prefix "CAFE"
+  SerialHeader *serial_header = nullptr;
+  BatchHeader *batch_header = nullptr;
+  DataHeader *data_header = nullptr;
+
+  // sync on serial header
+  byte error_code = idd_decode(
+    IN rx_buffer, IN msg_size,
+    OUT &serial_header, OUT &batch_header, OUT &data_header
+  );
+
+  if (error_code != OPCODE_ERROR_OK)
+  {
+    // send error
+    send_error(tx_buffer, error_code);
+    return;
+  }
+
+  // treat the 'timeout' update message
+  if (serial_header->opCode == OPCODE_TIMEOUT_UPDATE)
+  {
+    // if no data, just return the current timeout value
+    if (data_header->nof_elements > 0)
+    {
+      // get the timeout value in seconds
+      int new_timeout_sec = *reinterpret_cast<int*>((byte*)(data_header) + sizeof(*data_header));
+      timeout_restart_sec = new_timeout_sec;
+    }
+    // update some params, if only read requested 
+    if (data_header->nof_elements == 0)
+    {
+      byte* data = ((byte*)data_header) + sizeof(*data_header);
+      memcpy(data, &timeout_restart_sec, sizeof(timeout_restart_sec));
+      data_header->nof_elements = sizeof(timeout_restart_sec);
+      serial_header->data_size += sizeof(timeout_restart_sec);
+      // update the crc
+      serial_header->crc = crc16((byte*)serial_header, sizeof(*serial_header) - 
+          sizeof(serial_header->crc));
+    }
+    // loopback the message as ACK, or add the current value of the timeout
+    memcpy(tx_buffer, serial_header, sizeof(*serial_header) + serial_header->data_size);
+    Serial.write(tx_buffer, sizeof(*serial_header) + serial_header->data_size);
+    Serial.flush();
+    return;
+  }
+
+  SerialHeader* serial_header_out = (SerialHeader*)&tx_buffer[0];
   memcpy(serial_header_out, serial_header, sizeof(*serial_header_out));
   serial_header_out->data_size = sizeof(BatchHeader);
   BatchHeader* batch_header_out = (BatchHeader*)((byte*)serial_header_out + sizeof(*serial_header_out));
   memcpy(batch_header_out, batch_header, sizeof(*batch_header_out));
+  batch_header_out->nof_data_elements = 0; // it will be updated lated, in accordance with message type 
   DataHeader* data_header_out = (DataHeader*)((byte*)batch_header_out + sizeof(*batch_header_out));
   memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
   byte* data_out = (byte*)data_header_out + sizeof(*data_header_out);
-  int out_size = 0;
 
-  for (k = 0; k < 1/*nof_batch_elements*/; k++)
+  bool rc;
+  int out_size = 0;
+  byte* data = (byte*)(data_header) + sizeof(*data_header);
+  for (int k = 0; k < batch_header->nof_data_elements; k++)
   {
     switch (serial_header->opCode)
     {
-    case 0xEA:
+    case OPCODE_I2C_WRITE:
+      rc = i2c_lib.write(data[0], &data[1], data_header->nof_elements - 1);
+      if (rc == false)
+      {
+        send_error(tx_buffer, OPCODE_ERROR_I2C);
+        return;
+      }
+      break;
+    case OPCODE_I2C_READ:
+      out_size = i2c_lib.read(data[0], data_out, data_header->nof_elements - 1);
+      
+      // increment nof batch elements
+      batch_header_out->nof_data_elements += 1;
+      // update num of output elements
+      data_header_out->nof_elements = out_size;
+      // advance data header ptr
+      data_header_out = (DataHeader *)(data_out + out_size);
+      memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+      data_out += sizeof(*data_header_out) + out_size;
+      // update total size
+      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+
+      break;
+    case OPCODE_SPI_READ:
       // SPI read
-      spiRead(vspi, out_buffer, data_header->nof_elements);
+      out_size = spi_lib.read(data, data_out, data_header->nof_elements);
+
+      // increment nof batch elements
+      batch_header_out->nof_data_elements += 1;
+
+      // update num of output elements
+      data_header_out->nof_elements = out_size;
+      // advance data header ptr
+      data_header_out = (DataHeader *)(data_out + out_size);
+      memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+      data_out += sizeof(*data_header_out) + out_size;
+      // update total size
+      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
       break;
-    case 0x1E:
+    case OPCODE_SPI_WRITE:
       // SPI write
-    //  log_i("write nof_elements = %d; [%d,%d,%d,%d,%d,%d]...", data_header->nof_elements, data[0],data[1],data[2],data[3],data[4],data[5]);
-      spiWrite(vspi, data, data_header->nof_elements);
-      break;
-    case 0xEE:
-      // SPI write and read
-  //    log_i("read/write [%d,%d,%d,%d,%d,%d]...", data[0],data[1],data[2],data[3],data[4],data[5]);
-      spiWrite(vspi, data, data_header->nof_elements);
-      out_size = spiRead(vspi, data_out, data_header->nof_elements);
+      spi_lib.write(data, data_header->nof_elements);
       break;
     default:
       break;
     }
-    // data_header = (DataHeader*)(data + data_header->nof_elements);
-    // data = (byte*)(data_header) + sizeof(*data_header);
 
-    // // update num of output elements
-    // data_header_out->nof_elements = out_size;
-
-    // data_header_out = (DataHeader*)(data_out + out_size);
-    // memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
-    // data_out += sizeof(*data_header_out);
-
-    // serial_header_out->data_size += sizeof(*data_header_out) + out_size;
+    //
+    data_header = (DataHeader*)(data + data_header->nof_elements);
+    data = (byte*)(data_header) + sizeof(*data_header);
   }
-  
-//  auto stop = std::chrono::system_clock::now();
-//  auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
+
+  auto stop = std::chrono::system_clock::now();
+  auto difference = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
 
   // write back to HOST
-//  send_report(out_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
-  // msg_size = out_size + sizeof(MAGICWORD); // includes size of the magic word
-  // Serial.write((byte*)PREFIX, sizeof(PREFIX));
-  // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));
-  // Serial.write((byte*)&msg_size, sizeof(msg_size));
-  // Serial.write((byte*)&difference, sizeof(difference));
-  // Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
-  // Serial.write(out_buffer, out_size);
-  // Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
-  // Serial.flush();
-
-  //log_i("end main loop (elapsed time %f)...", difference);
-}
-
-void send_report(byte* data, int data_size)
-{
-  // int msg_size = data_size + sizeof(MAGICWORD); // includes size of the magic word
-  // Serial.write((byte*)PREFIX, sizeof(PREFIX));
-  // Serial.write((byte*)&msg_opcode, sizeof(msg_opcode));
-  // Serial.write((byte*)&msg_size, sizeof(msg_size));
-  // Serial.write((byte*)&elapsed_time, sizeof(elapsed_time));
-  // Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
-  Serial.write(data, data_size);
-  //Serial.write((char*)MAGICWORD, sizeof(MAGICWORD));
+  // calculate and update header crc
+  serial_header_out->crc = crc16((byte*)serial_header_out, sizeof(*serial_header_out) -
+    sizeof(serial_header_out->crc));
+  Serial.write(tx_buffer, sizeof(*serial_header_out) + serial_header_out->data_size);
   Serial.flush();
-}
 
-void spiWrite(SPIClass *spi, byte* data, uint32_t len) {
-  //use it as you would the regular arduino SPI API
-  spi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
-  digitalWrite(spi->pinSS(), LOW); //pull SS slow to prep other end for transfer
-  for (int k = 0; k < len; k++)
-  {
-    spi->transfer(data[k]);
-  }
-  digitalWrite(spi->pinSS(), HIGH); //pull ss high to signify end of data transfer
-  spi->endTransaction();
-}
-
-int spiRead(SPIClass *spi, byte* out, uint32_t len) {
-  int readBytes = 0;
-  //use it as you would the regular arduino SPI API
-  // spi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
-  // digitalWrite(spi->pinSS(), LOW); //pull SS slow to prep other end for transfer
-  // while (readBytes < len)
-  // {
-  //   out[readBytes++] = spi->transfer(0x00);
-  // }
-  // digitalWrite(spi->pinSS(), HIGH); //pull ss high to signify end of data transfer
-  // spi->endTransaction();
-
-  return readBytes;
+//  log_d("end main loop (elapsed time %f)...", difference);
 }

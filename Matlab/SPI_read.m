@@ -1,7 +1,7 @@
 function msg = SPI_read(a, data)
 % SPI read
 %
-% a - serial connection object to esp
+% a - serial/wifi connection object to esp
 % data format example:
 %	data = [68,0,68,0,68,0;...
 %   	    72,0,72,0,72,0;...

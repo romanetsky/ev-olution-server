@@ -1,11 +1,12 @@
 #pragma once
 #include <Arduino.h>
+#include <ESPmDNS.h>
 #include "wifi_lib.h"
 #include "BaseCommunicator.h"
 
 const char* wifi_ssid = "EVONET";
 const char* wifi_password = "12345678";
-const char* wifi_hostname = "my-evo-host";
+const char* wifi_hostname = "my_evo_host";
 const uint16_t wifi_port = 4556;
 WiFiServer wifi_server(wifi_port);
 
@@ -22,9 +23,23 @@ public:
         // multicast DNS
         MDNS.begin(wifi_hostname);
         MDNS.addService("http", "tcp", 80);
-
+    
         WiFi.setHostname(wifi_hostname);
-        wifi_server.begin(wifi_port);
+        wifi_server.begin();
+
+//         int nrOfServices = MDNS.queryService("http", "tcp");
+// Serial.print("Number of services found: ");
+// Serial.println(nrOfServices);
+// for (int i = 0; i < nrOfServices; i=i+1) {
+//     Serial.println("---------------");
+//     Serial.print("Hostname: ");
+//     Serial.println(MDNS.hostname(i));
+//     Serial.print("IP address: ");
+//     Serial.println(MDNS.IP(i));
+//     Serial.print("Port: ");
+//     Serial.println(MDNS.port(i));
+//     Serial.println("---------------");
+// }
     }
     virtual int available() override
     {

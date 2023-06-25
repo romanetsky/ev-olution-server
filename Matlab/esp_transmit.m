@@ -3,7 +3,7 @@ function msg = esp_transmit(a, bytes)
 
 msg = [];
 if ~isempty(bytes)
-	write(a, bytes, 'uint8');
+    write(a, bytes, 'uint8');
 	% wait for data
 	while a.NumBytesAvailable < 11
 		pause(a.Timeout);

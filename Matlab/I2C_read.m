@@ -1,7 +1,7 @@
 function msg = I2C_read(a, data)
 % I2C read
 %
-% a - serial connection object to esp
+% a - serial/wifi connection object to esp
 % data format example:
 %	data = [0,0,0,0,0;...
 %   	    1,0,0,0,0;...

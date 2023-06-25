@@ -16,7 +16,7 @@
 // const char* wifi_password = "12345678";
 // const char* wifi_hostname = "my-evo-host";
 // const uint16_t wifi_port = 4556;
-
+//
 // create a instance of the server
 // WiFiServer wifi_server(wifi_port);
 
@@ -34,7 +34,7 @@ std::chrono::system_clock::time_point last_communication_time;
 
 void setup() {
 //  log_d("begin setup...");
-//Serial.begin(115200);
+//Serial.begin(SerialBaudRate);
   communicator = CommunicatorFactory::createCommunicator(DEF_COMMUNICATOR_WIFI);
   if (communicator == nullptr)
     while(1);
@@ -47,11 +47,11 @@ void setup() {
   // WiFi.onEvent(onWiFiEvent);
   // WiFi.mode(WIFI_AP);
   // WiFi.softAP(wifi_ssid, wifi_password);
-
+  //
   // // multicast DNS
   // MDNS.begin(wifi_hostname);
   // MDNS.addService("http", "tcp", 80);
-
+  //
   // WiFi.setHostname(wifi_hostname);
   // wifi_server.begin(wifi_port);
 
@@ -91,6 +91,7 @@ void setup() {
 
 void loop() {
 //  log_d("start main loop...");
+
   if (communicator == nullptr)
     return;
 

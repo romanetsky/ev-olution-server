@@ -35,7 +35,7 @@ std::chrono::system_clock::time_point last_communication_time;
 void setup() {
 //  log_d("begin setup...");
 //Serial.begin(SerialBaudRate);
-  communicator = CommunicatorFactory::createCommunicator(DEF_COMMUNICATOR_WIFI);
+  communicator = CommunicatorFactory::createCommunicator(DEF_COMMUNICATOR_SERIAL);
   if (communicator == nullptr)
     while(1);
 
@@ -58,14 +58,14 @@ void setup() {
   // power ON
   pinMode(POWER_ON_PIN, OUTPUT);
   digitalWrite(POWER_ON_PIN, LOW);
-  delay(1);
+  delay(100);
   digitalWrite(POWER_ON_PIN, HIGH);
-  delay(1);
+  delay(10);
 
   // PAC power ON
   pinMode(PAC_POWER_PIN, OUTPUT);
   digitalWrite(PAC_POWER_PIN, LOW);
-  delay(1);
+  delay(100);
   digitalWrite(PAC_POWER_PIN, HIGH);
   delay(1);
 
@@ -119,8 +119,68 @@ void loop() {
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(start - last_communication_time).count();
     if (duration > timeout_restart_sec)
     {
-      // connection lost for too long, restart
-      esp_restart();
+      // // connection lost for too long, restart
+      // esp_restart();
+      
+      // SPI - all ports OFF
+      byte data[6];
+      int data_len = sizeof(data);
+      data[0] = 0x09;
+      data[1] = 0x00;
+      data[2] = 0x09;
+      data[3] = 0x00;
+      data[4] = 0x09;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      data[0] = 0x0A;
+      data[1] = 0x00;
+      data[2] = 0x0A;
+      data[3] = 0x00;
+      data[4] = 0x0A;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      data[0] = 0x0B;
+      data[1] = 0x00;
+      data[2] = 0x0B;
+      data[3] = 0x00;
+      data[4] = 0x0B;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      data[0] = 0x0C;
+      data[1] = 0x00;
+      data[2] = 0x0C;
+      data[3] = 0x00;
+      data[4] = 0x0C;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      data[0] = 0x0D;
+      data[1] = 0x00;
+      data[2] = 0x0D;
+      data[3] = 0x00;
+      data[4] = 0x0D;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      data[0] = 0x0E;
+      data[1] = 0x00;
+      data[2] = 0x0E;
+      data[3] = 0x00;
+      data[4] = 0x0E;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      data[0] = 0x0F;
+      data[1] = 0x00;
+      data[2] = 0x0F;
+      data[3] = 0x00;
+      data[4] = 0x0F;
+      data[5] = 0x00;
+      spi_lib.write(data, data_len);
+      delay(100);
+      // power OFF/ON
+      pinMode(POWER_ON_PIN, OUTPUT);
+      digitalWrite(POWER_ON_PIN, LOW);
+      delay(100);
+      digitalWrite(POWER_ON_PIN, HIGH);
+      delay(10);
     }
     else
       return;

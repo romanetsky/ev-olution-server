@@ -57,7 +57,7 @@ bool SpiLib::Init()
     data[1] = 0x5A;
     data[2] = 0x0F;
     data[3] = 0x55;
-    data[4] = 0x0B;
+    data[4] = 0x0F;
     data[5] = 0x55;
     write(data, data_len);
     data[0] = 0x04;

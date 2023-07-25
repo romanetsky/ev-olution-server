@@ -25,12 +25,12 @@ def crc16(byte_stream):
     return crc & 0xFFFF
 
 
-arduino = serial.Serial(port='COM5', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM6', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
 arduino.flushInput()
 
-timeout_sec = 10*60  # [] - is for reading only
+timeout_sec = []  # [] - is for reading only
 data_bytes = np.array(timeout_sec, dtype='uint32').tobytes()
 prefix = np.array([0xCA, 0xFE], dtype='uint8').tobytes()
 # opcode = 0xDA - set timeout value in secs

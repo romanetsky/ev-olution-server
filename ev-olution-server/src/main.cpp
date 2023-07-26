@@ -123,64 +123,17 @@ void loop() {
       // esp_restart();
       
       // SPI - all ports OFF
-      byte data[6];
-      int data_len = sizeof(data);
-      data[0] = 0x09;
-      data[1] = 0x00;
-      data[2] = 0x09;
-      data[3] = 0x00;
-      data[4] = 0x09;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      data[0] = 0x0A;
-      data[1] = 0x00;
-      data[2] = 0x0A;
-      data[3] = 0x00;
-      data[4] = 0x0A;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      data[0] = 0x0B;
-      data[1] = 0x00;
-      data[2] = 0x0B;
-      data[3] = 0x00;
-      data[4] = 0x0B;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      data[0] = 0x0C;
-      data[1] = 0x00;
-      data[2] = 0x0C;
-      data[3] = 0x00;
-      data[4] = 0x0C;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      data[0] = 0x0D;
-      data[1] = 0x00;
-      data[2] = 0x0D;
-      data[3] = 0x00;
-      data[4] = 0x0D;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      data[0] = 0x0E;
-      data[1] = 0x00;
-      data[2] = 0x0E;
-      data[3] = 0x00;
-      data[4] = 0x0E;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      data[0] = 0x0F;
-      data[1] = 0x00;
-      data[2] = 0x0F;
-      data[3] = 0x00;
-      data[4] = 0x0F;
-      data[5] = 0x00;
-      spi_lib.write(data, data_len);
-      delay(100);
+      spi_lib.Reset();
+
       // power OFF/ON
       pinMode(POWER_ON_PIN, OUTPUT);
       digitalWrite(POWER_ON_PIN, LOW);
       delay(100);
       digitalWrite(POWER_ON_PIN, HIGH);
-      delay(10);
+      delay(100);
+
+      // now configure all ports
+      spi_lib.ConfigurePorts();
     }
     else
       return;

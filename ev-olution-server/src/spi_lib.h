@@ -13,6 +13,8 @@ class SpiLib
 {
 public:
     bool Init();
+    void Reset();
+    void ConfigurePorts();
     void write(byte *data_in, uint32_t len);
     int  read(byte *data_in, byte *data_out, uint32_t len);
 

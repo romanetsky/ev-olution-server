@@ -28,20 +28,23 @@ time.sleep(1)
 data = arduino.read_all()
 arduino.flushInput()
 
-data1 = [[68,0,68,0,68,0],
-         [76,0,76,0,76,0],
+data1 = [
+         [0x44,0x01,0x44,0x01,0x44,0x01],
+         [0x4C,0x01,0x4C,0x01,0x4C,0x01],
+         [0x54,0x01,0x54,0x01,0x54,0x01],
+         [0x5C,0x01,0x5C,0x01,0x5C,0x01],
+         # [0x58,0x01,0x58,0x01,0x58,0x01],
+         [0x0F,0x01,0x0F,0x01,0x0F,0x01]
+         ]
+
+data1 = [
+         [68,1,68,0,68,0],
+         [76,64,76,1,76,0],
          [84,0,84,0,84,0],
-         [92,0,92,0,92,0]]
-
-data1 = [[68,3,68,3,68,3],
-          [76,3,76,3,76,3],
-          [84,3,84,3,84,3],
-          [92,3,92,3,92,3]]
-
-# data1 = [[68,3,68,3,68,3],
-#          [76,3,76,3,76,3],
-#          [84,3,84,3,84,3],
-#          [92,3,92,3,92,3]]
+         [92,0,92,0,92,0],
+         # [0x58,0x01,0x58,0x01,0x58,0x01],
+         [0x0F,0x01,0x0F,0x01,0x0F,0x01]
+         ]
 
 for i in range(0,1):
     for j in range(0,1):
@@ -54,7 +57,7 @@ for i in range(0,1):
         nof_batch_elements = np.array(nx, dtype='uint32').tobytes()
         nof_elements = np.array(ny, dtype='uint32').tobytes()
         prefix = np.array([0xCA,0xFE], dtype='uint8').tobytes()
-        # opcode = 0x6A - read; 0x65 - write
+        # opcode = 0x6A - read; 0x65 - write; 0x60 - write & read
         opcode = np.array([0x6A], dtype='uint8').tobytes()
         magic_word = np.array([0xBA,0xDA], dtype='uint8').tobytes()
         data_size = np.array(
@@ -79,30 +82,7 @@ for i in range(0,1):
             packet = packet + nof_elements
             # data
             packet = packet + data_bytes[k,:].tobytes()
-        
-        # insert opcode for writing
-        packet_write = packet[0:2] + np.array([0x65], dtype='uint8').tobytes() + packet[3:]
-        # recalculate the crc
-        packet_write = packet_write[0:9] + np.array([crc16(packet_write[0:9])], dtype='uint16').tobytes() + packet_write[11:]
-    
-        start_time = time.time_ns()
-        # send write request
-        arduino.write(packet_write)
-        # read the write status
-        while arduino.in_waiting < 11:
-            None
-        data_out_hdr = arduino.read(11) # read the header
-        in_data_size = struct.unpack('<I', data_out_hdr[3:7])[0]
-        while arduino.in_waiting < in_data_size:
-            None
-        data_out = arduino.read_all()
-        stop_time = time.time_ns()
-        print('==== WRITE REQUEST STATUS ====')
-        print('header        : ', data_out_hdr.hex(':'))
-        print('batch header  : ', data_out[0:6].hex(':'))
-        print('data          : ', data_out[6:].hex(':'))
-        print('overall command time: ', (stop_time - start_time)/1000000, ' msec')
-    
+
         start_time = time.time_ns()
         # send read request
         arduino.write(packet)

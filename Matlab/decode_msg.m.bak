@@ -52,8 +52,6 @@ switch opcode
         opcode_str = 'SPI read';
     case '65'
         opcode_str = 'SPI write';
-    case '60'
-        opcode_str = 'SPI write/read';
     case '9A'
         opcode_str = 'I2C read';
     case '95'

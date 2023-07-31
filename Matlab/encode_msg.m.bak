@@ -2,7 +2,7 @@ function bytes_array = encode_msg(command, data)
 % supported commands:
 %   'SPIread'   	- read from SPI device
 %   'SPIwrite'  	- write to SPI device
-%   'SPIwriteread'	- write and read in the same command to SPI device
+%   'SPIwriteread'	- write and read in the same command to/from SPI device
 %   'PACread'   	- read from PAC device (I2C)
 %   'PACwrite'  	- write to PAC device (I2C)
 %   'TO'        	- setup timeout before restart (in seconds - 4 bytes)

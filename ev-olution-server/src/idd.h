@@ -11,6 +11,7 @@
 constexpr byte OPCODE_TIMEOUT_UPDATE = 0xDA;
 constexpr byte OPCODE_SPI_READ       = 0x6A;
 constexpr byte OPCODE_SPI_WRITE      = 0x65;
+constexpr byte OPCODE_SPI_WRITEREAD  = 0x60;
 constexpr byte OPCODE_I2C_READ       = 0x9A;
 constexpr byte OPCODE_I2C_WRITE      = 0x95;
 constexpr byte OPCODE_ERROR_OK       = 0xE0;

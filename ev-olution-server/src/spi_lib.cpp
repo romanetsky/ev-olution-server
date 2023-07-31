@@ -11,6 +11,9 @@ bool SpiLib::Init()
     // make expanders initialization
     ConfigurePorts();
 
+    // reset
+    Reset();
+
     return rc;
 }
 
@@ -81,53 +84,32 @@ void SpiLib::Reset()
           // SPI - all ports OFF
       byte data[6];
       int data_len = sizeof(data);
-      data[0] = 0x09;
+      data[0] = DEF_PORT_STATE_4_11;
       data[1] = 0x00;
-      data[2] = 0x09;
+      data[2] = DEF_PORT_STATE_4_11;
       data[3] = 0x00;
-      data[4] = 0x09;
+      data[4] = DEF_PORT_STATE_4_11;
       data[5] = 0x00;
       write(data, data_len);
-      data[0] = 0x0A;
+      data[0] = DEF_PORT_STATE_12_19;
       data[1] = 0x00;
-      data[2] = 0x0A;
+      data[2] = DEF_PORT_STATE_12_19;
       data[3] = 0x00;
-      data[4] = 0x0A;
+      data[4] = DEF_PORT_STATE_12_19;
       data[5] = 0x00;
       write(data, data_len);
-      data[0] = 0x0B;
+      data[0] = DEF_PORT_STATE_20_27;
       data[1] = 0x00;
-      data[2] = 0x0B;
+      data[2] = DEF_PORT_STATE_20_27;
       data[3] = 0x00;
-      data[4] = 0x0B;
+      data[4] = DEF_PORT_STATE_20_27;
       data[5] = 0x00;
       write(data, data_len);
-      data[0] = 0x0C;
+      data[0] = DEF_PORT_STATE_28_31;
       data[1] = 0x00;
-      data[2] = 0x0C;
+      data[2] = DEF_PORT_STATE_28_31;
       data[3] = 0x00;
-      data[4] = 0x0C;
-      data[5] = 0x00;
-      write(data, data_len);
-      data[0] = 0x0D;
-      data[1] = 0x00;
-      data[2] = 0x0D;
-      data[3] = 0x00;
-      data[4] = 0x0D;
-      data[5] = 0x00;
-      write(data, data_len);
-      data[0] = 0x0E;
-      data[1] = 0x00;
-      data[2] = 0x0E;
-      data[3] = 0x00;
-      data[4] = 0x0E;
-      data[5] = 0x00;
-      write(data, data_len);
-      data[0] = 0x0F;
-      data[1] = 0x00;
-      data[2] = 0x0F;
-      data[3] = 0x00;
-      data[4] = 0x0F;
+      data[4] = DEF_PORT_STATE_28_31;
       data[5] = 0x00;
       write(data, data_len);
       delay(100);
@@ -167,10 +149,27 @@ int SpiLib::read(byte *data_in, byte *data_out, uint32_t len)
 {
     int out_size = 0;
     spiEnable_();
+
+    // now write the real data
     for (int k = 0; k < len; k++)
     {
         // rise last bit (0x80) to indicate reading
-        data_out[out_size++] = m_spi->transfer(data_in[k] /*| 0x80*/);
+        data_out[out_size] = m_spi->transfer(data_in[k] | 0x80);
+        data_out[out_size] = (k % 2 == 0) ? (data_out[out_size] & 0x7f) : data_out[out_size];
+        ++out_size;
+    }
+    spiDisable_();
+
+    return out_size;
+}
+
+int SpiLib::writeread(byte *data_in, byte *data_out, uint32_t len)
+{
+    int out_size = 0;
+    spiEnable_();
+    for (int k = 0; k < len; k++)
+    {
+        data_out[out_size++] = m_spi->transfer(data_in[k]);
     }
     spiDisable_();
 

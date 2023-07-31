@@ -198,7 +198,8 @@ void loop() {
     // Serial.flush();
     return;
   }
-
+  
+  memset(tx_buffer, 0, sizeof(tx_buffer));
   SerialHeader* serial_header_out = (SerialHeader*)&tx_buffer[0];
   memcpy(serial_header_out, serial_header, sizeof(*serial_header_out));
   serial_header_out->data_size = sizeof(BatchHeader);
@@ -238,6 +239,22 @@ void loop() {
       // update total size
       serial_header_out->data_size += sizeof(*data_header_out) + out_size;
 
+      break;
+    case OPCODE_SPI_WRITEREAD:
+      // SPI write and read
+      out_size = spi_lib.writeread(data, data_out, data_header->nof_elements);
+
+      // increment nof batch elements
+      batch_header_out->nof_data_elements += 1;
+
+      // update num of output elements
+      data_header_out->nof_elements = out_size;
+      // advance data header ptr
+      data_header_out = (DataHeader *)(data_out + out_size);
+      memcpy(data_header_out->magic_word, MAGICWORD, sizeof(MAGICWORD));
+      data_out += sizeof(*data_header_out) + out_size;
+      // update total size
+      serial_header_out->data_size += sizeof(*data_header_out) + out_size;
       break;
     case OPCODE_SPI_READ:
       // SPI read

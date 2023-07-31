@@ -86,7 +86,7 @@ function msg = esp_comm(a, bytes, time_out)
             wait = wait + time_out;
             if wait > 1
                 a.delete();
-                error('time out accured');
+                error('time out occured');
             end
         end
         data_raw = read(a, a.NumBytesAvailable, 'uint8');

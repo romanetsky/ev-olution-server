@@ -1,0 +1,16 @@
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\bin\Debug\ParamsEditor.exe.config
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\bin\Debug\ParamsEditor.exe
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\bin\Debug\ParamsEditor.pdb
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.csproj.AssemblyReference.cache
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.csproj.SuggestedBindingRedirects.cache
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\MainWindow.g.cs
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\App.g.cs
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor_MarkupCompile.cache
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor_MarkupCompile.lref
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\MainWindow.baml
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.g.resources
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.Properties.Resources.resources
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.csproj.GenerateResource.cache
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.csproj.CoreCompileInputs.cache
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.exe
+C:\Users\roman\Documents\GitHub\ev-olution-server\GUI\ParamsEditor\ParamsEditor\obj\Debug\ParamsEditor.pdb

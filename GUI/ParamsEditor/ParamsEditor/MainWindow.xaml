@@ -1,0 +1,515 @@
+﻿<Window x:Class="ParamsEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ParamsEditor"
+        mc:Ignorable="d"
+        Title="Parameters Editor" Height="680" Width="400">
+
+    <Border Padding="6">
+        <StackPanel>
+            <Grid Margin="0 16 0 10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Margin="10 0 10 0" Grid.Column="1" Content="Load" Click="Load_Click"/>
+                <Button Margin="10 0 10 0" Grid.Column="2" Content="Save" Click="Save_Click"/>
+                <Button Margin="10 0 10 0" Grid.Column="3" Content="Run"/>
+                <Button Margin="10 0 10 0" Grid.Column="0" Content="Close" Click="Close_Click"/>
+            </Grid>
+
+            <TextBlock Text="Settings" FontWeight="Bold" Margin="10 4 10 4"/>
+
+            <TabControl Margin="10 10 10 0">
+                <TabItem Header="Run">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="2,10,2,10" Grid.Column="0" Grid.ColumnSpan="2">
+                            <CheckBox Margin="2" x:Name="plotSocFlag" Content="PlotSocFlag"/>
+                            <CheckBox Margin="2" x:Name="plotItFlag" Content="PlotItFlag"/>
+                            <CheckBox Margin="2" x:Name="plotTempFlag" Content="PlotTempFlag"/>
+                            <CheckBox Margin="2" x:Name="plotVFlag" Content="PlotVFlag"/>
+                            <CheckBox Margin="2" x:Name="plotIFlag" Content="PlotIFlag"/>
+                            <CheckBox Margin="2" x:Name="plotIacsFlag" Content="PlotIacsFlag"/>
+                        </StackPanel>
+                        <StackPanel Margin="2,10,2,10" Grid.Column="2">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="MaxTime" />
+                                <TextBox x:Name="maxTime" Grid.Column="1" Text=""/>
+                            </Grid>
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="dt" />
+                                <TextBox x:Name="dt" Grid.Column="1" Text=""/>
+                            </Grid>
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="T2Show" />
+                                <TextBox x:Name="t2Show" Grid.Column="1" Text=""/>
+                            </Grid>
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Nt" />
+                                <TextBox x:Name="nt" Grid.Column="1" Text=""/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Sequence">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Margin="4 4 4 4" FontWeight="Bold" Text="Choose sequence"/>
+                            <ComboBox x:Name="sequence" SelectedIndex="0" Background="White" Margin="4" Padding="4">
+                                <ComboBoxItem>seq 1: Dis kp184</ComboBoxItem>
+                                <ComboBoxItem>seq 2: B2B</ComboBoxItem>
+                                <ComboBoxItem>seq 3: Chr ka6005p</ComboBoxItem>
+                                <ComboBoxItem>seq 4: Chr + Dis NA?</ComboBoxItem>
+                                <ComboBoxItem>seq 5: Chr->Dis->Chr</ComboBoxItem>
+                                <ComboBoxItem>seq 6: Calibration</ComboBoxItem>
+                                <ComboBoxItem>seq 7: Dis passive load</ComboBoxItem>
+                                <ComboBoxItem>seq 8: juntek+ACDC (chr)</ComboBoxItem>
+                            </ComboBox>
+                            <StackPanel>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="mod:" />
+                                    <TextBox x:Name="seq_mod" Grid.Column="1" Text="" Height="40"/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="chr:" />
+                                    <TextBox x:Name="seq_chr" Grid.Column="1" Text=""/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="vth:" />
+                                    <TextBox x:Name="seq_vth" Grid.Column="1" Text=""/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="ins:" />
+                                    <TextBox x:Name="seq_ins" Grid.Column="1" Text="" Height="40"/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Nst:" />
+                                    <TextBox x:Name="seq_nst" Grid.Column="1" Text=""/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="swm:" />
+                                    <TextBox x:Name="seq_swm" Grid.Column="1" Text=""/>
+                                </Grid>
+                                <TextBlock Margin="4" FontWeight="Bold" Text="tst"/>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="ins:" />
+                                    <TextBox x:Name="seq_tst_ins" Grid.Column="1" Text=""/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="v:" />
+                                    <CheckBox x:Name="seq_tst_v" Grid.Column="1" IsChecked="False"/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="i:" />
+                                    <CheckBox x:Name="seq_tst_i" Grid.Column="1" IsChecked="False"/>
+                                </Grid>
+                                <Grid Margin="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="swm:" />
+                                    <TextBox x:Name="seq_tst_swm" Grid.Column="1" Text=""/>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Instr">
+                    <StackPanel>
+                        <TextBlock Margin="4 4 4 4" FontWeight="Bold" Text="Choose Project"/>
+                        <ComboBox x:Name="project" SelectedIndex="3" Background="White" Margin="4" Padding="4">
+                            <ComboBoxItem>0 - ina219</ComboBoxItem>
+                            <ComboBoxItem>1 - EVBOTS_v1</ComboBoxItem>
+                            <ComboBoxItem>2 - esp32</ComboBoxItem>
+                            <ComboBoxItem>3 - serial esp32</ComboBoxItem>
+                            <ComboBoxItem>4 - wifi esp32</ComboBoxItem>
+                        </ComboBox>
+                        <StackPanel>
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" FontWeight="Bold" Text="Serial Port:"/>
+                                <TextBox x:Name="serial_port" Grid.Column="1" Text="COM"/>
+                            </Grid>
+                        </StackPanel>
+                        <TextBlock Margin="4 4 4 4" FontWeight="Bold" Text="Intruments to init"/>
+                        <CheckBox x:Name="juntek" Margin="4" Content="juntek"/>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="10 0 0 0" Grid.Column="0" Text="ImaxAcDc:"/>
+                            <TextBox x:Name="ImaxAcDc" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="10 0 0 0" Grid.Column="0" Text="minVjuntekInput:"/>
+                            <TextBox x:Name="minVjuntekInput" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="10 0 0 0" Grid.Column="0" Text="juntekEfficencyFactor:"/>
+                            <TextBox x:Name="junketEfficencyFactor" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <CheckBox x:Name="ka6005p" Margin="4" Content="ka6005p"/>
+                        <CheckBox x:Name="kp184" Margin="4" Content="kp184"/>
+                        <CheckBox x:Name="swm" Margin="4" Content="swm"/>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Board">
+                    <StackPanel>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="N_bat1:"/>
+                            <TextBox x:Name="nBat1" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="N_bat2:"/>
+                            <TextBox x:Name="nBat2" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <TextBlock Margin="4" FontWeight="Bold" Text="SPI"/>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="ports (HEX):"/>
+                            <TextBox x:Name="spiPorts" Grid.Column="1" Text="" IsReadOnly="True"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="bin2port:"/>
+                            <TextBox x:Name="bin2port" Grid.Column="1" Height="70" 
+                                     Text="" IsReadOnly="True" TextWrapping="Wrap" MinLines="4"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="reset timeout (sec):"/>
+                            <TextBox x:Name="resetTimeout" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="disconnect:"/>
+                            <TextBox x:Name="disconnect" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="bypass:"/>
+                            <TextBox x:Name="bypass" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <CheckBox x:Name="createPortFile" Content="Create Port File" IsChecked="False"/>
+                        <TextBlock Margin="4" FontWeight="Bold" Text="PAC"/>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="I2C Pac Address:"/>
+                            <TextBox x:Name="i2cPacAddr" Grid.Column="1" Text="" MinLines="2" TextWrapping="Wrap"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="VIpacId:"/>
+                            <TextBox x:Name="vIpacId" Grid.Column="1" Text="" MinLines="2" TextWrapping="Wrap"/>
+                        </Grid>
+                        <CheckBox x:Name="readIpac" Content="read Ipac" IsChecked="False"/>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Rval:"/>
+                            <TextBox x:Name="rVal" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Rshunt:"/>
+                            <TextBox x:Name="rShunt" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Iacs758Flag:"/>
+                            <TextBox x:Name="Iacs758Flag" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Iacs758Id:"/>
+                            <TextBox x:Name="Iacs758Id" Grid.Column="1" Text=""/>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Config">
+                    <StackPanel Margin="0 10 0 4">
+                        <CheckBox x:Name="cfgToggle" Content="Toggle" IsChecked="False"/>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="T toggle:"/>
+                            <TextBox x:Name="tToggle" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="N toggle drop:"/>
+                            <TextBox x:Name="nToggleDrop" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="minLenIna219:"/>
+                            <TextBox x:Name="minLenIna219" Grid.Column="1" Text=""/>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Bat">
+                    <StackPanel Margin="4">
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Vd:"/>
+                            <TextBox x:Name="vD" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="ImaxDis:"/>
+                            <TextBox x:Name="imaxDis" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Icharge:"/>
+                            <TextBox x:Name="iCharge" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="IchargePhase2:"/>
+                            <TextBox x:Name="IchargePhase2" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="IchargePhase3:"/>
+                            <TextBox x:Name="IchargePhase3" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="minIphase2:"/>
+                            <TextBox x:Name="minIphase2" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="dIphase2:"/>
+                            <TextBox x:Name="dIphase2" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="CutOffDisV:"/>
+                            <TextBox x:Name="CutOffDisV" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="CutOffChrV:"/>
+                            <TextBox x:Name="CutOffChrV" Grid.Column="1" Text=""/>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Kalman">
+                    <StackPanel Margin="4">
+                        <CheckBox x:Name="isKalman" Margin="0 4" Content="Kalman" IsChecked="False"/>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="BatParamsFile #1:"/>
+                            <TextBox x:Name="batParamsFile1" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="BatParamsFile #2:"/>
+                            <TextBox x:Name="batParamsFile2" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Files">
+                    <StackPanel Margin="4">
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Save Dir:"/>
+                            <TextBox x:Name="saveDir" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Sufix Dir:"/>
+                            <TextBox x:Name="sufixDir" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Prefix file:"/>
+                            <TextBox x:Name="prefixFile" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Save path pIacs:"/>
+                            <TextBox x:Name="savePathPiacs" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                        <Grid Margin="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Save path Rval:"/>
+                            <TextBox x:Name="savePathRval" Grid.Column="1" Text="" HorizontalScrollBarVisibility="Auto"/>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </StackPanel>
+    </Border>
+</Window>

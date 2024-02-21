@@ -23,7 +23,7 @@ def crc16(data):
 
     return crc & 0xFFFF
 
-arduino = serial.Serial(port='COM6', baudrate=115200, timeout=None)
+arduino = serial.Serial(port='COM8', baudrate=115200, timeout=None)
 time.sleep(1)
 data = arduino.read_all()
 arduino.flushInput()
@@ -38,8 +38,8 @@ data1 = [
          ]
 
 data1 = [
-         [68,1,68,0,68,0],
-         [76,64,76,1,76,0],
+         [68,0,68,0,68,0],
+         [76,0,76,0,76,0],
          [84,0,84,0,84,0],
          [92,0,92,0,92,0],
          # [0x58,0x01,0x58,0x01,0x58,0x01],

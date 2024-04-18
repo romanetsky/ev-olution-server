@@ -5,7 +5,7 @@
  * File: Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229_types.h
  *
  * MATLAB Coder version            : 23.2
- * C/C++ source code generated on  : 12-Apr-2024 17:40:22
+ * C/C++ source code generated on  : 17-Apr-2024 18:20:59
  */
 
 #ifndef CHR_DIS_KP184_KA6005P_JUNTEK_ESP32SER_20240229_TYPES_H

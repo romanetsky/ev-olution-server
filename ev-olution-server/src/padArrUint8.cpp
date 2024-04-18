@@ -5,7 +5,7 @@
  * File: padArrUint8.c
  *
  * MATLAB Coder version            : 23.2
- * C/C++ source code generated on  : 03-Apr-2024 21:30:55
+ * C/C++ source code generated on  : 13-Apr-2024 21:34:04
  */
 
 /* Include Files */
@@ -171,13 +171,60 @@ void c_padArrUint8(const unsigned char Ain_data[], int Ain_size, short N1,
 }
 
 /*
+ * Arguments    : const unsigned char Ain[2]
+ *                short N1
+ *                short N2
+ *                emxArray_uint8_T *B
+ * Return Type  : void
+ */
+void d_padArrUint8(const unsigned char Ain[2], short N1, short N2,
+                   emxArray_uint8_T *B)
+{
+  int idx;
+  int ii;
+  signed char ii_data;
+  unsigned char *B_data;
+  boolean_T x[2];
+  boolean_T exitg1;
+  ii = B->size[0] * B->size[1];
+  B->size[0] = N1;
+  B->size[1] = N2;
+  emxEnsureCapacity_uint8_T(B, ii);
+  B_data = B->data;
+  idx = N1 * N2;
+  for (ii = 0; ii < idx; ii++) {
+    B_data[ii] = 0U;
+  }
+  x[0] = (Ain[0] != 0);
+  x[1] = (Ain[1] != 0);
+  idx = 0;
+  ii = 2;
+  exitg1 = false;
+  while ((!exitg1) && (ii > 0)) {
+    if (x[ii - 1]) {
+      idx = 1;
+      ii_data = (signed char)ii;
+      exitg1 = true;
+    } else {
+      ii--;
+    }
+  }
+  if (idx == 0) {
+  }
+  idx = ii_data;
+  for (ii = 0; ii < idx; ii++) {
+    B_data[ii] = Ain[ii];
+  }
+}
+
+/*
  * Arguments    : const unsigned char Ain[256]
  *                double N1
  *                double N2
  *                emxArray_uint8_T *B
  * Return Type  : void
  */
-void d_padArrUint8(const unsigned char Ain[256], double N1, double N2,
+void e_padArrUint8(const unsigned char Ain[256], double N1, double N2,
                    emxArray_uint8_T *B)
 {
   int i;
@@ -254,7 +301,7 @@ void d_padArrUint8(const unsigned char Ain[256], double N1, double N2,
  *                emxArray_uint8_T *B
  * Return Type  : void
  */
-void e_padArrUint8(unsigned char Ain, double N1, double N2, emxArray_uint8_T *B)
+void f_padArrUint8(unsigned char Ain, double N1, double N2, emxArray_uint8_T *B)
 {
   int i;
   int loop_ub;

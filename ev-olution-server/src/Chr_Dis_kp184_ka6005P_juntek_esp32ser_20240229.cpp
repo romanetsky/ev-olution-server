@@ -5,7 +5,7 @@
  * File: Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229.c
  *
  * MATLAB Coder version            : 23.2
- * C/C++ source code generated on  : 10-Apr-2024 21:46:28
+ * C/C++ source code generated on  : 17-Apr-2024 18:20:59
  */
 
 /* Include Files */
@@ -53,11 +53,11 @@
 #include "tic.h"
 #include "toc.h"
 #include "unique.h"
+#include "writePortToSpi4RowMask_ser.h"
 #include "rt_nonfinite.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "esp_attr.h"
 
 /* Type Definitions */
 #ifndef struct_emxArray_real_T_1x1
@@ -277,13 +277,10 @@ static float rt_roundf_snf(float u)
  *                struct30_T *outStruct
  * Return Type  : void
  */
-//unsigned char* bitCnfg_data = nullptr;
 void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   *outStruct)
 {
   static unsigned char bitCnfg_data[32768];
-//  if (bitCnfg_data == nullptr)
-//    bitCnfg_data = new unsigned char[32768];
   static unsigned char c_y_data[32767];
   static signed char j_tmp_data[32767];
   emxArray_boolean_T b_AllBypassPerGroup_data;
@@ -388,7 +385,6 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   double BattConfigPerInaHelp_data[512];
   double BattConfigPerIna_data[512];
   double n_tmp_data[512];
-  double VbusTest0_data[256];
   double Vdebug_data[256];
   double VmV_data[256];
   double b_BattConfigPerInaHelp_data[256];
@@ -469,8 +465,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   int Pac2Vid0All_size[3];
   int VdebugVec_size[3];
   int b_VdebugVec_size[3];
-  int b_tmp_size[3];
   int bitCnfg_size[3];
+  int c_tmp_size[3];
   int kEst_size[3];
   int pIacs758_size[3];
   int AllBypassPerGroup_size[2];
@@ -489,10 +485,11 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   int a__4_size[2];
   int b_Rwire_size[2];
   int b_VmV_size[2];
-  int c_tmp_size[2];
+  int b_tmp_size[2];
   int d_tmp_size[2];
   int e_tmp_size[2];
   int errI2C_size[2];
+  int f_tmp_size[2];
   int id2Bypass_data[2];
   int ipos_data[2];
   int tLastToggle_size[2];
@@ -505,10 +502,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   int VmKp184Test_size_idx_0;
   int VmKp184Test_size_idx_1;
   int b_end;
-  int b_i;
   int b_loop_ub;
   int b_loop_ub_tmp;
   int b_size;
+  int b_trueCount;
   int c_end;
   int c_loop_ub;
   int c_loop_ub_tmp;
@@ -523,6 +520,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   int id2Bypass_size;
   int ipos_size;
   int k0;
+  int k1;
   int k_ina219_;
   int k_t0;
   int k_tstState;
@@ -539,16 +537,19 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   unsigned short size_tmp_idx_1;
   char bitCnfgStr_data[4096];
   unsigned char Pac2Vid0All_data[512];
+  unsigned char Pac2Vid0[256];
   unsigned char b_bitCnfg_data[256];
   unsigned char i_tmp_data[256];
   unsigned char id0_data[256];
+  unsigned char l_tmp_data[256];
+  unsigned char m_tmp_data[256];
   signed char g_tmp_data[255];
   signed char h_tmp_data[255];
+  unsigned char SpiPortRowBypass[24];
   unsigned char disConAll[24];
   signed char g_prm[16];
-  signed char l_tmp_data[16];
-  signed char m_tmp_data[16];
   signed char iv[8];
+  unsigned char N_bat[2];
   signed char b_tmp_data[2];
   signed char c_tmp_data[2];
   signed char e_tmp_data[2];
@@ -566,7 +567,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   signed char k_groups_tmp;
   signed char *Vbat_data;
   unsigned char *r31;
-  boolean_T b_VbusTest0_data[256];
+  boolean_T VbusTest0_data[256];
   boolean_T ismember0_data[255];
   boolean_T BattConfigAct_data[32];
   boolean_T c_VbusTest_data[32];
@@ -605,6 +606,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   ProjectFlag = prm->ins.ProjectFlag;
 
   /*  disconnect All */
+  CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                 prm->brd.spi.PortSpiRow_esp, prm->brd.spi.SwitchMat_esp,
+                 prm->brd.spi.PortSpiRow_esp2, prm->brd.spi.SwitchMat_esp2,
+                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                 prm->brd.spi.disconnect, disConAll, a__1_data, a__1_size,
+                 id0_data);
   Nina219_tmp_tmp = prm->brd.Nina219;
 
   /* length(Esp32_v1); */
@@ -622,45 +629,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
      case 3:
       /* esp32 ser */
       /*  writePortToSpi4RowMask_ser(disConAll,Esp32_v1(k_ina219),false); */
-      /* UNTITLED Summary of this function goes here */
-      /*    Detailed explanation goes here */
-      /*  if coder.target('MATLAB') */
-      /*  read current */
-      /*   chip1     |   chip2     |   chip3 */
-      /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-      /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-      /*  */
-      /*  for k_row = 1:N_row */
-      /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-      /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-      /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-      /*  end */
-      /* mask current */
-      /* write current mask */
-      /*  for k_row = 1:N_row */
-      /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-      /*  end */
-      pause(0.001);
-
-      /* mask new */
-      /* write mask new */
-      /*  for k_row = 1:N_row */
-      /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-      /*  end */
-      /* write new */
-      /*  for k_row = 1:N_row */
-      /*      write(SPI0,PortSpiRow(k_row,:)); */
-      /*  end */
-      /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-      /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-      /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-      /* mask current */
-      /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-      /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-      /* %chip1 Port20-23 NC */
-      /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-      /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-      /*  end */
+      writePortToSpi4RowMask_ser(disConAll);
       break;
     }
   }
@@ -734,17 +703,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   end_tmp = trueCount - 1;
   trueCount = 0;
   partialTrueCount = 0;
-  for (i = 0; i <= end_tmp; i++) {
-    b_i = prm->ser.com.grp[tmp_data[i]];
-    if (b_i > 0) {
+  for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+    i = prm->ser.com.grp[tmp_data[loop_ub]];
+    if (i > 0) {
       trueCount++;
-      b_tmp_data[partialTrueCount] = (signed char)i;
+      b_tmp_data[partialTrueCount] = (signed char)loop_ub;
       partialTrueCount++;
     }
   }
 
-  for (b_i = 0; b_i < trueCount; b_i++) {
-    prm_data[b_i] = prm->ser.com.grp[tmp_data[b_tmp_data[b_i]]];
+  for (i = 0; i < trueCount; i++) {
+    prm_data[i] = prm->ser.com.grp[tmp_data[b_tmp_data[i]]];
   }
 
   b_size = unique_vector(prm_data, trueCount, b_data, id2Bypass_data,
@@ -801,10 +770,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   /*  for k_ina219 = 1:Nina219 */
   /*      BattConfigAct{k_ina219,1} = true(N_bat,1); */
   /*  end */
-  for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-    VbusTest_data[b_i] = 0.0;
-    VmKp184Test_data[b_i] = 0.0;
-    BattConfigAct_data[b_i] = true;
+  for (i = 0; i < loop_ub_tmp; i++) {
+    VbusTest_data[i] = 0.0;
+    VmKp184Test_data[i] = 0.0;
+    BattConfigAct_data[i] = true;
   }
 
   pause(1.0);
@@ -863,10 +832,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   emxInit_char_T(&r10);
   emxInit_char_T(&r11);
   emxInit_char_T(&k_Ttest);
-  emxInit_char_T(&b_VbusTest2);
   emxInit_char_T(&b_vSumMax);
-  emxInit_char_T(&b_k_Ttest);
+  emxInit_char_T(&b_VbusTest2);
   emxInit_char_T(&d_prm);
+  emxInit_char_T(&b_k_Ttest);
   emxInit_char_T(&b_IshuntTest2);
   emxInit_char_T(&r12);
   emxInit_char_T(&r13);
@@ -920,29 +889,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       y->size[0] = 1;
       y->size[1] = 0;
     } else {
-      b_i = y->size[0] * y->size[1];
+      i = y->size[0] * y->size[1];
       y->size[0] = 1;
       y->size[1] = (int)(prm->brd.Nina219 - 1.0) + 1;
-      emxEnsureCapacity_real_T(y, b_i);
+      emxEnsureCapacity_real_T(y, i);
       y_data = y->data;
       loop_ub = (int)(prm->brd.Nina219 - 1.0);
-      for (b_i = 0; b_i <= loop_ub; b_i++) {
-        y_data[b_i] = (double)b_i + 1.0;
+      for (i = 0; i <= loop_ub; i++) {
+        y_data[i] = (double)i + 1.0;
       }
     }
 
-    b_i = b_y->size[0];
+    i = b_y->size[0];
     b_y->size[0] = y->size[1];
-    emxEnsureCapacity_real_T(b_y, b_i);
+    emxEnsureCapacity_real_T(b_y, i);
     b_y_data = b_y->data;
     loop_ub = y->size[1];
-    for (b_i = 0; b_i < loop_ub; b_i++) {
-      b_y_data[b_i] = y_data[b_i];
+    for (i = 0; i < loop_ub; i++) {
+      b_y_data[i] = y_data[i];
     }
 
     loop_ub = y->size[1];
-    for (b_i = 0; b_i < loop_ub; b_i++) {
-      VecIna219_data[b_i] = b_y_data[b_i];
+    for (i = 0; i < loop_ub; i++) {
+      VecIna219_data[i] = b_y_data[i];
     }
 
     kEst_size[0] = (int)prm->brd.Nina219;
@@ -951,32 +920,32 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
     }
 
     /*  [~,~,~,~]          = ControlKp184(s_kp184,'Read',[]); */
-    b_i = prm->seq.tst.v.Nst;
-    for (k_tstState = 0; k_tstState < b_i; k_tstState++) {
+    i = prm->seq.tst.v.Nst;
+    for (k_tstState = 0; k_tstState < i; k_tstState++) {
       pause(0.1);
 
       /* 1:length(uGroups) */
-      loop_ub = ipos_size - 1;
+      id2Bypass_size = ipos_size - 1;
       trueCount = 0;
       partialTrueCount = 0;
 
       /* VecIna219_k = find(k_groups == uGroupId); */
-      id2Bypass_size = 0;
-      for (i = 0; i <= loop_ub; i++) {
+      b_trueCount = 0;
+      for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
         k_groups_tmp = prm->seq.tst.v.grp[k_tstState];
-        i1 = ipos_data[i];
+        i1 = ipos_data[loop_ub];
         if (k_groups_tmp == i1) {
           trueCount++;
-          c_tmp_data[partialTrueCount] = (signed char)i;
+          c_tmp_data[partialTrueCount] = (signed char)loop_ub;
           partialTrueCount++;
         }
 
         if (k_groups_tmp != i1) {
-          id2Bypass_size++;
+          b_trueCount++;
         }
       }
 
-      for (k0 = 0; k0 < id2Bypass_size; k0++) {
+      for (k0 = 0; k0 < b_trueCount; k0++) {
         /* k_ina219not = VecIna219_notk %diconnect group that not tested */
         switch (ProjectFlag) {
          case 2:
@@ -985,45 +954,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
          case 3:
           /* ESP32 ser */
-          /* UNTITLED Summary of this function goes here */
-          /*    Detailed explanation goes here */
-          /*  if coder.target('MATLAB') */
-          /*  read current */
-          /*   chip1     |   chip2     |   chip3 */
-          /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-          /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-          /*  */
-          /*  for k_row = 1:N_row */
-          /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-          /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-          /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-          /*  end */
-          /* mask current */
-          /* write current mask */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-          /*  end */
-          pause(0.001);
-
-          /* mask new */
-          /* write mask new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-          /*  end */
-          /* write new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRow(k_row,:)); */
-          /*  end */
-          /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-          /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-          /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-          /* mask current */
-          /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-          /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-          /* %chip1 Port20-23 NC */
-          /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-          /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-          /*  end */
+          writePortToSpi4RowMask_ser(disConAll);
           break;
         }
 
@@ -1051,6 +982,26 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         }
 
         c_loop_ub = size_tmp_idx_1;
+        i1 = (int)rt_roundd_snf((double)N_bat_tmp_tmp_tmp / 2.0 + 1.0);
+        if (i1 < 256) {
+          if (i1 >= 0) {
+            NstTst_tmp_tmp = (unsigned char)i1;
+          } else {
+            NstTst_tmp_tmp = 0U;
+          }
+        } else {
+          NstTst_tmp_tmp = MAX_uint8_T;
+        }
+
+        N_bat[0] = NstTst_tmp_tmp;
+        i1 = N_bat_tmp_tmp_tmp;
+        if (N_bat_tmp_tmp_tmp < 0) {
+          i1 = 0;
+        } else if (N_bat_tmp_tmp_tmp > 255) {
+          i1 = 255;
+        }
+
+        N_bat[1] = (unsigned char)i1;
       }
 
       for (k0 = 0; k0 < trueCount; k0++) {
@@ -1061,12 +1012,21 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         }
 
         id2Bypass_size = c_eml_find(b_VecIna219_data, trueCount, id2Bypass_data);
-        for (i = 0; i < id2Bypass_size; i++) {
+        if (id2Bypass_size - 1 >= 0) {
+          CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                         prm->brd.spi.PortSpiRow_esp, prm->brd.spi.SwitchMat_esp,
+                         prm->brd.spi.PortSpiRow_esp2,
+                         prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
+                         prm->brd.spi.Pac2Vid2, prm->brd.spi.bypass,
+                         SpiPortRowBypass, a__1_data, a__1_size, id0_data);
+        }
+
+        for (k1 = 0; k1 < id2Bypass_size; k1++) {
           /* k_bypass = VecIna219_k(id2Bypass) */
           /*  ina219StateAll(:,k_bypass)   = ina219StateBypass; */
           /*  BattConfig{k_bypass}       = prm.brd.spi.bypass;%-2; */
           /*  BattConfigPerIna{k_bypass} = prm.brd.spi.bypass;%-2; */
-          d_tmp_data = VecIna219_data[c_tmp_data[id2Bypass_data[i] - 1]];
+          d_tmp_data = VecIna219_data[c_tmp_data[id2Bypass_data[k1] - 1]];
           if (d_tmp_data < 2.147483648E+9) {
             i1 = (int)d_tmp_data;
           } else {
@@ -1089,45 +1049,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
            case 3:
             /* ESP32 ser */
-            /* UNTITLED Summary of this function goes here */
-            /*    Detailed explanation goes here */
-            /*  if coder.target('MATLAB') */
-            /*  read current */
-            /*   chip1     |   chip2     |   chip3 */
-            /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-            /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-            /*  */
-            /*  for k_row = 1:N_row */
-            /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-            /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-            /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-            /*  end */
-            /* mask current */
-            /* write current mask */
-            /*  for k_row = 1:N_row */
-            /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-            /*  end */
-            pause(0.001);
-
-            /* mask new */
-            /* write mask new */
-            /*  for k_row = 1:N_row */
-            /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-            /*  end */
-            /* write new */
-            /*  for k_row = 1:N_row */
-            /*      write(SPI0,PortSpiRow(k_row,:)); */
-            /*  end */
-            /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-            /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-            /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-            /* mask current */
-            /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-            /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-            /* %chip1 Port20-23 NC */
-            /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-            /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-            /*  end */
+            writePortToSpi4RowMask_ser(SpiPortRowBypass);
             break;
           }
 
@@ -1153,12 +1075,13 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           }
 
           padArrUint8(NstTst_tmp_tmp, prm->Nmax.NbatMax, prm->Nmax.NbatMax, r3);
-          CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
-                         prm->brd.spi.PortSpiRow_esp, prm->brd.spi.SwitchMat_esp,
-                         prm->brd.spi.PortSpiRow_esp2,
-                         prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
-                         prm->brd.spi.Pac2Vid2, r3, disConAll, a__1_data,
-                         a__1_size, id0_data);
+          b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                           prm->brd.spi.PortSpiRow_esp,
+                           prm->brd.spi.SwitchMat_esp,
+                           prm->brd.spi.PortSpiRow_esp2,
+                           prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
+                           prm->brd.spi.Pac2Vid2, r3, SpiPortRowBypass,
+                           a__1_data, a__1_size, id0_data);
 
           /*                  ina219State = findSwitch(SwitchCell,k_bat);%8+(k_bat-1); */
           /*  BattConfig{k_ina219}       = k_bat + (k_ina219-1)*N_bat; */
@@ -1202,45 +1125,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
            case 3:
             /* ESP32 ser */
-            /* UNTITLED Summary of this function goes here */
-            /*    Detailed explanation goes here */
-            /*  if coder.target('MATLAB') */
-            /*  read current */
-            /*   chip1     |   chip2     |   chip3 */
-            /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-            /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-            /*  */
-            /*  for k_row = 1:N_row */
-            /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-            /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-            /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-            /*  end */
-            /* mask current */
-            /* write current mask */
-            /*  for k_row = 1:N_row */
-            /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-            /*  end */
-            pause(0.001);
-
-            /* mask new */
-            /* write mask new */
-            /*  for k_row = 1:N_row */
-            /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-            /*  end */
-            /* write new */
-            /*  for k_row = 1:N_row */
-            /*      write(SPI0,PortSpiRow(k_row,:)); */
-            /*  end */
-            /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-            /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-            /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-            /* mask current */
-            /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-            /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-            /* %chip1 Port20-23 NC */
-            /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-            /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-            /*  end */
+            writePortToSpi4RowMask_ser(SpiPortRowBypass);
             break;
           }
 
@@ -1250,6 +1135,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             /* ESP32 */
             memset(&VmV_data[0], 0, 16U * sizeof(double));
             Vdebug_size[0] = 16;
+            Vdebug_size[1] = 2;
             memset(&Vdebug_data[0], 0, 32U * sizeof(double));
 
             /*  */
@@ -1276,6 +1162,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
            default:
             Vdebug_size[0] = N_bat_tmp_tmp_tmp;
+            Vdebug_size[1] = 1;
             if (N_bat_tmp_tmp_tmp - 1 >= 0) {
               memset(&VmV_data[0], 0, (unsigned int)N_bat_tmp_tmp_tmp * sizeof
                      (double));
@@ -1287,12 +1174,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
           VbusTest_data[((int)b_meanIbrd0 + (int)Nina219_tmp_tmp * b_loop_ub_tmp)
             - 1] = VmV_data[b_loop_ub_tmp];
-          partialTrueCount = (int)b_meanIbrd0 + VdebugVec_size[0] *
-            b_loop_ub_tmp;
-          VdebugVec_data[partialTrueCount - 1] = Vdebug_data[b_loop_ub_tmp];
-          VdebugVec_data[(partialTrueCount + VdebugVec_size[0] *
-                          VdebugVec_size_tmp) - 1] = Vdebug_data[b_loop_ub_tmp +
-            Vdebug_size[0]];
+          b_trueCount = (int)b_meanIbrd0 + VdebugVec_size[0] * b_loop_ub_tmp;
+          VdebugVec_data[b_trueCount - 1] = Vdebug_data[b_loop_ub_tmp];
+          VdebugVec_data[(b_trueCount + VdebugVec_size[0] * VdebugVec_size_tmp)
+            - 1] = Vdebug_data[b_loop_ub_tmp + Vdebug_size[0]];
           c_sprintf(c_loop_ub_tmp, b_loop_ub_tmp + 1, k_bat);
           d_sprintf(VbusTest_data[((int)b_meanIbrd0 + (int)Nina219_tmp_tmp *
                      b_loop_ub_tmp) - 1], b_VbusTest_data);
@@ -1300,7 +1185,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           if (prm->seq.tst.v.ins[k_tstState] == 1) {
             /* kp184 */
             ControlKp184((double *)&N0, a__3_size, (double *)&a__4_data,
-                         a__4_size, (double *)&d_tmp_data, b_VmV_size, (double *)
+                         a__4_size, (double *)&d_tmp_data, b_tmp_size, (double *)
                          &b_dv0, errI2C_size);
             VmKp184Test_data[((int)b_meanIbrd0 + (int)Nina219_tmp_tmp *
                               b_loop_ub_tmp) - 1] = d_tmp_data;
@@ -1331,11 +1216,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
         c_padArrUint8(c_y_data, size_tmp_idx_1, prm->Nmax.NbatMax,
                       prm->Nmax.NbatMax, r3);
-        CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
-                       prm->brd.spi.PortSpiRow_esp, prm->brd.spi.SwitchMat_esp,
-                       prm->brd.spi.PortSpiRow_esp2, prm->brd.spi.SwitchMat_esp2,
-                       prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2, r3,
-                       disConAll, a__1_data, a__1_size, id0_data);
+        b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                         prm->brd.spi.PortSpiRow_esp, prm->brd.spi.SwitchMat_esp,
+                         prm->brd.spi.PortSpiRow_esp2,
+                         prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
+                         prm->brd.spi.Pac2Vid2, r3, SpiPortRowBypass, a__1_data,
+                         a__1_size, id0_data);
         switch (ProjectFlag) {
          case 2:
           /* ESP32 */
@@ -1343,45 +1229,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
          case 3:
           /* ESP32 ser */
-          /* UNTITLED Summary of this function goes here */
-          /*    Detailed explanation goes here */
-          /*  if coder.target('MATLAB') */
-          /*  read current */
-          /*   chip1     |   chip2     |   chip3 */
-          /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-          /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-          /*  */
-          /*  for k_row = 1:N_row */
-          /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-          /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-          /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-          /*  end */
-          /* mask current */
-          /* write current mask */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-          /*  end */
-          pause(0.001);
-
-          /* mask new */
-          /* write mask new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-          /*  end */
-          /* write new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRow(k_row,:)); */
-          /*  end */
-          /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-          /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-          /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-          /* mask current */
-          /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-          /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-          /* %chip1 Port20-23 NC */
-          /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-          /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-          /*  end */
+          writePortToSpi4RowMask_ser(SpiPortRowBypass);
           break;
         }
 
@@ -1434,6 +1282,13 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         }
 
         /*  [SpiPortRow0,ina219State,Pac2Vid0] = CalcPortSpi(SwitchMat_esp,SwitchMat_esp2,PortSpiRow_esp,PortSpiRow_esp2,Pac2Vid,Pac2Vid2,[1+N_bat/2,N_bat]'); */
+        d_padArrUint8(N_bat, prm->Nmax.NbatMax, prm->Nmax.NbatMax, r3);
+        b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                         prm->brd.spi.PortSpiRow_esp, prm->brd.spi.SwitchMat_esp,
+                         prm->brd.spi.PortSpiRow_esp2,
+                         prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
+                         prm->brd.spi.Pac2Vid2, r3, SpiPortRowBypass, a__1_data,
+                         a__1_size, Pac2Vid0);
         switch (ProjectFlag) {
          case 2:
           /* ESP32 */
@@ -1441,45 +1296,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
          case 3:
           /* ESP32 ser */
-          /* UNTITLED Summary of this function goes here */
-          /*    Detailed explanation goes here */
-          /*  if coder.target('MATLAB') */
-          /*  read current */
-          /*   chip1     |   chip2     |   chip3 */
-          /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-          /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-          /*  */
-          /*  for k_row = 1:N_row */
-          /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-          /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-          /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-          /*  end */
-          /* mask current */
-          /* write current mask */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-          /*  end */
-          pause(0.001);
-
-          /* mask new */
-          /* write mask new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-          /*  end */
-          /* write new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRow(k_row,:)); */
-          /*  end */
-          /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-          /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-          /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-          /* mask current */
-          /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-          /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-          /* %chip1 Port20-23 NC */
-          /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-          /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-          /*  end */
+          writePortToSpi4RowMask_ser(SpiPortRowBypass);
           break;
         }
 
@@ -1487,10 +1304,6 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         switch (ProjectFlag) {
          case 2:
           /* ESP32 */
-          Vdebug_size[0] = 16;
-          Vdebug_size[1] = 2;
-          memset(&Vdebug_data[0], 0, 32U * sizeof(double));
-
           /*  */
           break;
 
@@ -1505,15 +1318,6 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             (double *)&N0, a__3_size, Vdebug_data, Vdebug_size);
 
           /*  */
-          break;
-
-         default:
-          Vdebug_size[0] = N_bat_tmp_tmp_tmp;
-          Vdebug_size[1] = 1;
-          if (N_bat_tmp_tmp_tmp - 1 >= 0) {
-            memset(&Vdebug_data[0], 0, (unsigned int)N_bat_tmp_tmp_tmp * sizeof
-                   (double));
-          }
           break;
         }
 
@@ -1531,6 +1335,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             }
           }
 
+          squeeze(b_VdebugVec_data, b_VdebugVec_size, Vdebug_data, Vdebug_size);
           for (i1 = 0; i1 < 16; i1++) {
             g_prm[i1] = prm->brd.pac.VIpacId[((int)b_meanIbrd0 + (i1 << 1)) - 1];
           }
@@ -1540,16 +1345,15 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               Nina219_tmp_tmp * i1) - 1];
           }
 
-          squeeze(b_VdebugVec_data, b_VdebugVec_size, VbusTest0_data, b_VmV_size);
-          CalcK(VmV_data, VmV_size, VbusTest0_data, b_VmV_size, g_prm,
-                &id0_data[0], c_VmKp184Test_data, N_bat_tmp_tmp_tmp,
-                b_VdebugVec_data, a__1_size);
+          CalcK(VmV_data, VmV_size, Vdebug_data, Vdebug_size, g_prm, &id0_data[0],
+                c_VmKp184Test_data, N_bat_tmp_tmp_tmp, b_VdebugVec_data,
+                b_tmp_size);
           for (i1 = 0; i1 < 2; i1++) {
             for (id2Bypass_size = 0; id2Bypass_size < VdebugVec_size_tmp;
                  id2Bypass_size++) {
               kEst_data[(((int)b_meanIbrd0 + kEst_size[0] * id2Bypass_size) +
                          kEst_size[0] * VdebugVec_size_tmp * i1) - 1] =
-                b_VdebugVec_data[id2Bypass_size + a__1_size[0] * i1];
+                b_VdebugVec_data[id2Bypass_size + b_tmp_size[0] * i1];
             }
           }
         } else {
@@ -1616,23 +1420,23 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       }
 
       if (prm->brd.N_bat < 1) {
-        partialTrueCount = 0;
+        b_trueCount = 0;
       } else {
-        partialTrueCount = prm->brd.N_bat;
+        b_trueCount = prm->brd.N_bat;
       }
 
-      for (b_i = 0; b_i < 2; b_i++) {
-        for (i1 = 0; i1 < partialTrueCount; i1++) {
+      for (i = 0; i < 2; i++) {
+        for (i1 = 0; i1 < b_trueCount; i1++) {
           for (i2 = 0; i2 < loop_ub; i2++) {
-            prm->brd.pac.Rval[(i2 + (i1 << 1)) + (b_i << 5)] = (float)kEst_data
-              [(i2 + loop_ub * i1) + loop_ub * partialTrueCount * b_i];
+            prm->brd.pac.Rval[(i2 + (i1 << 1)) + (i << 5)] = (float)kEst_data
+              [(i2 + loop_ub * i1) + loop_ub * b_trueCount * i];
           }
         }
       }
     }
 
-    b_i = (int)prm->brd.Nina219;
-    for (k_ina219_ = 0; k_ina219_ < b_i; k_ina219_++) {
+    i = (int)prm->brd.Nina219;
+    for (k_ina219_ = 0; k_ina219_ < i; k_ina219_++) {
       switch (ProjectFlag) {
        case 2:
         /* esp32 */
@@ -1641,52 +1445,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
        case 3:
         /* esp32 ser */
         /*  writePortToSpi4RowMask_ser(disConAll,Esp32_v1(k_ina219),false); */
-        /* UNTITLED Summary of this function goes here */
-        /*    Detailed explanation goes here */
-        /*  if coder.target('MATLAB') */
-        /*  read current */
-        /*   chip1     |   chip2     |   chip3 */
-        /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-        /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-        /*  */
-        /*  for k_row = 1:N_row */
-        /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-        /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-        /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-        /*  end */
-        /* mask current */
-        /* write current mask */
-        /*  for k_row = 1:N_row */
-        /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-        /*  end */
-        pause(0.001);
-
-        /* mask new */
-        /* write mask new */
-        /*  for k_row = 1:N_row */
-        /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-        /*  end */
-        /* write new */
-        /*  for k_row = 1:N_row */
-        /*      write(SPI0,PortSpiRow(k_row,:)); */
-        /*  end */
-        /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-        /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-        /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-        /* mask current */
-        /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-        /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-        /* %chip1 Port20-23 NC */
-        /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-        /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-        /*  end */
+        writePortToSpi4RowMask_ser(disConAll);
         break;
       }
     }
 
     if (prm->run.testVreset) {
-      for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-        c_VbusTest_data[b_i] = (VbusTest_data[b_i] > prm->bat.VresetMax);
+      for (i = 0; i < loop_ub_tmp; i++) {
+        c_VbusTest_data[i] = (VbusTest_data[i] > prm->bat.VresetMax);
       }
 
       if (any(c_VbusTest_data, loop_ub_tmp)) {
@@ -1700,25 +1466,25 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         Nina219[0] = loop_ub;
         Nina219[1] = outStruct->VbusTest->size[1];
         b_loop_ub = outStruct->VbusTest->size[1];
-        for (b_i = 0; b_i < b_loop_ub; b_i++) {
+        for (i = 0; i < b_loop_ub; i++) {
           for (i1 = 0; i1 < loop_ub; i1++) {
-            outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * b_i] =
-              VbusTest_data[i1 + Nina219[0] * b_i];
+            outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * i] =
+              VbusTest_data[i1 + Nina219[0] * i];
           }
         }
 
         Nina219[0] = loop_ub;
         Nina219[1] = outStruct->VmKp184Test->size[1];
         b_loop_ub = outStruct->VmKp184Test->size[1];
-        for (b_i = 0; b_i < b_loop_ub; b_i++) {
+        for (i = 0; i < b_loop_ub; i++) {
           for (i1 = 0; i1 < loop_ub; i1++) {
             outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] *
-              b_i] = VmKp184Test_data[i1 + Nina219[0] * b_i];
+              i] = VmKp184Test_data[i1 + Nina219[0] * i];
           }
         }
       } else {
-        for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-          c_VbusTest_data[b_i] = (VbusTest_data[b_i] < prm->bat.VresetMax);
+        for (i = 0; i < loop_ub_tmp; i++) {
+          c_VbusTest_data[i] = (VbusTest_data[i] < prm->bat.VresetMax);
         }
 
         if (all(c_VbusTest_data, loop_ub_tmp)) {
@@ -1732,20 +1498,20 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           Nina219[0] = loop_ub;
           Nina219[1] = outStruct->VbusTest->size[1];
           b_loop_ub = outStruct->VbusTest->size[1];
-          for (b_i = 0; b_i < b_loop_ub; b_i++) {
+          for (i = 0; i < b_loop_ub; i++) {
             for (i1 = 0; i1 < loop_ub; i1++) {
-              outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * b_i]
-                = VbusTest_data[i1 + Nina219[0] * b_i];
+              outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * i] =
+                VbusTest_data[i1 + Nina219[0] * i];
             }
           }
 
           Nina219[0] = loop_ub;
           Nina219[1] = outStruct->VmKp184Test->size[1];
           b_loop_ub = outStruct->VmKp184Test->size[1];
-          for (b_i = 0; b_i < b_loop_ub; b_i++) {
+          for (i = 0; i < b_loop_ub; i++) {
             for (i1 = 0; i1 < loop_ub; i1++) {
               outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] *
-                b_i] = VmKp184Test_data[i1 + Nina219[0] * b_i];
+                i] = VmKp184Test_data[i1 + Nina219[0] * i];
             }
           }
         } else {
@@ -1759,48 +1525,48 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           Nina219[0] = loop_ub;
           Nina219[1] = outStruct->VbusTest->size[1];
           b_loop_ub = outStruct->VbusTest->size[1];
-          for (b_i = 0; b_i < b_loop_ub; b_i++) {
+          for (i = 0; i < b_loop_ub; i++) {
             for (i1 = 0; i1 < loop_ub; i1++) {
-              outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * b_i]
-                = VbusTest_data[i1 + Nina219[0] * b_i];
+              outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * i] =
+                VbusTest_data[i1 + Nina219[0] * i];
             }
           }
 
           Nina219[0] = loop_ub;
           Nina219[1] = outStruct->VmKp184Test->size[1];
           b_loop_ub = outStruct->VmKp184Test->size[1];
-          for (b_i = 0; b_i < b_loop_ub; b_i++) {
+          for (i = 0; i < b_loop_ub; i++) {
             for (i1 = 0; i1 < loop_ub; i1++) {
               outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] *
-                b_i] = VmKp184Test_data[i1 + Nina219[0] * b_i];
+                i] = VmKp184Test_data[i1 + Nina219[0] * i];
             }
           }
         }
       }
     } else {
-      for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-        c_VbusTest_data[b_i] = (VbusTest_data[b_i] > prm->bat.Vmax);
+      for (i = 0; i < loop_ub_tmp; i++) {
+        c_VbusTest_data[i] = (VbusTest_data[i] > prm->bat.Vmax);
       }
 
       if (any(c_VbusTest_data, loop_ub_tmp)) {
         guard2 = true;
       } else {
-        for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-          c_VbusTest_data[b_i] = (VbusTest_data[b_i] < prm->bat.Vmin);
+        for (i = 0; i < loop_ub_tmp; i++) {
+          c_VbusTest_data[i] = (VbusTest_data[i] < prm->bat.Vmin);
         }
 
         if (any(c_VbusTest_data, loop_ub_tmp)) {
           guard2 = true;
         } else {
-          for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-            c_VbusTest_data[b_i] = (VmKp184Test_data[b_i] > prm->bat.Vmax);
+          for (i = 0; i < loop_ub_tmp; i++) {
+            c_VbusTest_data[i] = (VmKp184Test_data[i] > prm->bat.Vmax);
           }
 
           if (any(c_VbusTest_data, loop_ub_tmp)) {
             guard2 = true;
           } else {
-            for (b_i = 0; b_i < loop_ub_tmp; b_i++) {
-              c_VbusTest_data[b_i] = (VmKp184Test_data[b_i] < prm->bat.Vmin);
+            for (i = 0; i < loop_ub_tmp; i++) {
+              c_VbusTest_data[i] = (VmKp184Test_data[i] < prm->bat.Vmin);
             }
 
             if (any(c_VbusTest_data, loop_ub_tmp)) {
@@ -1825,12 +1591,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         VmKp184Test_size_idx_1 = N_bat_tmp_tmp_tmp;
         VmKp184Test_size[0] = 1;
         VmKp184Test_size[1] = N_bat_tmp_tmp_tmp;
-        for (b_i = 0; b_i < b_loop_ub; b_i++) {
-          VmKp184Test_data[b_i] = 4.0;
+        for (i = 0; i < b_loop_ub; i++) {
+          VmKp184Test_data[i] = 4.0;
         }
 
-        for (b_i = 0; b_i < c_loop_ub; b_i++) {
-          c_VmKp184Test_data[b_i] = 4.0;
+        for (i = 0; i < c_loop_ub; i++) {
+          c_VmKp184Test_data[i] = 4.0;
         }
       }
 
@@ -1867,134 +1633,132 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
       /* 10; */
       /* linspace(0,4.9,NTtest); */
-      b_i = VbusTest2->size[0] * VbusTest2->size[1] * VbusTest2->size[2] *
+      i = VbusTest2->size[0] * VbusTest2->size[1] * VbusTest2->size[2] *
         VbusTest2->size[3];
       VbusTest2->size[0] = (int)prm->brd.Nina219;
       VbusTest2->size[1] = prm->brd.N_bat;
       VbusTest2->size[2] = prm->seq.tst.i.NTtest;
-      c_loop_ub = prm->seq.tst.i.Nst;
+      VdebugVec_size_tmp = prm->seq.tst.i.Nst;
       VbusTest2->size[3] = prm->seq.tst.i.Nst;
-      emxEnsureCapacity_real_T(VbusTest2, b_i);
+      emxEnsureCapacity_real_T(VbusTest2, i);
       VbusTest2_data = VbusTest2->data;
-      VdebugVec_size_tmp = (int)prm->brd.Nina219 * prm->brd.N_bat;
-      b_loop_ub_tmp = VdebugVec_size_tmp * prm->seq.tst.i.NTtest *
+      partialTrueCount = (int)prm->brd.Nina219 * prm->brd.N_bat;
+      b_loop_ub_tmp = partialTrueCount * prm->seq.tst.i.NTtest *
         prm->seq.tst.i.Nst;
-      for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-        VbusTest2_data[b_i] = 0.0;
+      for (i = 0; i < b_loop_ub_tmp; i++) {
+        VbusTest2_data[i] = 0.0;
       }
 
-      b_i = IshuntTest2->size[0] * IshuntTest2->size[1] * IshuntTest2->size[2] *
+      i = IshuntTest2->size[0] * IshuntTest2->size[1] * IshuntTest2->size[2] *
         IshuntTest2->size[3];
       IshuntTest2->size[0] = (int)prm->brd.Nina219;
       IshuntTest2->size[1] = prm->brd.N_bat;
       IshuntTest2->size[2] = prm->seq.tst.i.NTtest;
       IshuntTest2->size[3] = prm->seq.tst.i.Nst;
-      emxEnsureCapacity_real_T(IshuntTest2, b_i);
+      emxEnsureCapacity_real_T(IshuntTest2, i);
       IshuntTest2_data = IshuntTest2->data;
-      for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-        IshuntTest2_data[b_i] = 0.0;
+      for (i = 0; i < b_loop_ub_tmp; i++) {
+        IshuntTest2_data[i] = 0.0;
       }
 
-      b_i = ImKp184Test2->size[0] * ImKp184Test2->size[1] * ImKp184Test2->size[2]
-        * ImKp184Test2->size[3];
+      i = ImKp184Test2->size[0] * ImKp184Test2->size[1] * ImKp184Test2->size[2] *
+        ImKp184Test2->size[3];
       ImKp184Test2->size[0] = (int)prm->brd.Nina219;
       ImKp184Test2->size[1] = prm->brd.N_bat;
       ImKp184Test2->size[2] = prm->seq.tst.i.NTtest;
       ImKp184Test2->size[3] = prm->seq.tst.i.Nst;
-      emxEnsureCapacity_real_T(ImKp184Test2, b_i);
+      emxEnsureCapacity_real_T(ImKp184Test2, i);
       ImKp184Test2_data = ImKp184Test2->data;
-      for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-        ImKp184Test2_data[b_i] = 0.0;
+      for (i = 0; i < b_loop_ub_tmp; i++) {
+        ImKp184Test2_data[i] = 0.0;
       }
 
-      b_i = Iacs758_cal->size[0] * Iacs758_cal->size[1] * Iacs758_cal->size[2] *
+      i = Iacs758_cal->size[0] * Iacs758_cal->size[1] * Iacs758_cal->size[2] *
         Iacs758_cal->size[3];
       Iacs758_cal->size[0] = (int)prm->brd.Nina219;
       Iacs758_cal->size[1] = 1;
       Iacs758_cal->size[2] = prm->seq.tst.i.NTtest;
       Iacs758_cal->size[3] = prm->seq.tst.i.Nst;
-      emxEnsureCapacity_real_T(Iacs758_cal, b_i);
+      emxEnsureCapacity_real_T(Iacs758_cal, i);
       Iacs758_cal_data = Iacs758_cal->data;
       loop_ub = (int)prm->brd.Nina219 * prm->seq.tst.i.NTtest *
         prm->seq.tst.i.Nst;
-      for (b_i = 0; b_i < loop_ub; b_i++) {
-        Iacs758_cal_data[b_i] = 0.0;
+      for (i = 0; i < loop_ub; i++) {
+        Iacs758_cal_data[i] = 0.0;
       }
 
       Rtot_size[0] = (int)prm->brd.Nina219;
       Rtot_size[1] = prm->brd.N_bat;
       Rwire_size[0] = (int)prm->brd.Nina219;
       Rwire_size[1] = prm->brd.N_bat;
-      if (VdebugVec_size_tmp - 1 >= 0) {
-        memset(&Rtot_data[0], 0, (unsigned int)VdebugVec_size_tmp * sizeof
-               (double));
-        memset(&Rwire_data[0], 0, (unsigned int)VdebugVec_size_tmp * sizeof
-               (float));
+      if (partialTrueCount - 1 >= 0) {
+        memset(&Rtot_data[0], 0, (unsigned int)partialTrueCount * sizeof(double));
+        memset(&Rwire_data[0], 0, (unsigned int)partialTrueCount * sizeof(float));
       }
 
       if (prm->brd.Nina219 < 1.0) {
         y->size[0] = 1;
         y->size[1] = 0;
       } else {
-        b_i = y->size[0] * y->size[1];
+        i = y->size[0] * y->size[1];
         y->size[0] = 1;
         y->size[1] = (int)(prm->brd.Nina219 - 1.0) + 1;
-        emxEnsureCapacity_real_T(y, b_i);
+        emxEnsureCapacity_real_T(y, i);
         y_data = y->data;
         loop_ub = (int)(prm->brd.Nina219 - 1.0);
-        for (b_i = 0; b_i <= loop_ub; b_i++) {
-          y_data[b_i] = (double)b_i + 1.0;
+        for (i = 0; i <= loop_ub; i++) {
+          y_data[i] = (double)i + 1.0;
         }
       }
 
-      b_i = b_y->size[0];
+      i = b_y->size[0];
       b_y->size[0] = y->size[1];
-      emxEnsureCapacity_real_T(b_y, b_i);
+      emxEnsureCapacity_real_T(b_y, i);
       b_y_data = b_y->data;
       loop_ub = y->size[1];
-      for (b_i = 0; b_i < loop_ub; b_i++) {
-        b_y_data[b_i] = y_data[b_i];
+      for (i = 0; i < loop_ub; i++) {
+        b_y_data[i] = y_data[i];
       }
 
       loop_ub = y->size[1];
-      for (b_i = 0; b_i < loop_ub; b_i++) {
-        VecIna219_data[b_i] = b_y_data[b_i];
+      for (i = 0; i < loop_ub; i++) {
+        VecIna219_data[i] = b_y_data[i];
       }
 
-      for (k_tstState = 0; k_tstState < c_loop_ub; k_tstState++) {
+      for (k_tstState = 0; k_tstState < VdebugVec_size_tmp; k_tstState++) {
         pause(0.1);
         if (Nina219_tmp_tmp < 1.0) {
-          b_i = 0;
+          i = 0;
         } else {
-          b_i = (int)Nina219_tmp_tmp;
+          i = (int)Nina219_tmp_tmp;
         }
 
-        for (k0 = 0; k0 < b_i; k0++) {
+        for (k0 = 0; k0 < i; k0++) {
           k_ina219_ = k_tstState << 3;
           k_groups_tmp = prm->seq.tst.i.grp[k0 + k_ina219_];
 
           /* 1:length(uGroups) %seqTstI.grp(k_tstState)%1:length(uGroups) */
           /* seqTstI.ItestSwitch{k_groups,k_tstState};%[1:N_bat]'; */
           i1 = ((k_groups_tmp - 1) << 8) + (k_tstState << 11);
-          b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+          c_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
                            prm->brd.spi.PortSpiRow_esp,
                            prm->brd.spi.SwitchMat_esp,
                            prm->brd.spi.PortSpiRow_esp2,
                            prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
                            prm->brd.spi.Pac2Vid2, &prm->seq.tst.i.ItestSwitch[i1],
-                           disConAll, a__1_data, a__1_size, id0_data);
+                           SpiPortRowBypass, a__1_data, a__1_size, id0_data);
 
           /*  I2switchId = ina219State; */
           /*  calc V */
           /* squeeze(Pac2Vid0All(k_ina219,:,:));%Pac2Vid3(:,1); */
           trueCount = 0;
-          for (i = 0; i < 256; i++) {
-            if (id0_data[i] > 0) {
+          for (loop_ub = 0; loop_ub < 256; loop_ub++) {
+            if (id0_data[loop_ub] > 0) {
               trueCount++;
             }
           }
 
-          VdebugVec_size_tmp = (k_groups_tmp + k_ina219_) - 1;
+          c_loop_ub = (k_groups_tmp + k_ina219_) - 1;
           partialTrueCount = (unsigned short)trueCount;
           if (partialTrueCount < 1) {
             partialTrueCount = 1;
@@ -2005,28 +1769,28 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           }
 
           c_vSumMax = prm->bat.Vd + ((prm->bat.CutOffChrV[0] + 0.1F) + maximum
-            (prm->seq.tst.i.i_in_test) * prm->seq.tst.i.Rin[VdebugVec_size_tmp])
-            * (float)partialTrueCount;
-          loop_ub = ipos_size - 1;
+            (prm->seq.tst.i.i_in_test) * prm->seq.tst.i.Rin[c_loop_ub]) * (float)
+            partialTrueCount;
+          id2Bypass_size = ipos_size - 1;
           trueCount = 0;
           partialTrueCount = 0;
 
           /* VecIna219_k = find(k_groups == uGroupId); */
-          id2Bypass_size = 0;
-          for (i = 0; i <= loop_ub; i++) {
-            i2 = ipos_data[i];
+          b_trueCount = 0;
+          for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
+            i2 = ipos_data[loop_ub];
             if (k_groups_tmp == i2) {
               trueCount++;
-              e_tmp_data[partialTrueCount] = (signed char)i;
+              e_tmp_data[partialTrueCount] = (signed char)loop_ub;
               partialTrueCount++;
             }
 
             if (k_groups_tmp != i2) {
-              id2Bypass_size++;
+              b_trueCount++;
             }
           }
 
-          for (i = 0; i < id2Bypass_size; i++) {
+          for (k1 = 0; k1 < b_trueCount; k1++) {
             /* diconnect group that not tested */
             switch (ProjectFlag) {
              case 2:
@@ -2035,54 +1799,16 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
              case 3:
               /* ESP32 ser */
-              /* UNTITLED Summary of this function goes here */
-              /*    Detailed explanation goes here */
-              /*  if coder.target('MATLAB') */
-              /*  read current */
-              /*   chip1     |   chip2     |   chip3 */
-              /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-              /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-              /*  */
-              /*  for k_row = 1:N_row */
-              /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-              /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-              /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-              /*  end */
-              /* mask current */
-              /* write current mask */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-              /*  end */
-              pause(0.001);
-
-              /* mask new */
-              /* write mask new */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-              /*  end */
-              /* write new */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI0,PortSpiRow(k_row,:)); */
-              /*  end */
-              /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-              /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-              /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-              /* mask current */
-              /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-              /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-              /* %chip1 Port20-23 NC */
-              /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-              /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-              /*  end */
+              writePortToSpi4RowMask_ser(disConAll);
               break;
             }
 
             pause(0.1);
           }
 
-          for (i = 0; i < trueCount; i++) {
-            b_meanIbrd0 = VecIna219_data[e_tmp_data[i]];
-            if (prm->seq.tst.i.BrdBeforePSflag[VdebugVec_size_tmp] != 0) {
+          for (k1 = 0; k1 < trueCount; k1++) {
+            b_meanIbrd0 = VecIna219_data[e_tmp_data[k1]];
+            if (prm->seq.tst.i.BrdBeforePSflag[c_loop_ub] != 0) {
               for (i2 = 0; i2 < trueCount; i2++) {
                 b_VecIna219_data[i2] = (VecIna219_data[e_tmp_data[i2]] !=
                   b_meanIbrd0);
@@ -2092,6 +1818,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 id2Bypass_data);
               for (k_ina219_ = 0; k_ina219_ < id2Bypass_size; k_ina219_++) {
                 /* k_bypass = VecIna219_k(id2Bypass) */
+                CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                               prm->brd.spi.PortSpiRow_esp,
+                               prm->brd.spi.SwitchMat_esp,
+                               prm->brd.spi.PortSpiRow_esp2,
+                               prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
+                               prm->brd.spi.Pac2Vid2, prm->brd.spi.bypass,
+                               SpiPortRowBypass, a__1_data, a__1_size, id0_data);
+
                 /*  ina219StateAll(:,k_bypass)   = ina219StateBypass; */
                 /*  BattConfig{k_bypass}       = prm.brd.spi.bypass;%-2; */
                 /*  BattConfigPerIna{k_bypass} = prm.brd.spi.bypass;%-2; */
@@ -2104,6 +1838,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 }
 
                 b_sprintf(i2, r7);
+                if (prm->seq.tst.i.measRintR) {
+                  for (i2 = 0; i2 < 24; i2++) {
+                    SpiPortRowBypass[i2] = disConAll[i2];
+                  }
+                }
+
                 switch (ProjectFlag) {
                  case 2:
                   /* ESP32 */
@@ -2112,45 +1852,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                  case 3:
                   /* ESP32 ser */
-                  /* UNTITLED Summary of this function goes here */
-                  /*    Detailed explanation goes here */
-                  /*  if coder.target('MATLAB') */
-                  /*  read current */
-                  /*   chip1     |   chip2     |   chip3 */
-                  /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                  /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                  /*  */
-                  /*  for k_row = 1:N_row */
-                  /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                  /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                  /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                  /*  end */
-                  /* mask current */
-                  /* write current mask */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  pause(0.001);
+                  writePortToSpi4RowMask_ser(SpiPortRowBypass);
 
-                  /* mask new */
-                  /* write mask new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  /* write new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRow(k_row,:)); */
-                  /*  end */
-                  /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                  /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                  /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                  /* mask current */
-                  /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                  /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                  /* %chip1 Port20-23 NC */
-                  /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                  /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                  /*  end */
                   /* TODO bypass */
                   break;
                 }
@@ -2158,13 +1861,13 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 pause(0.1);
               }
 
-              b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+              c_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
                                prm->brd.spi.PortSpiRow_esp,
                                prm->brd.spi.SwitchMat_esp,
                                prm->brd.spi.PortSpiRow_esp2,
                                prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
                                prm->brd.spi.Pac2Vid2,
-                               &prm->seq.tst.i.ItestSwitch[i1], disConAll,
+                               &prm->seq.tst.i.ItestSwitch[i1], SpiPortRowBypass,
                                a__1_data, a__1_size, id0_data);
 
               /*  ina219StateAll(:,k_ina219)   = ina219State; */
@@ -2209,6 +1912,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               fflush(stdout);
             }
 
+            if (prm->seq.tst.i.measRintR) {
+              for (i2 = 0; i2 < 24; i2++) {
+                SpiPortRowBypass[i2] = disConAll[i2];
+              }
+            }
+
             switch (ProjectFlag) {
              case 2:
               /* esp32 */
@@ -2216,45 +1925,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
              case 3:
               /* esp32 ser */
-              /* UNTITLED Summary of this function goes here */
-              /*    Detailed explanation goes here */
-              /*  if coder.target('MATLAB') */
-              /*  read current */
-              /*   chip1     |   chip2     |   chip3 */
-              /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-              /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-              /*  */
-              /*  for k_row = 1:N_row */
-              /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-              /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-              /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-              /*  end */
-              /* mask current */
-              /* write current mask */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-              /*  end */
-              pause(0.001);
-
-              /* mask new */
-              /* write mask new */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-              /*  end */
-              /* write new */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI0,PortSpiRow(k_row,:)); */
-              /*  end */
-              /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-              /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-              /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-              /* mask current */
-              /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-              /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-              /* %chip1 Port20-23 NC */
-              /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-              /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-              /*  end */
+              writePortToSpi4RowMask_ser(SpiPortRowBypass);
               break;
             }
 
@@ -2270,7 +1941,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               }
             }
 
-            for (c_loop_ub_tmp = 0; c_loop_ub_tmp < i2; c_loop_ub_tmp++) {
+            for (b_trueCount = 0; b_trueCount < i2; b_trueCount++) {
               /*  for k_ina219 = 1:Nina219 */
               switch (prm->seq.tst.i.ins[(k_groups_tmp + (k_tstState << 3)) - 1])
               {
@@ -2288,7 +1959,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                 /* ['VSET',num2str(ch),':',num2str(Val)];%[V] */
                 pause(0.05);
-                f_sprintf(rt_roundf_snf(prm->seq.tst.i.i_in_test[c_loop_ub_tmp]),
+                f_sprintf(rt_roundf_snf(prm->seq.tst.i.i_in_test[b_trueCount]),
                           b_prm);
 
                 /* ['ISET',num2str(ch),':',num2str(Val)];%[A] */
@@ -2299,7 +1970,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                case 3:
                 /* juntek+ACDC */
                 /* Imax); */
-                i_prm[0] = prm->seq.tst.i.i_in_test[c_loop_ub_tmp];
+                i_prm[0] = prm->seq.tst.i.i_in_test[b_trueCount];
                 i_prm[1] = ImaxAcDC;
                 f = rt_roundf_snf(rt_roundf_snf(1000.0F * minimum(i_prm)) /
                                   1000.0F * 1000.0F);
@@ -2351,7 +2022,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
               /*              [~,~,~,~]  = ControlKp184(s_kp184,'Read',[]); */
               pause(0.5);
-              if (prm->seq.tst.i.BrdBeforePSflag[VdebugVec_size_tmp] == 0) {
+              if (prm->seq.tst.i.BrdBeforePSflag[c_loop_ub] == 0) {
                 for (i3 = 0; i3 < trueCount; i3++) {
                   b_VecIna219_data[i3] = (VecIna219_data[e_tmp_data[i3]] !=
                     b_meanIbrd0);
@@ -2360,6 +2031,15 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 id2Bypass_size = c_eml_find(b_VecIna219_data, trueCount,
                   id2Bypass_data);
                 for (k_ina219_ = 0; k_ina219_ < id2Bypass_size; k_ina219_++) {
+                  CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                                 prm->brd.spi.PortSpiRow_esp,
+                                 prm->brd.spi.SwitchMat_esp,
+                                 prm->brd.spi.PortSpiRow_esp2,
+                                 prm->brd.spi.SwitchMat_esp2,
+                                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                                 prm->brd.spi.bypass, SpiPortRowBypass,
+                                 a__1_data, a__1_size, id0_data);
+
                   /*  ina219StateAll(:,k_bypass)   = ina219StateBypass; */
                   /*  BattConfig{k_bypass}       = prm.brd.spi.bypass;%-2; */
                   /*  BattConfigPerIna{k_bypass} = prm.brd.spi.bypass;%-2; */
@@ -2372,6 +2052,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   }
 
                   b_sprintf(i3, r10);
+                  if (prm->seq.tst.i.measRintR) {
+                    for (i3 = 0; i3 < 24; i3++) {
+                      SpiPortRowBypass[i3] = disConAll[i3];
+                    }
+                  }
+
                   switch (ProjectFlag) {
                    case 2:
                     /* ESP32 */
@@ -2380,45 +2066,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                    case 3:
                     /* ESP32 ser */
-                    /* UNTITLED Summary of this function goes here */
-                    /*    Detailed explanation goes here */
-                    /*  if coder.target('MATLAB') */
-                    /*  read current */
-                    /*   chip1     |   chip2     |   chip3 */
-                    /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                    /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                    /*  */
-                    /*  for k_row = 1:N_row */
-                    /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                    /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                    /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                    /*  end */
-                    /* mask current */
-                    /* write current mask */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                    /*  end */
-                    pause(0.001);
+                    writePortToSpi4RowMask_ser(SpiPortRowBypass);
 
-                    /* mask new */
-                    /* write mask new */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                    /*  end */
-                    /* write new */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI0,PortSpiRow(k_row,:)); */
-                    /*  end */
-                    /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                    /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                    /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                    /* mask current */
-                    /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                    /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                    /* %chip1 Port20-23 NC */
-                    /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                    /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                    /*  end */
                     /* TODO bypass */
                     break;
                   }
@@ -2426,14 +2075,15 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   pause(0.1);
                 }
 
-                b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                c_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
                                  prm->brd.spi.PortSpiRow_esp,
                                  prm->brd.spi.SwitchMat_esp,
                                  prm->brd.spi.PortSpiRow_esp2,
                                  prm->brd.spi.SwitchMat_esp2,
                                  prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
-                                 &prm->seq.tst.i.ItestSwitch[i1], disConAll,
-                                 a__1_data, a__1_size, id0_data);
+                                 &prm->seq.tst.i.ItestSwitch[i1],
+                                 SpiPortRowBypass, a__1_data, a__1_size,
+                                 id0_data);
 
                 /*  ina219StateAll(:,k_ina219)   = ina219State; */
                 /*  BattConfig{k_ina219}       = iTestSwitchCell_1+(k_ina219-1)*N_bat; */
@@ -2493,7 +2143,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               for (i3 = 0; i3 < loop_ub; i3++) {
                 VbusTest2_data[((((int)b_meanIbrd0 + VbusTest2->size[0] * i3) +
                                  VbusTest2->size[0] * VbusTest2->size[1] *
-                                 c_loop_ub_tmp) + VbusTest2->size[0] *
+                                 b_trueCount) + VbusTest2->size[0] *
                                 VbusTest2->size[1] * VbusTest2->size[2] *
                                 k_tstState) - 1] = VmV_data[i3];
               }
@@ -2504,7 +2154,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               for (i3 = 0; i3 < loop_ub; i3++) {
                 IshuntTest2_data[((((int)b_meanIbrd0 + IshuntTest2->size[0] * i3)
                                    + IshuntTest2->size[0] * IshuntTest2->size[1]
-                                   * c_loop_ub_tmp) + IshuntTest2->size[0] *
+                                   * b_trueCount) + IshuntTest2->size[0] *
                                   IshuntTest2->size[1] * IshuntTest2->size[2] *
                                   k_tstState) - 1] = I_data[i3];
               }
@@ -2514,10 +2164,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                case 1:
                 /* kp184 */
                 ControlKp184((double *)&N0, a__3_size, (double *)&a__4_data,
-                             a__4_size, (double *)&d_tmp_data, b_VmV_size,
+                             a__4_size, (double *)&d_tmp_data, b_tmp_size,
                              (double *)&a__16_data, id2Bypass_data);
                 ImKp184Test2_data[(((int)b_meanIbrd0 + ImKp184Test2->size[0] *
-                                    ImKp184Test2->size[1] * c_loop_ub_tmp) +
+                                    ImKp184Test2->size[1] * b_trueCount) +
                                    ImKp184Test2->size[0] * ImKp184Test2->size[1]
                                    * ImKp184Test2->size[2] * k_tstState) - 1] =
                   a__16_data;
@@ -2528,7 +2178,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 /* read I */
                 d_tmp_data = d_rand();
                 ImKp184Test2_data[(((int)b_meanIbrd0 + ImKp184Test2->size[0] *
-                                    ImKp184Test2->size[1] * c_loop_ub_tmp) +
+                                    ImKp184Test2->size[1] * b_trueCount) +
                                    ImKp184Test2->size[0] * ImKp184Test2->size[1]
                                    * ImKp184Test2->size[2] * k_tstState) - 1] =
                   d_tmp_data * 5.0;
@@ -2539,9 +2189,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                case 3:
                 /* juntek+ACDC */
-                controlJuntekDPH8920((double *)&d_tmp_data, b_VmV_size);
+                controlJuntekDPH8920((double *)&d_tmp_data, b_tmp_size);
                 ImKp184Test2_data[(((int)b_meanIbrd0 + ImKp184Test2->size[0] *
-                                    ImKp184Test2->size[1] * c_loop_ub_tmp) +
+                                    ImKp184Test2->size[1] * b_trueCount) +
                                    ImKp184Test2->size[0] * ImKp184Test2->size[1]
                                    * ImKp184Test2->size[2] * k_tstState) - 1] =
                   d_tmp_data;
@@ -2554,17 +2204,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 d_tmp_data = d_rand() * 2.5 + 2.0;
                 b_dv0 = d_rand() * 5.0;
                 if (prm->ins.prm.swOut.IfromVdivR_flag) {
-                  if (prm->seq.tst.i.i_in_test[c_loop_ub_tmp] == 0.0F) {
+                  if (prm->seq.tst.i.i_in_test[b_trueCount] == 0.0F) {
                     ImKp184Test2_data[(((int)b_meanIbrd0 + ImKp184Test2->size[0]
-                                        * ImKp184Test2->size[1] * c_loop_ub_tmp)
-                                       + ImKp184Test2->size[0] *
+                                        * ImKp184Test2->size[1] * b_trueCount) +
+                                       ImKp184Test2->size[0] *
                                        ImKp184Test2->size[1] *
                                        ImKp184Test2->size[2] * k_tstState) - 1] =
                       0.0;
                   } else {
                     ImKp184Test2_data[(((int)b_meanIbrd0 + ImKp184Test2->size[0]
-                                        * ImKp184Test2->size[1] * c_loop_ub_tmp)
-                                       + ImKp184Test2->size[0] *
+                                        * ImKp184Test2->size[1] * b_trueCount) +
+                                       ImKp184Test2->size[0] *
                                        ImKp184Test2->size[1] *
                                        ImKp184Test2->size[2] * k_tstState) - 1] =
                       (float)d_tmp_data / prm->seq.tst.i.Rload;
@@ -2573,7 +2223,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   }
                 } else {
                   ImKp184Test2_data[(((int)b_meanIbrd0 + ImKp184Test2->size[0] *
-                                      ImKp184Test2->size[1] * c_loop_ub_tmp) +
+                                      ImKp184Test2->size[1] * b_trueCount) +
                                      ImKp184Test2->size[0] * ImKp184Test2->size
                                      [1] * ImKp184Test2->size[2] * k_tstState) -
                     1] = b_dv0;
@@ -2585,22 +2235,22 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               /*  formatSpec1 = '%.5g'; */
               /*                      disp(['V(',pad(num2str([k_ina219,k_Ttest,k_tstState]),'left',padLeft),')=',pad(num2str(VbusTest2(k_ina219,:,k_Ttest,k_tstState)),padRight,'left',padLeft),'V ',newline ,... */
               /*                          'I(',pad(num2str([k_ina219,k_Ttest,k_tstState]),'left',padLeft),')=',pad(num2str(IshuntTest2(k_ina219,:,k_Ttest,k_tstState)),padRight,'left',padLeft),'A ']); */
-              h_sprintf(k_t0, c_loop_ub_tmp + 1, k_tstState + 1, k_Ttest);
+              h_sprintf(k_t0, b_trueCount + 1, k_tstState + 1, k_Ttest);
               for (b_loop_ub_tmp = 0; b_loop_ub_tmp < N_bat_tmp_tmp_tmp;
                    b_loop_ub_tmp++) {
                 i_sprintf(VbusTest2_data[((((int)b_meanIbrd0 + VbusTest2->size[0]
                   * b_loop_ub_tmp) + VbusTest2->size[0] * VbusTest2->size[1] *
-                            c_loop_ub_tmp) + VbusTest2->size[0] *
-                           VbusTest2->size[1] * VbusTest2->size[2] * k_tstState)
-                          - 1], b_VbusTest2);
+                            b_trueCount) + VbusTest2->size[0] * VbusTest2->size
+                           [1] * VbusTest2->size[2] * k_tstState) - 1],
+                          b_VbusTest2);
               }
 
-              h_sprintf(state_k, c_loop_ub_tmp + 1, k_tstState + 1, b_k_Ttest);
+              h_sprintf(state_k, b_trueCount + 1, k_tstState + 1, b_k_Ttest);
               for (b_loop_ub_tmp = 0; b_loop_ub_tmp < N_bat_tmp_tmp_tmp;
                    b_loop_ub_tmp++) {
                 i_sprintf(IshuntTest2_data[((((int)b_meanIbrd0 +
                   IshuntTest2->size[0] * b_loop_ub_tmp) + IshuntTest2->size[0] *
-                            IshuntTest2->size[1] * c_loop_ub_tmp) +
+                            IshuntTest2->size[1] * b_trueCount) +
                            IshuntTest2->size[0] * IshuntTest2->size[1] *
                            IshuntTest2->size[2] * k_tstState) - 1],
                           b_IshuntTest2);
@@ -2613,16 +2263,16 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 if (ProjectFlag == 2) {
                   /* esp32 */
                   Iacs758_cal_data[(((int)b_meanIbrd0 + Iacs758_cal->size[0] *
-                                     Iacs758_cal->size[1] * c_loop_ub_tmp) +
+                                     Iacs758_cal->size[1] * b_trueCount) +
                                     Iacs758_cal->size[0] * Iacs758_cal->size[1] *
                                     Iacs758_cal->size[2] * k_tstState) - 1] =
                     0.0;
                 }
 
                 b_dv0 = Iacs758_cal_data[(((int)b_meanIbrd0 + Iacs758_cal->size
-                  [0] * Iacs758_cal->size[1] * c_loop_ub_tmp) +
-                  Iacs758_cal->size[0] * Iacs758_cal->size[1] *
-                  Iacs758_cal->size[2] * k_tstState) - 1];
+                  [0] * Iacs758_cal->size[1] * b_trueCount) + Iacs758_cal->size
+                  [0] * Iacs758_cal->size[1] * Iacs758_cal->size[2] * k_tstState)
+                  - 1];
                 Nina219[0] = I_size[0];
                 Nina219[1] = I_size[1];
                 loop_ub = Nina219[0] * Nina219[1];
@@ -2640,7 +2290,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   /* UNTITLED3 Summary of this function goes here */
                   /*    Detailed explanation goes here */
                   Iacs758_cal_data[(((int)b_meanIbrd0 + Iacs758_cal->size[0] *
-                                     Iacs758_cal->size[1] * c_loop_ub_tmp) +
+                                     Iacs758_cal->size[1] * b_trueCount) +
                                     Iacs758_cal->size[0] * Iacs758_cal->size[1] *
                                     Iacs758_cal->size[2] * k_tstState) - 1] =
                     randn() * 5.0;
@@ -2656,8 +2306,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   /*  I = I(10); */
                   /*  tI = tI(10); */
                   b_dv0 = Iacs758_cal_data[(((int)b_meanIbrd0 +
-                    Iacs758_cal->size[0] * Iacs758_cal->size[1] * c_loop_ub_tmp)
-                    + Iacs758_cal->size[0] * Iacs758_cal->size[1] *
+                    Iacs758_cal->size[0] * Iacs758_cal->size[1] * b_trueCount) +
+                    Iacs758_cal->size[0] * Iacs758_cal->size[1] *
                     Iacs758_cal->size[2] * k_tstState) - 1];
                   Nina219[0] = I_size[0];
                   Nina219[1] = I_size[1];
@@ -2716,45 +2366,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
              case 3:
               /* esp32 ser */
-              /* UNTITLED Summary of this function goes here */
-              /*    Detailed explanation goes here */
-              /*  if coder.target('MATLAB') */
-              /*  read current */
-              /*   chip1     |   chip2     |   chip3 */
-              /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-              /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-              /*  */
-              /*  for k_row = 1:N_row */
-              /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-              /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-              /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-              /*  end */
-              /* mask current */
-              /* write current mask */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-              /*  end */
-              pause(0.001);
-
-              /* mask new */
-              /* write mask new */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-              /*  end */
-              /* write new */
-              /*  for k_row = 1:N_row */
-              /*      write(SPI0,PortSpiRow(k_row,:)); */
-              /*  end */
-              /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-              /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-              /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-              /* mask current */
-              /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-              /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-              /* %chip1 Port20-23 NC */
-              /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-              /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-              /*  end */
+              writePortToSpi4RowMask_ser(disConAll);
               break;
             }
 
@@ -2771,7 +2383,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       /*  end */
       /* TODO save */
       /*      coder.varsize('ImKp184Test2_bat_0','Ishunt_cal_bat_0','Vbus_cal_bat_0',[Nmax.NbitCnfgMax*Nmax.NstateMax 1],[1,1]); */
-      b_i = (int)prm->brd.Nina219;
+      i = (int)prm->brd.Nina219;
       kEst_size[0] = (int)prm->brd.Nina219;
       kEst_size[1] = prm->brd.N_bat;
       kEst_size[2] = 2;
@@ -2792,7 +2404,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       }
 
       if (!prm->seq.tst.i.measRintR) {
-        if (b_i - 1 >= 0) {
+        if (i - 1 >= 0) {
           if (N_bat_tmp_tmp_tmp - 1 >= 0) {
             end = NstTst_tmp_tmp - 1;
             tmp_size[0] = 1;
@@ -2801,7 +2413,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           d_loop_ub = Rtot_size[1];
         }
 
-        for (k_ina219_ = 0; k_ina219_ < b_i; k_ina219_++) {
+        for (k_ina219_ = 0; k_ina219_ < i; k_ina219_++) {
           VbusTest2_size[0] = 1;
           VbusTest2_size[1] = 1;
           VbusTest2_size[2] = Iacs758_cal->size[2];
@@ -2866,7 +2478,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           /* polyfit(squeeze(IshuntTest2(k_ina219,k_bat,:,k_iTest)),1000*squeeze(ImKp184Test2(k_ina219,1,:,k_iTest)),1); */
           for (b_loop_ub_tmp = 0; b_loop_ub_tmp < N_bat_tmp_tmp_tmp;
                b_loop_ub_tmp++) {
-            for (k_tstState = 0; k_tstState < c_loop_ub; k_tstState++) {
+            for (k_tstState = 0; k_tstState < VdebugVec_size_tmp; k_tstState++)
+            {
               ismember0_data[k_tstState] = isMember((double)b_loop_ub_tmp + 1.0,
                 &prm->seq.tst.i.ItestSwitch[((ipos_data[k_ina219_] - 1) << 8) +
                 (k_tstState << 11)]);
@@ -2874,10 +2487,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
             trueCount = 0;
             partialTrueCount = 0;
-            for (i = 0; i <= end; i++) {
-              if (ismember0_data[i]) {
+            for (loop_ub = 0; loop_ub <= end; loop_ub++) {
+              if (ismember0_data[loop_ub]) {
                 trueCount++;
-                g_tmp_data[partialTrueCount] = (signed char)i;
+                g_tmp_data[partialTrueCount] = (signed char)loop_ub;
                 partialTrueCount++;
               }
             }
@@ -2958,16 +2571,16 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             trueCount = Vbus_cal_bat_00->size[0] * Vbus_cal_bat_00->size[1];
             polyfit(ImKp184Test2_bat_00_data, id2Bypass_size, (double *)
                     Vbus_cal_bat_00->data, trueCount, outVI);
-            partialTrueCount = k_ina219_ + VdebugVec_size[0] * b_loop_ub_tmp;
-            VdebugVec_data[partialTrueCount] = outVI[0];
-            VdebugVec_data[partialTrueCount + VdebugVec_size[0] * prm->brd.N_bat]
-              = outVI[1];
+            b_trueCount = k_ina219_ + VdebugVec_size[0] * b_loop_ub_tmp;
+            VdebugVec_data[b_trueCount] = outVI[0];
+            VdebugVec_data[b_trueCount + VdebugVec_size[0] * prm->brd.N_bat] =
+              outVI[1];
             trueCount = Ishunt_cal_bat_00->size[0] * Ishunt_cal_bat_00->size[1];
             polyfit((double *)Ishunt_cal_bat_00->data, trueCount,
                     ImKp184Test2_bat_00_data, id2Bypass_size, outVI);
-            partialTrueCount = k_ina219_ + kEst_size[0] * b_loop_ub_tmp;
-            kEst_data[partialTrueCount] = outVI[0];
-            kEst_data[partialTrueCount + kEst_size[0] * kEst_size[1]] = outVI[1];
+            b_trueCount = k_ina219_ + kEst_size[0] * b_loop_ub_tmp;
+            kEst_data[b_trueCount] = outVI[0];
+            kEst_data[b_trueCount + kEst_size[0] * kEst_size[1]] = outVI[1];
 
             /* polyfit(squeeze(IshuntTest2(k_ina219,k_bat,:,k_iTest)),1000*squeeze(ImKp184Test2(k_ina219,1,:,k_iTest)),1); */
           }
@@ -3004,9 +2617,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         guard3 = true;
       } else if (prm->seq.tst.i.measRintR) {
         loop_ub = ImKp184Test2->size[2];
-        for (b_i = 0; b_i < loop_ub; b_i++) {
-          tvv_data[b_i] = ImKp184Test2_data[ImKp184Test2->size[0] *
-            ImKp184Test2->size[1] * b_i];
+        for (i = 0; i < loop_ub; i++) {
+          tvv_data[i] = ImKp184Test2_data[ImKp184Test2->size[0] *
+            ImKp184Test2->size[1] * i];
         }
 
         if (prm->seq.tst.i.RintBatId < 1) {
@@ -3016,9 +2629,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         }
 
         loop_ub = VbusTest2->size[2];
-        for (b_i = 0; b_i < loop_ub; b_i++) {
-          b_VmV_data[b_i] = VbusTest2_data[VbusTest2->size[0] * (k_groups_tmp -
-            1) + VbusTest2->size[0] * VbusTest2->size[1] * b_i];
+        for (i = 0; i < loop_ub; i++) {
+          b_VmV_data[i] = VbusTest2_data[VbusTest2->size[0] * (k_groups_tmp - 1)
+            + VbusTest2->size[0] * VbusTest2->size[1] * i];
         }
 
         Nina219[0] = 1;
@@ -3029,32 +2642,32 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         outStruct->Rint = -outVI[0];
         VbusTest2_size[2] = VbusTest2->size[2];
         loop_ub = VbusTest2->size[3];
-        for (b_i = 0; b_i < loop_ub; b_i++) {
+        for (i = 0; i < loop_ub; i++) {
           b_loop_ub = VbusTest2->size[2];
           for (i1 = 0; i1 < b_loop_ub; i1++) {
-            b_VbusTest2_data[i1 + VbusTest2_size[2] * b_i] = VbusTest2_data
+            b_VbusTest2_data[i1 + VbusTest2_size[2] * i] = VbusTest2_data
               [(VbusTest2->size[0] * (prm->seq.tst.i.RintBatId - 1) +
                 VbusTest2->size[0] * VbusTest2->size[1] * i1) + VbusTest2->size
-              [0] * VbusTest2->size[1] * VbusTest2->size[2] * b_i];
+              [0] * VbusTest2->size[1] * VbusTest2->size[2] * i];
           }
         }
 
         trueCount = VbusTest2->size[2] * VbusTest2->size[3];
         outStruct->VpassFlag = true;
-        for (b_i = 0; b_i < trueCount; b_i++) {
-          d_tmp_data = b_VbusTest2_data[b_i];
-          VbusTest0_data[b_i] = d_tmp_data;
-          b_VbusTest0_data[b_i] = (d_tmp_data > prm->bat.Vmax);
+        for (i = 0; i < trueCount; i++) {
+          d_tmp_data = b_VbusTest2_data[i];
+          VmV_data[i] = d_tmp_data;
+          VbusTest0_data[i] = (d_tmp_data > prm->bat.Vmax);
         }
 
-        if (any(b_VbusTest0_data, trueCount)) {
+        if (any(VbusTest0_data, trueCount)) {
           outStruct->VpassFlag = false;
         } else {
-          for (b_i = 0; b_i < trueCount; b_i++) {
-            b_VbusTest0_data[b_i] = (VbusTest0_data[b_i] < prm->bat.Vmin);
+          for (i = 0; i < trueCount; i++) {
+            VbusTest0_data[i] = (VmV_data[i] < prm->bat.Vmin);
           }
 
-          if (any(b_VbusTest0_data, trueCount)) {
+          if (any(VbusTest0_data, trueCount)) {
             outStruct->VpassFlag = false;
           } else {
             j_sprintf(prm->seq.tst.i.RintBatId, c_prm);
@@ -3080,17 +2693,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         memset(&kEst_data[0], 0, (unsigned int)loop_ub * sizeof(double));
       }
 
-      for (b_i = 0; b_i < c_loop_ub_tmp; b_i++) {
+      for (i = 0; i < c_loop_ub_tmp; i++) {
         for (i1 = 0; i1 < b_loop_ub_tmp; i1++) {
-          kEst_data[i1 + b_loop_ub_tmp * b_i] = 1.0;
+          kEst_data[i1 + b_loop_ub_tmp * i] = 1.0;
         }
       }
 
       /* pIshunt*0; */
       loop_ub = prm->brd.N_bat;
-      for (b_i = 0; b_i < loop_ub; b_i++) {
+      for (i = 0; i < loop_ub; i++) {
         for (i1 = 0; i1 < b_loop_ub_tmp; i1++) {
-          kEst_data[(i1 + kEst_size[0] * b_i) + kEst_size[0] * c_loop_ub_tmp] =
+          kEst_data[(i1 + kEst_size[0] * i) + kEst_size[0] * c_loop_ub_tmp] =
             0.0;
         }
       }
@@ -3104,7 +2717,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
     /*      I2switchId = [I2switchId 2];%add bypass */
     /*      pIshuntAll(:,:,:,1+end) = zeros(Nina219,Nbat,2); */
     /*      pIshunt(:,2:2:end,:) = 0;%pac even disconnected */
-    for (k_ina219_ = 0; k_ina219_ < b_i; k_ina219_++) {
+    for (k_ina219_ = 0; k_ina219_ < i; k_ina219_++) {
       switch (ProjectFlag) {
        case 2:
         /* esp32 */
@@ -3112,63 +2725,25 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
        case 3:
         /* esp32 ser */
-        /* UNTITLED Summary of this function goes here */
-        /*    Detailed explanation goes here */
-        /*  if coder.target('MATLAB') */
-        /*  read current */
-        /*   chip1     |   chip2     |   chip3 */
-        /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-        /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-        /*  */
-        /*  for k_row = 1:N_row */
-        /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-        /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-        /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-        /*  end */
-        /* mask current */
-        /* write current mask */
-        /*  for k_row = 1:N_row */
-        /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-        /*  end */
-        pause(0.001);
-
-        /* mask new */
-        /* write mask new */
-        /*  for k_row = 1:N_row */
-        /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-        /*  end */
-        /* write new */
-        /*  for k_row = 1:N_row */
-        /*      write(SPI0,PortSpiRow(k_row,:)); */
-        /*  end */
-        /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-        /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-        /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-        /* mask current */
-        /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-        /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-        /* %chip1 Port20-23 NC */
-        /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-        /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-        /*  end */
+        writePortToSpi4RowMask_ser(disConAll);
         break;
       }
     }
 
     loop_ub = prm->brd.N_bat;
-    for (b_i = 0; b_i < loop_ub; b_i++) {
+    for (i = 0; i < loop_ub; i++) {
       b_loop_ub = kEst_size[0];
       for (i1 = 0; i1 < b_loop_ub; i1++) {
-        kEst_data[i1 + kEst_size[0] * b_i] = 1.0;
+        kEst_data[i1 + kEst_size[0] * i] = 1.0;
       }
     }
 
     /* pIshunt*0; */
     loop_ub = prm->brd.N_bat;
-    for (b_i = 0; b_i < loop_ub; b_i++) {
+    for (i = 0; i < loop_ub; i++) {
       b_loop_ub = kEst_size[0];
       for (i1 = 0; i1 < b_loop_ub; i1++) {
-        kEst_data[(i1 + kEst_size[0] * b_i) + kEst_size[0] * kEst_size[1]] = 0.0;
+        kEst_data[(i1 + kEst_size[0] * i) + kEst_size[0] * kEst_size[1]] = 0.0;
       }
     }
 
@@ -3189,20 +2764,20 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
     Nina219[0] = loop_ub;
     Nina219[1] = outStruct->VbusTest->size[1];
     b_loop_ub = outStruct->VbusTest->size[1];
-    for (b_i = 0; b_i < b_loop_ub; b_i++) {
+    for (i = 0; i < b_loop_ub; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
-        outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * b_i] =
-          VbusTest_data[i1 + Nina219[0] * b_i];
+        outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * i] =
+          VbusTest_data[i1 + Nina219[0] * i];
       }
     }
 
     Nina219[0] = loop_ub;
     Nina219[1] = outStruct->VmKp184Test->size[1];
     b_loop_ub = outStruct->VmKp184Test->size[1];
-    for (b_i = 0; b_i < b_loop_ub; b_i++) {
+    for (i = 0; i < b_loop_ub; i++) {
       for (i1 = 0; i1 < loop_ub; i1++) {
-        outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] * b_i]
-          = VmKp184Test_data[i1 + Nina219[0] * b_i];
+        outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] * i] =
+          VmKp184Test_data[i1 + Nina219[0] * i];
       }
     }
   }
@@ -3239,7 +2814,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       /*  N_bitIdis = length(prm.bit.Idis); */
       /*  N_bitIchr = length(prm.bit.Ichr); */
       /* [128,16,32,32,32],[1 1 1 1 1]); */
-      b_i = Vbrd->size[0] * Vbrd->size[1] * Vbrd->size[2] * Vbrd->size[3] *
+      i = Vbrd->size[0] * Vbrd->size[1] * Vbrd->size[2] * Vbrd->size[3] *
         Vbrd->size[4];
       Vbrd->size[0] = N_bitCnfg;
       Vbrd->size[1] = (int)prm->brd.Nina219;
@@ -3247,54 +2822,54 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       Vbrd->size[3] = prm->brd.N_bat;
       i1 = prm->seq.bit.Nst;
       Vbrd->size[4] = prm->seq.bit.Nst;
-      emxEnsureCapacity_real_T(Vbrd, b_i);
+      emxEnsureCapacity_real_T(Vbrd, i);
       VbusTest2_data = Vbrd->data;
-      VdebugVec_size_tmp = N_bitCnfg * (int)prm->brd.Nina219;
-      id2Bypass_size = VdebugVec_size_tmp * prm->brd.N_bat * prm->seq.bit.Nst;
-      for (b_i = 0; b_i < id2Bypass_size; b_i++) {
-        VbusTest2_data[b_i] = 0.0;
+      partialTrueCount = N_bitCnfg * (int)prm->brd.Nina219;
+      id2Bypass_size = partialTrueCount * prm->brd.N_bat * prm->seq.bit.Nst;
+      for (i = 0; i < id2Bypass_size; i++) {
+        VbusTest2_data[i] = 0.0;
       }
 
-      b_i = Ibrd->size[0] * Ibrd->size[1] * Ibrd->size[2] * Ibrd->size[3] *
+      i = Ibrd->size[0] * Ibrd->size[1] * Ibrd->size[2] * Ibrd->size[3] *
         Ibrd->size[4];
       Ibrd->size[0] = N_bitCnfg;
       Ibrd->size[1] = (int)prm->brd.Nina219;
       Ibrd->size[2] = 1;
       Ibrd->size[3] = prm->brd.N_bat;
       Ibrd->size[4] = prm->seq.bit.Nst;
-      emxEnsureCapacity_real_T(Ibrd, b_i);
+      emxEnsureCapacity_real_T(Ibrd, i);
       IshuntTest2_data = Ibrd->data;
-      for (b_i = 0; b_i < id2Bypass_size; b_i++) {
-        IshuntTest2_data[b_i] = 0.0;
+      for (i = 0; i < id2Bypass_size; i++) {
+        IshuntTest2_data[i] = 0.0;
       }
 
       /*  VbrdChr = zeros(N_bitCnfg,Nina219,N_bitIchr,N_bat); */
       /*  IbrdChr = zeros(N_bitCnfg,Nina219,N_bitIchr,N_bat); */
       /* [128,16,32,32],[1 1 1 1]); */
-      b_i = meanIbrd->size[0] * meanIbrd->size[1] * meanIbrd->size[2] *
+      i = meanIbrd->size[0] * meanIbrd->size[1] * meanIbrd->size[2] *
         meanIbrd->size[3];
       meanIbrd->size[0] = N_bitCnfg;
       meanIbrd->size[1] = (int)prm->brd.Nina219;
       meanIbrd->size[2] = 1;
       meanIbrd->size[3] = prm->seq.bit.Nst;
-      emxEnsureCapacity_real_T(meanIbrd, b_i);
+      emxEnsureCapacity_real_T(meanIbrd, i);
       ImKp184Test2_data = meanIbrd->data;
-      id2Bypass_size = VdebugVec_size_tmp * prm->seq.bit.Nst;
-      for (b_i = 0; b_i < id2Bypass_size; b_i++) {
-        ImKp184Test2_data[b_i] = 0.0;
+      id2Bypass_size = partialTrueCount * prm->seq.bit.Nst;
+      for (i = 0; i < id2Bypass_size; i++) {
+        ImKp184Test2_data[i] = 0.0;
       }
 
       /*  meanIbrdChr = zeros(N_bitCnfg,Nina219,N_bitIchr); */
-      b_i = VbitInsMeas->size[0] * VbitInsMeas->size[1] * VbitInsMeas->size[2] *
+      i = VbitInsMeas->size[0] * VbitInsMeas->size[1] * VbitInsMeas->size[2] *
         VbitInsMeas->size[3];
       VbitInsMeas->size[0] = N_bitCnfg;
       VbitInsMeas->size[1] = (int)prm->brd.Nina219;
       VbitInsMeas->size[2] = 1;
       VbitInsMeas->size[3] = prm->seq.bit.Nst;
-      emxEnsureCapacity_real_T(VbitInsMeas, b_i);
+      emxEnsureCapacity_real_T(VbitInsMeas, i);
       Iacs758_cal_data = VbitInsMeas->data;
-      for (b_i = 0; b_i < id2Bypass_size; b_i++) {
-        Iacs758_cal_data[b_i] = 0.0;
+      for (i = 0; i < id2Bypass_size; i++) {
+        Iacs758_cal_data[i] = 0.0;
       }
 
       /*  VbitInsMeasChr = zeros(N_bitCnfg,Nina219,N_bitIdis); */
@@ -3303,29 +2878,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         y->size[0] = 1;
         y->size[1] = 0;
       } else {
-        b_i = y->size[0] * y->size[1];
+        i = y->size[0] * y->size[1];
         y->size[0] = 1;
         y->size[1] = (int)(prm->brd.Nina219 - 1.0) + 1;
-        emxEnsureCapacity_real_T(y, b_i);
+        emxEnsureCapacity_real_T(y, i);
         y_data = y->data;
         loop_ub = (int)(prm->brd.Nina219 - 1.0);
-        for (b_i = 0; b_i <= loop_ub; b_i++) {
-          y_data[b_i] = (double)b_i + 1.0;
+        for (i = 0; i <= loop_ub; i++) {
+          y_data[i] = (double)i + 1.0;
         }
       }
 
-      b_i = b_y->size[0];
+      i = b_y->size[0];
       b_y->size[0] = y->size[1];
-      emxEnsureCapacity_real_T(b_y, b_i);
+      emxEnsureCapacity_real_T(b_y, i);
       b_y_data = b_y->data;
       loop_ub = y->size[1];
-      for (b_i = 0; b_i < loop_ub; b_i++) {
-        b_y_data[b_i] = y_data[b_i];
+      for (i = 0; i < loop_ub; i++) {
+        b_y_data[i] = y_data[i];
       }
 
       loop_ub = y->size[1];
-      for (b_i = 0; b_i < loop_ub; b_i++) {
-        VecIna219_data[b_i] = b_y_data[b_i];
+      for (i = 0; i < loop_ub; i++) {
+        VecIna219_data[i] = b_y_data[i];
       }
 
       size_tmp_idx_1 = (unsigned short)N_bitCnfg;
@@ -3333,17 +2908,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         size_tmp_idx_1 = 32767U;
       }
 
-      b_i = size_tmp_idx_1;
-      for (k_t0 = 0; k_t0 < b_i; k_t0++) {
+      i = size_tmp_idx_1;
+      for (k_t0 = 0; k_t0 < i; k_t0++) {
         for (state_k = 0; state_k < i1; state_k++) {
           for (k_tstState = 0; k_tstState < b_size; k_tstState++) {
-            loop_ub = ipos_size - 1;
+            id2Bypass_size = ipos_size - 1;
             trueCount = 0;
             partialTrueCount = 0;
-            for (i = 0; i <= loop_ub; i++) {
-              if (k_tstState + 1 == ipos_data[i]) {
+            for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
+              if (k_tstState + 1 == ipos_data[loop_ub]) {
                 trueCount++;
-                f_tmp_data[partialTrueCount] = (signed char)i;
+                f_tmp_data[partialTrueCount] = (signed char)loop_ub;
                 partialTrueCount++;
               }
             }
@@ -3357,9 +2932,22 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                     VecIna219_data[f_tmp_data[k0]]);
                 }
 
+                VdebugVec_size_tmp = c_eml_find(b_VecIna219_data, trueCount,
+                  id2Bypass_data);
                 c_loop_ub = c_eml_find(b_VecIna219_data, trueCount,
                   id2Bypass_data);
-                for (i = 0; i < c_loop_ub; i++) {
+                if (c_loop_ub - 1 >= 0) {
+                  CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                                 prm->brd.spi.PortSpiRow_esp,
+                                 prm->brd.spi.SwitchMat_esp,
+                                 prm->brd.spi.PortSpiRow_esp2,
+                                 prm->brd.spi.SwitchMat_esp2,
+                                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                                 prm->brd.spi.bypass, SpiPortRowBypass,
+                                 a__1_data, a__1_size, id0_data);
+                }
+
+                for (k1 = 0; k1 < VdebugVec_size_tmp; k1++) {
                   /* for k_bypass = VecIna219(id2Bypass) */
                   switch (ProjectFlag) {
                    case 2:
@@ -3369,45 +2957,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                    case 3:
                     /* ESP32 ser */
-                    /* UNTITLED Summary of this function goes here */
-                    /*    Detailed explanation goes here */
-                    /*  if coder.target('MATLAB') */
-                    /*  read current */
-                    /*   chip1     |   chip2     |   chip3 */
-                    /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                    /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                    /*  */
-                    /*  for k_row = 1:N_row */
-                    /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                    /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                    /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                    /*  end */
-                    /* mask current */
-                    /* write current mask */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                    /*  end */
-                    pause(0.001);
+                    writePortToSpi4RowMask_ser(SpiPortRowBypass);
 
-                    /* mask new */
-                    /* write mask new */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                    /*  end */
-                    /* write new */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI0,PortSpiRow(k_row,:)); */
-                    /*  end */
-                    /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                    /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                    /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                    /* mask current */
-                    /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                    /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                    /* %chip1 Port20-23 NC */
-                    /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                    /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                    /*  end */
                     /* TODO bypass */
                     break;
                   }
@@ -3433,13 +2984,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 d_bitCnfg_data.allocatedSize = 256;
                 d_bitCnfg_data.numDimensions = 2;
                 d_bitCnfg_data.canFreeData = false;
-                CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
-                               prm->brd.spi.PortSpiRow_esp,
-                               prm->brd.spi.SwitchMat_esp,
-                               prm->brd.spi.PortSpiRow_esp2,
-                               prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
-                               prm->brd.spi.Pac2Vid2, &d_bitCnfg_data, disConAll,
-                               a__1_data, a__1_size, id0_data);
+                b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                                 prm->brd.spi.PortSpiRow_esp,
+                                 prm->brd.spi.SwitchMat_esp,
+                                 prm->brd.spi.PortSpiRow_esp2,
+                                 prm->brd.spi.SwitchMat_esp2,
+                                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                                 &d_bitCnfg_data, SpiPortRowBypass, a__1_data,
+                                 a__1_size, id0_data);
                 for (i2 = 0; i2 < d_loop_ub; i2++) {
                   for (i3 = 0; i3 < d_loop_ub; i3++) {
                     Pac2Vid0All_data[(((int)VecIna219_data[f_tmp_data[k0]] +
@@ -3457,45 +3009,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                  case 3:
                   /* esp32 ser */
-                  /* UNTITLED Summary of this function goes here */
-                  /*    Detailed explanation goes here */
-                  /*  if coder.target('MATLAB') */
-                  /*  read current */
-                  /*   chip1     |   chip2     |   chip3 */
-                  /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                  /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                  /*  */
-                  /*  for k_row = 1:N_row */
-                  /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                  /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                  /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                  /*  end */
-                  /* mask current */
-                  /* write current mask */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  pause(0.001);
-
-                  /* mask new */
-                  /* write mask new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  /* write new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRow(k_row,:)); */
-                  /*  end */
-                  /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                  /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                  /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                  /* mask current */
-                  /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                  /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                  /* %chip1 Port20-23 NC */
-                  /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                  /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                  /*  end */
+                  writePortToSpi4RowMask_ser(SpiPortRowBypass);
                   break;
                 }
               } else {
@@ -3517,13 +3031,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 c_bitCnfg_data.allocatedSize = 256;
                 c_bitCnfg_data.numDimensions = 2;
                 c_bitCnfg_data.canFreeData = false;
-                CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
-                               prm->brd.spi.PortSpiRow_esp,
-                               prm->brd.spi.SwitchMat_esp,
-                               prm->brd.spi.PortSpiRow_esp2,
-                               prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
-                               prm->brd.spi.Pac2Vid2, &c_bitCnfg_data, disConAll,
-                               a__1_data, a__1_size, id0_data);
+                b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                                 prm->brd.spi.PortSpiRow_esp,
+                                 prm->brd.spi.SwitchMat_esp,
+                                 prm->brd.spi.PortSpiRow_esp2,
+                                 prm->brd.spi.SwitchMat_esp2,
+                                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                                 &c_bitCnfg_data, SpiPortRowBypass, a__1_data,
+                                 a__1_size, id0_data);
                 for (i2 = 0; i2 < d_loop_ub; i2++) {
                   for (i3 = 0; i3 < d_loop_ub; i3++) {
                     Pac2Vid0All_data[(((int)VecIna219_data[f_tmp_data[k0]] +
@@ -3551,20 +3066,20 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               c_squeeze(b_bitCnfg_data, bitCnfg_size, id0_data, id2Bypass_data);
 
               /* Pac2Vid3(:,1); */
-              loop_ub = id2Bypass_data[0] * id2Bypass_data[1] - 1;
-              id2Bypass_size = 0;
-              for (i = 0; i <= loop_ub; i++) {
-                if (id0_data[i] > 0) {
-                  id2Bypass_size++;
+              id2Bypass_size = id2Bypass_data[0] * id2Bypass_data[1] - 1;
+              b_trueCount = 0;
+              for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
+                if (id0_data[loop_ub] > 0) {
+                  b_trueCount++;
                 }
               }
 
-              partialTrueCount = (unsigned short)id2Bypass_size;
+              partialTrueCount = (unsigned short)b_trueCount;
               if (partialTrueCount < 1) {
                 partialTrueCount = 1;
               }
 
-              if ((unsigned short)id2Bypass_size == 0) {
+              if ((unsigned short)b_trueCount == 0) {
                 partialTrueCount = 0;
               }
 
@@ -3649,9 +3164,22 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                     VecIna219_data[f_tmp_data[k0]]);
                 }
 
+                VdebugVec_size_tmp = c_eml_find(b_VecIna219_data, trueCount,
+                  id2Bypass_data);
                 c_loop_ub = c_eml_find(b_VecIna219_data, trueCount,
                   id2Bypass_data);
-                for (i = 0; i < c_loop_ub; i++) {
+                if (c_loop_ub - 1 >= 0) {
+                  CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                                 prm->brd.spi.PortSpiRow_esp,
+                                 prm->brd.spi.SwitchMat_esp,
+                                 prm->brd.spi.PortSpiRow_esp2,
+                                 prm->brd.spi.SwitchMat_esp2,
+                                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                                 prm->brd.spi.bypass, SpiPortRowBypass,
+                                 a__1_data, a__1_size, id0_data);
+                }
+
+                for (k1 = 0; k1 < VdebugVec_size_tmp; k1++) {
                   /* for k_bypass = VecIna219(id2Bypass) */
                   /*                                for k_bypass = VecIna219(id2Bypass) */
                   switch (ProjectFlag) {
@@ -3662,45 +3190,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                    case 3:
                     /* ESP32 ser */
-                    /* UNTITLED Summary of this function goes here */
-                    /*    Detailed explanation goes here */
-                    /*  if coder.target('MATLAB') */
-                    /*  read current */
-                    /*   chip1     |   chip2     |   chip3 */
-                    /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                    /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                    /*  */
-                    /*  for k_row = 1:N_row */
-                    /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                    /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                    /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                    /*  end */
-                    /* mask current */
-                    /* write current mask */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                    /*  end */
-                    pause(0.001);
+                    writePortToSpi4RowMask_ser(SpiPortRowBypass);
 
-                    /* mask new */
-                    /* write mask new */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                    /*  end */
-                    /* write new */
-                    /*  for k_row = 1:N_row */
-                    /*      write(SPI0,PortSpiRow(k_row,:)); */
-                    /*  end */
-                    /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                    /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                    /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                    /* mask current */
-                    /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                    /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                    /* %chip1 Port20-23 NC */
-                    /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                    /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                    /*  end */
                     /* TODO bypass */
                     break;
                   }
@@ -3726,13 +3217,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 e_bitCnfg_data.allocatedSize = 256;
                 e_bitCnfg_data.numDimensions = 2;
                 e_bitCnfg_data.canFreeData = false;
-                CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
-                               prm->brd.spi.PortSpiRow_esp,
-                               prm->brd.spi.SwitchMat_esp,
-                               prm->brd.spi.PortSpiRow_esp2,
-                               prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
-                               prm->brd.spi.Pac2Vid2, &e_bitCnfg_data, disConAll,
-                               a__1_data, a__1_size, id0_data);
+                b_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+                                 prm->brd.spi.PortSpiRow_esp,
+                                 prm->brd.spi.SwitchMat_esp,
+                                 prm->brd.spi.PortSpiRow_esp2,
+                                 prm->brd.spi.SwitchMat_esp2,
+                                 prm->brd.spi.Pac2Vid, prm->brd.spi.Pac2Vid2,
+                                 &e_bitCnfg_data, SpiPortRowBypass, a__1_data,
+                                 a__1_size, id0_data);
                 for (i2 = 0; i2 < d_loop_ub; i2++) {
                   for (i3 = 0; i3 < d_loop_ub; i3++) {
                     Pac2Vid0All_data[(((int)VecIna219_data[f_tmp_data[k0]] +
@@ -3750,45 +3242,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                  case 3:
                   /* esp32 ser */
-                  /* UNTITLED Summary of this function goes here */
-                  /*    Detailed explanation goes here */
-                  /*  if coder.target('MATLAB') */
-                  /*  read current */
-                  /*   chip1     |   chip2     |   chip3 */
-                  /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                  /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                  /*  */
-                  /*  for k_row = 1:N_row */
-                  /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                  /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                  /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                  /*  end */
-                  /* mask current */
-                  /* write current mask */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  pause(0.001);
-
-                  /* mask new */
-                  /* write mask new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  /* write new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRow(k_row,:)); */
-                  /*  end */
-                  /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                  /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                  /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                  /* mask current */
-                  /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                  /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                  /* %chip1 Port20-23 NC */
-                  /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                  /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                  /*  end */
+                  writePortToSpi4RowMask_ser(SpiPortRowBypass);
                   break;
                 }
               }
@@ -3816,29 +3270,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   }
                 }
 
-                k_ina219_ = (int)VecIna219_data[k_groups_tmp] - 1;
-                i_prm[0] = pIacs758_data[k_ina219_];
-                i_prm[1] = pIacs758_data[k_ina219_ + pIacs758_size[0]];
+                c_loop_ub = (int)VecIna219_data[k_groups_tmp] - 1;
+                i_prm[0] = pIacs758_data[c_loop_ub];
+                i_prm[1] = pIacs758_data[c_loop_ub + pIacs758_size[0]];
                 b_Rwire_size[0] = 1;
                 loop_ub = Rwire_size[1];
                 b_Rwire_size[1] = Rwire_size[1];
                 for (i2 = 0; i2 < loop_ub; i2++) {
-                  e_prm[i2] = Rwire_data[k_ina219_ + Rwire_size[0] * i2];
+                  e_prm[i2] = Rwire_data[c_loop_ub + Rwire_size[0] * i2];
                 }
 
                 ReadVI(ProjectFlag, g_prm, b_bitCnfg_data, bitCnfg_size, N_bat1,
                        N_bat_tmp_tmp_tmp, i_prm, Iacs758Flag, kEst_data,
                        kEst_size, e_prm, b_Rwire_size, a__36_data,
-                       c_VmKp184Test_data, &VdebugVec_size_tmp, tvv_data,
-                       &c_loop_ub, Rtot_data, Rtot_size, a__38_data,
-                       id2Bypass_data, a__39_data, a__1_size, a__40_data,
-                       b_VmV_size, b_VmV_data, &partialTrueCount, a__42_data,
-                       tii_size, I_data, &id2Bypass_size, outVI, a__4_size,
+                       c_VmKp184Test_data, &partialTrueCount, tvv_data,
+                       &VdebugVec_size_tmp, Rtot_data, Rtot_size, a__38_data,
+                       id2Bypass_data, a__39_data, b_VmV_size, a__40_data,
+                       tii_size, b_VmV_data, &id2Bypass_size, a__42_data,
+                       a__4_size, I_data, &k_ina219_, outVI, b_tmp_size,
                        VdebugVec_data, VdebugVec_size, &showVdiff, (double *)
                        &b_dv0, errI2C_size);
                 loop_ub = Vbrd->size[3];
                 for (i2 = 0; i2 < loop_ub; i2++) {
-                  VbusTest2_data[((k_t0 + Vbrd->size[0] * k_ina219_) +
+                  VbusTest2_data[((k_t0 + Vbrd->size[0] * c_loop_ub) +
                                   Vbrd->size[0] * Vbrd->size[1] * Vbrd->size[2] *
                                   i2) + Vbrd->size[0] * Vbrd->size[1] *
                     Vbrd->size[2] * Vbrd->size[3] * state_k] =
@@ -3847,7 +3301,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                 loop_ub = Ibrd->size[3];
                 for (i2 = 0; i2 < loop_ub; i2++) {
-                  IshuntTest2_data[((k_t0 + Ibrd->size[0] * k_ina219_) +
+                  IshuntTest2_data[((k_t0 + Ibrd->size[0] * c_loop_ub) +
                                     Ibrd->size[0] * Ibrd->size[1] * Ibrd->size[2]
                                     * i2) + Ibrd->size[0] * Ibrd->size[1] *
                     Ibrd->size[2] * Ibrd->size[3] * state_k] = tvv_data[i2];
@@ -3876,29 +3330,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   }
                 }
 
-                k_ina219_ = (int)VecIna219_data[k_groups_tmp] - 1;
-                i_prm[0] = pIacs758_data[k_ina219_];
-                i_prm[1] = pIacs758_data[k_ina219_ + pIacs758_size[0]];
+                c_loop_ub = (int)VecIna219_data[k_groups_tmp] - 1;
+                i_prm[0] = pIacs758_data[c_loop_ub];
+                i_prm[1] = pIacs758_data[c_loop_ub + pIacs758_size[0]];
                 b_Rwire_size[0] = 1;
                 loop_ub = Rwire_size[1];
                 b_Rwire_size[1] = Rwire_size[1];
                 for (i2 = 0; i2 < loop_ub; i2++) {
-                  e_prm[i2] = Rwire_data[k_ina219_ + Rwire_size[0] * i2];
+                  e_prm[i2] = Rwire_data[c_loop_ub + Rwire_size[0] * i2];
                 }
 
                 ReadVI(ProjectFlag, g_prm, b_bitCnfg_data, bitCnfg_size, N_bat1,
                        N_bat_tmp_tmp_tmp, i_prm, Iacs758Flag, kEst_data,
                        kEst_size, e_prm, b_Rwire_size, a__36_data,
-                       c_VmKp184Test_data, &VdebugVec_size_tmp, tvv_data,
-                       &c_loop_ub, Rtot_data, Rtot_size, a__38_data,
-                       id2Bypass_data, a__39_data, a__1_size, a__40_data,
-                       b_VmV_size, b_VmV_data, &partialTrueCount, a__42_data,
-                       tii_size, I_data, &id2Bypass_size, outVI, a__4_size,
+                       c_VmKp184Test_data, &partialTrueCount, tvv_data,
+                       &VdebugVec_size_tmp, Rtot_data, Rtot_size, a__38_data,
+                       id2Bypass_data, a__39_data, b_VmV_size, a__40_data,
+                       tii_size, b_VmV_data, &id2Bypass_size, a__42_data,
+                       a__4_size, I_data, &k_ina219_, outVI, b_tmp_size,
                        VdebugVec_data, VdebugVec_size, &showVdiff, (double *)
                        &b_dv0, errI2C_size);
                 loop_ub = Vbrd->size[3];
                 for (i2 = 0; i2 < loop_ub; i2++) {
-                  VbusTest2_data[((k_t0 + Vbrd->size[0] * k_ina219_) +
+                  VbusTest2_data[((k_t0 + Vbrd->size[0] * c_loop_ub) +
                                   Vbrd->size[0] * Vbrd->size[1] * Vbrd->size[2] *
                                   i2) + Vbrd->size[0] * Vbrd->size[1] *
                     Vbrd->size[2] * Vbrd->size[3] * state_k] =
@@ -3907,7 +3361,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                 loop_ub = Ibrd->size[3];
                 for (i2 = 0; i2 < loop_ub; i2++) {
-                  IshuntTest2_data[((k_t0 + Ibrd->size[0] * k_ina219_) +
+                  IshuntTest2_data[((k_t0 + Ibrd->size[0] * c_loop_ub) +
                                     Ibrd->size[0] * Ibrd->size[1] * Ibrd->size[2]
                                     * i2) + Ibrd->size[0] * Ibrd->size[1] *
                     Ibrd->size[2] * Ibrd->size[3] * state_k] = tvv_data[i2];
@@ -3944,7 +3398,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                case 3:
                 /* juntek+ACDC */
                 pause(0.1);
-                b_controlJuntekDPH8920((double *)&d_tmp_data, b_VmV_size);
+                b_controlJuntekDPH8920((double *)&d_tmp_data, b_tmp_size);
                 d_tmp_data = (float)d_tmp_data - prm->seq.bit.meas.Vd[k_tstState
                   + (state_k << 3)];
                 Iacs758_cal_data[(k_t0 + VbitInsMeas->size[0] * ((int)
@@ -3960,7 +3414,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 pause(0.1);
                 ControlKp184((double *)&N0, a__3_size, (double *)&a__4_data,
                              a__4_size, (double *)&b_dv0, errI2C_size, (double *)
-                             &d_tmp_data, b_VmV_size);
+                             &d_tmp_data, b_tmp_size);
                 break;
 
                case 2:
@@ -3982,45 +3436,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
                case 3:
                 /* esp32 ser */
-                /* UNTITLED Summary of this function goes here */
-                /*    Detailed explanation goes here */
-                /*  if coder.target('MATLAB') */
-                /*  read current */
-                /*   chip1     |   chip2     |   chip3 */
-                /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                /*  */
-                /*  for k_row = 1:N_row */
-                /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                /*  end */
-                /* mask current */
-                /* write current mask */
-                /*  for k_row = 1:N_row */
-                /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                /*  end */
-                pause(0.001);
-
-                /* mask new */
-                /* write mask new */
-                /*  for k_row = 1:N_row */
-                /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                /*  end */
-                /* write new */
-                /*  for k_row = 1:N_row */
-                /*      write(SPI0,PortSpiRow(k_row,:)); */
-                /*  end */
-                /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                /* mask current */
-                /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                /* %chip1 Port20-23 NC */
-                /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                /*  end */
+                writePortToSpi4RowMask_ser(disConAll);
                 break;
               }
 
@@ -4036,13 +3452,13 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               }
 
               c_squeeze(b_bitCnfg_data, bitCnfg_size, id0_data, id2Bypass_data);
-              loop_ub = id2Bypass_data[0] * id2Bypass_data[1] - 1;
-              id2Bypass_size = 0;
+              id2Bypass_size = id2Bypass_data[0] * id2Bypass_data[1] - 1;
+              b_trueCount = 0;
               partialTrueCount = 0;
-              for (i = 0; i <= loop_ub; i++) {
-                if (id0_data[i] > 0) {
-                  id2Bypass_size++;
-                  i_tmp_data[partialTrueCount] = (unsigned char)i;
+              for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
+                if (id0_data[loop_ub] > 0) {
+                  b_trueCount++;
+                  i_tmp_data[partialTrueCount] = (unsigned char)loop_ub;
                   partialTrueCount++;
                 }
               }
@@ -4050,10 +3466,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               Ibrd_size[0] = 1;
               Ibrd_size[1] = 1;
               Ibrd_size[2] = 1;
-              Ibrd_size[3] = id2Bypass_size;
-              for (i2 = 0; i2 < id2Bypass_size; i2++) {
-                VbusTest0_data[i2] = IshuntTest2_data[((k_t0 + Ibrd->size[0] *
-                  ((int)VecIna219_data[f_tmp_data[k0]] - 1)) + Ibrd->size[0] *
+              Ibrd_size[3] = b_trueCount;
+              for (i2 = 0; i2 < b_trueCount; i2++) {
+                VmV_data[i2] = IshuntTest2_data[((k_t0 + Ibrd->size[0] * ((int)
+                  VecIna219_data[f_tmp_data[k0]] - 1)) + Ibrd->size[0] *
                   Ibrd->size[1] * Ibrd->size[2] * (id0_data[i_tmp_data[i2]] - 1))
                   + Ibrd->size[0] * Ibrd->size[1] * Ibrd->size[2] * Ibrd->size[3]
                   * state_k];
@@ -4062,7 +3478,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               b_dv0 = VecIna219_data[f_tmp_data[k0]];
               ImKp184Test2_data[(k_t0 + meanIbrd->size[0] * ((int)b_dv0 - 1)) +
                 meanIbrd->size[0] * meanIbrd->size[1] * meanIbrd->size[2] *
-                state_k] = b_mean(VbusTest0_data, Ibrd_size);
+                state_k] = b_mean(VmV_data, Ibrd_size);
               b_meanIbrd0 = ImKp184Test2_data[(k_t0 + meanIbrd->size[0] * ((int)
                 b_dv0 - 1)) + meanIbrd->size[0] * meanIbrd->size[1] *
                 meanIbrd->size[2] * state_k];
@@ -4084,8 +3500,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 }
 
                 b_sprintf(i2, r16);
-                for (k_ina219_ = 0; k_ina219_ < id2Bypass_size; k_ina219_++) {
-                  printf("%d\n", (int)id0_data[i_tmp_data[k_ina219_]]);
+                for (id2Bypass_size = 0; id2Bypass_size < b_trueCount;
+                     id2Bypass_size++) {
+                  printf("%d\n", (int)id0_data[i_tmp_data[id2Bypass_size]]);
                   fflush(stdout);
                 }
 
@@ -4095,15 +3512,15 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               Ibrd_size[0] = 1;
               Ibrd_size[1] = 1;
               Ibrd_size[2] = 1;
-              Ibrd_size[3] = id2Bypass_size;
-              for (i2 = 0; i2 < id2Bypass_size; i2++) {
-                VbusTest0_data[i2] = VbusTest2_data[((k_t0 + Vbrd->size[0] *
-                  ((int)b_dv0 - 1)) + Vbrd->size[0] * Vbrd->size[1] * Vbrd->
-                  size[2] * (id0_data[i_tmp_data[i2]] - 1)) + Vbrd->size[0] *
-                  Vbrd->size[1] * Vbrd->size[2] * Vbrd->size[3] * state_k];
+              Ibrd_size[3] = b_trueCount;
+              for (i2 = 0; i2 < b_trueCount; i2++) {
+                VmV_data[i2] = VbusTest2_data[((k_t0 + Vbrd->size[0] * ((int)
+                  b_dv0 - 1)) + Vbrd->size[0] * Vbrd->size[1] * Vbrd->size[2] *
+                  (id0_data[i_tmp_data[i2]] - 1)) + Vbrd->size[0] * Vbrd->size[1]
+                  * Vbrd->size[2] * Vbrd->size[3] * state_k];
               }
 
-              b_dv0 = sum(VbusTest0_data, Ibrd_size) - Iacs758_cal_data[(k_t0 +
+              b_dv0 = sum(VmV_data, Ibrd_size) - Iacs758_cal_data[(k_t0 +
                 VbitInsMeas->size[0] * ((int)b_dv0 - 1)) + VbitInsMeas->size[0] *
                 VbitInsMeas->size[1] * VbitInsMeas->size[2] * state_k];
               if ((fabs(b_dv0) > prm->seq.bit.dVthr) && showVdiff) {
@@ -4116,8 +3533,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 }
 
                 b_sprintf(i2, r17);
-                for (k_ina219_ = 0; k_ina219_ < id2Bypass_size; k_ina219_++) {
-                  printf("%d\n", (int)id0_data[i_tmp_data[k_ina219_]]);
+                for (id2Bypass_size = 0; id2Bypass_size < b_trueCount;
+                     id2Bypass_size++) {
+                  printf("%d\n", (int)id0_data[i_tmp_data[id2Bypass_size]]);
                   fflush(stdout);
                 }
               }
@@ -4151,13 +3569,13 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
     /* [16 32 1024],[1 1 1]); */
     /* [512 1024],[1 1]); */
     /* [16 32 1024],[1 1 1]); */
-    b_i = (int)(prm->brd.Nina219 * (double)prm->brd.N_bat);
+    i = (int)(prm->brd.Nina219 * (double)prm->brd.N_bat);
     i1 = b_Vbat->size[0] * b_Vbat->size[1];
-    b_Vbat->size[0] = b_i;
+    b_Vbat->size[0] = i;
     b_Vbat->size[1] = prm->run.Nt0;
     emxEnsureCapacity_int8_T(b_Vbat, i1);
     Vbat_data = b_Vbat->data;
-    id2Bypass_size = b_i * prm->run.Nt0;
+    id2Bypass_size = i * prm->run.Nt0;
     for (i1 = 0; i1 < id2Bypass_size; i1++) {
       Vbat_data[i1] = 0;
     }
@@ -4203,37 +3621,36 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
     }
 
     i1 = b_Vbat->size[0] * b_Vbat->size[1];
-    b_Vbat->size[0] = b_i;
+    b_Vbat->size[0] = i;
     b_Vbat->size[1] = prm->run.Nt0;
     emxEnsureCapacity_int8_T(b_Vbat, i1);
     Vbat_data = b_Vbat->data;
-    for (b_i = 0; b_i < id2Bypass_size; b_i++) {
-      Vbat_data[b_i] = 0;
+    for (i = 0; i < id2Bypass_size; i++) {
+      Vbat_data[i] = 0;
     }
 
-    b_i = tV1->size[0] * tV1->size[1];
+    i = tV1->size[0] * tV1->size[1];
     tV1->size[0] = b_Vbat->size[0];
     tV1->size[1] = b_Vbat->size[1];
-    emxEnsureCapacity_real_T(tV1, b_i);
+    emxEnsureCapacity_real_T(tV1, i);
     tV1_data = tV1->data;
-    for (b_i = 0; b_i < id2Bypass_size; b_i++) {
-      tV1_data[b_i] = 0.0;
+    for (i = 0; i < id2Bypass_size; i++) {
+      tV1_data[i] = 0.0;
     }
 
-    b_i = tV->size[0] * tV->size[1] * tV->size[2];
+    i = tV->size[0] * tV->size[1] * tV->size[2];
     tV->size[0] = (int)prm->brd.Nina219;
     tV->size[1] = prm->brd.N_bat;
     tV->size[2] = prm->run.Nt0;
-    emxEnsureCapacity_real_T(tV, b_i);
+    emxEnsureCapacity_real_T(tV, i);
     tV_data = tV->data;
-    for (b_i = 0; b_i < c_loop_ub_tmp; b_i++) {
-      tV_data[b_i] = 0.0;
+    for (i = 0; i < c_loop_ub_tmp; i++) {
+      tV_data[i] = 0.0;
     }
 
     /*  Ishunt = zeros(Nina219,N_bat,Nt); */
     /* [1 1024],[1 1]); */
     /* ,[16 1024],[1 1]); */
-    /* ,[16 32 64 1024],[1 1 1 1]); */
     /*  coder.varsize('Pac2Vid0All',[16 32 32],[1 1 1]); */
     Pac2Vid0All_size[0] = (int)prm->brd.Nina219;
     Pac2Vid0All_size[1] = prm->brd.N_bat;
@@ -4284,70 +3701,70 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
     /* 2.8;%2.7;%3.0;%2.8;%[V] */
     /* 4.1;%3.6;%4.1;%25;%4.1;%[V] */
     /*  seq            = prm.seq(prm.run.seq); */
-    b_i = SelDual->size[0] * SelDual->size[1];
+    i = SelDual->size[0] * SelDual->size[1];
     SelDual->size[0] = 1;
     SelDual->size[1] = (int)prm->brd.Nina219;
-    emxEnsureCapacity_real_T(SelDual, b_i);
+    emxEnsureCapacity_real_T(SelDual, i);
     SelDual_data = SelDual->data;
-    for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-      SelDual_data[b_i] = 0.0;
+    for (i = 0; i < b_loop_ub_tmp; i++) {
+      SelDual_data[i] = 0.0;
     }
 
-    b_i = SelDualHelp->size[0] * SelDualHelp->size[1];
+    i = SelDualHelp->size[0] * SelDualHelp->size[1];
     SelDualHelp->size[0] = 1;
     SelDualHelp->size[1] = (int)prm->brd.Nina219;
-    emxEnsureCapacity_real_T(SelDualHelp, b_i);
+    emxEnsureCapacity_real_T(SelDualHelp, i);
     SelDualHelp_data = SelDualHelp->data;
-    for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-      SelDualHelp_data[b_i] = 0.0;
+    for (i = 0; i < b_loop_ub_tmp; i++) {
+      SelDualHelp_data[i] = 0.0;
     }
 
     for (id2Bypass_size = 0; id2Bypass_size < b_size; id2Bypass_size++) {
-      for (i = 0; i <= end_tmp; i++) {
-        if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]]) {
-          SelDual_data[i] = prm->seq.chr[id2Bypass_size];
+      for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+        if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[loop_ub]]) {
+          SelDual_data[loop_ub] = prm->seq.chr[id2Bypass_size];
         }
       }
     }
 
     /* display V & I on command window */
     /* %%%%%%% read voltage and current %%%%%%%%%%% */
-    b_i = tLastToggle->size[0] * tLastToggle->size[1];
+    i = tLastToggle->size[0] * tLastToggle->size[1];
     tLastToggle->size[0] = 1;
     tLastToggle->size[1] = (int)prm->brd.Nina219;
-    emxEnsureCapacity_real_T(tLastToggle, b_i);
+    emxEnsureCapacity_real_T(tLastToggle, i);
     tLastToggle_data = tLastToggle->data;
-    for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-      tLastToggle_data[b_i] = 0.0;
+    for (i = 0; i < b_loop_ub_tmp; i++) {
+      tLastToggle_data[i] = 0.0;
     }
 
     k_t = 1.0;
     k_t0 = 0;
-    b_i = switchFlag->size[0] * switchFlag->size[1];
+    i = switchFlag->size[0] * switchFlag->size[1];
     switchFlag->size[0] = 1;
     switchFlag->size[1] = (int)prm->brd.Nina219;
-    emxEnsureCapacity_boolean_T(switchFlag, b_i);
+    emxEnsureCapacity_boolean_T(switchFlag, i);
     switchFlag_data = switchFlag->data;
-    for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-      switchFlag_data[b_i] = true;
+    for (i = 0; i < b_loop_ub_tmp; i++) {
+      switchFlag_data[i] = true;
     }
 
-    b_i = switchFlagHelp->size[0] * switchFlagHelp->size[1];
+    i = switchFlagHelp->size[0] * switchFlagHelp->size[1];
     switchFlagHelp->size[0] = 1;
     switchFlagHelp->size[1] = (int)prm->brd.Nina219;
-    emxEnsureCapacity_boolean_T(switchFlagHelp, b_i);
+    emxEnsureCapacity_boolean_T(switchFlagHelp, i);
     switchFlagHelp_data = switchFlagHelp->data;
-    for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-      switchFlagHelp_data[b_i] = false;
+    for (i = 0; i < b_loop_ub_tmp; i++) {
+      switchFlagHelp_data[i] = false;
     }
 
-    b_i = changeConfigFlag->size[0] * changeConfigFlag->size[1];
+    i = changeConfigFlag->size[0] * changeConfigFlag->size[1];
     changeConfigFlag->size[0] = 1;
     changeConfigFlag->size[1] = (int)prm->brd.Nina219;
-    emxEnsureCapacity_boolean_T(changeConfigFlag, b_i);
+    emxEnsureCapacity_boolean_T(changeConfigFlag, i);
     changeConfigFlag_data = changeConfigFlag->data;
-    for (b_i = 0; b_i < b_loop_ub_tmp; b_i++) {
-      changeConfigFlag_data[b_i] = false;
+    for (i = 0; i < b_loop_ub_tmp; i++) {
+      changeConfigFlag_data[i] = false;
     }
 
     tic();
@@ -4364,25 +3781,25 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         loop_ub_tmp = (int)prm->brd.Nina219;
       }
 
-      b_i = outStruct->VbusTest->size[0] * outStruct->VbusTest->size[1];
+      i = outStruct->VbusTest->size[0] * outStruct->VbusTest->size[1];
       outStruct->VbusTest->size[0] = loop_ub_tmp;
       outStruct->VbusTest->size[1] = prm->brd.N_bat;
-      emxEnsureCapacity_real_T(outStruct->VbusTest, b_i);
-      for (b_i = 0; b_i < N_bat_tmp_tmp_tmp; b_i++) {
+      emxEnsureCapacity_real_T(outStruct->VbusTest, i);
+      for (i = 0; i < N_bat_tmp_tmp_tmp; i++) {
         for (i1 = 0; i1 < loop_ub_tmp; i1++) {
-          outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * b_i] =
-            VbusTest_data[i1 + (int)Nina219_tmp_tmp * b_i];
+          outStruct->VbusTest->data[i1 + outStruct->VbusTest->size[0] * i] =
+            VbusTest_data[i1 + (int)Nina219_tmp_tmp * i];
         }
       }
 
-      b_i = outStruct->VmKp184Test->size[0] * outStruct->VmKp184Test->size[1];
+      i = outStruct->VmKp184Test->size[0] * outStruct->VmKp184Test->size[1];
       outStruct->VmKp184Test->size[0] = loop_ub_tmp;
       outStruct->VmKp184Test->size[1] = VmKp184Test_size_idx_1;
-      emxEnsureCapacity_real_T(outStruct->VmKp184Test, b_i);
-      for (b_i = 0; b_i < VmKp184Test_size_idx_1; b_i++) {
+      emxEnsureCapacity_real_T(outStruct->VmKp184Test, i);
+      for (i = 0; i < VmKp184Test_size_idx_1; i++) {
         for (i1 = 0; i1 < loop_ub_tmp; i1++) {
-          outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] *
-            b_i] = VmKp184Test_data[i1 + VmKp184Test_size_idx_0 * b_i];
+          outStruct->VmKp184Test->data[i1 + outStruct->VmKp184Test->size[0] * i]
+            = VmKp184Test_data[i1 + VmKp184Test_size_idx_0 * i];
         }
       }
     } else {
@@ -4393,14 +3810,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
       /* nadav coder */
       if ((prm->seq.pwr.VthFlag[0] == 1) || (prm->seq.pwr.VthFlag[0] == 2)) {
-        b_i = r2->size[0] * r2->size[1] * r2->size[2];
+        i = r2->size[0] * r2->size[1] * r2->size[2];
         r2->size[0] = (int)prm->brd.Nina219;
         r2->size[1] = prm->brd.N_bat;
         r2->size[2] = prm->brd.N_bat;
-        emxEnsureCapacity_uint8_T(r2, b_i);
+        emxEnsureCapacity_uint8_T(r2, i);
         r31 = r2->data;
-        for (b_i = 0; b_i < end; b_i++) {
-          r31[b_i] = 0U;
+        for (i = 0; i < end; i++) {
+          r31[i] = 0U;
         }
 
         b_ReadVI(prm->brd.Nina219, prm->ins.ProjectFlag, prm->brd.pac.VIpacId,
@@ -4409,9 +3826,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                  prm->brd.pac.Iacs758Flag, kEst_data, kEst_size, Rwire_data,
                  Rwire_size, a__64_data, b_VdebugVec_data, &id2Bypass_size,
                  VbusTest_data, &k_ina219_, Rtot_data, Rtot_size, a__38_data,
-                 id2Bypass_data, a__39_data, a__1_size, a__40_data, b_VmV_size,
-                 VmKp184Test_data, &VdebugVec_size_tmp, a__42_data, tii_size,
-                 a__72_data, &loop_ub, outVI, a__4_size, VdebugVec_data,
+                 id2Bypass_data, a__39_data, b_VmV_size, a__40_data, tii_size,
+                 VmKp184Test_data, &c_loop_ub, a__42_data, a__4_size, a__72_data,
+                 &partialTrueCount, outVI, b_tmp_size, VdebugVec_data,
                  VdebugVec_size, &showVdiff, (double *)&b_dv0, errI2C_size);
 
         /*  read V,I */
@@ -4420,80 +3837,75 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             y->size[0] = 1;
             y->size[1] = 0;
           } else {
-            b_i = y->size[0] * y->size[1];
+            i = y->size[0] * y->size[1];
             y->size[0] = 1;
             y->size[1] = prm->brd.N_bat;
-            emxEnsureCapacity_real_T(y, b_i);
+            emxEnsureCapacity_real_T(y, i);
             y_data = y->data;
             loop_ub = prm->brd.N_bat - 1;
-            for (b_i = 0; b_i <= loop_ub; b_i++) {
-              y_data[b_i] = (double)b_i + 1.0;
+            for (i = 0; i <= loop_ub; i++) {
+              y_data[i] = (double)i + 1.0;
             }
           }
 
           e_loop_ub = y->size[1];
         }
 
-        for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < b_loop_ub_tmp;
-             VdebugVec_size_tmp++) {
-          b_dv0 = (((double)VdebugVec_size_tmp + 1.0) - 1.0) * (double)
-            N_bat_tmp_tmp_tmp;
-          c_loop_ub = y->size[1];
-          for (b_i = 0; b_i < e_loop_ub; b_i++) {
-            j_tmp_data[b_i] = (signed char)((signed char)(b_dv0 + y_data[b_i]) -
-              1);
+        for (c_loop_ub = 0; c_loop_ub < b_loop_ub_tmp; c_loop_ub++) {
+          b_dv0 = (((double)c_loop_ub + 1.0) - 1.0) * (double)N_bat_tmp_tmp_tmp;
+          VdebugVec_size_tmp = y->size[1];
+          for (i = 0; i < e_loop_ub; i++) {
+            j_tmp_data[i] = (signed char)((signed char)(b_dv0 + y_data[i]) - 1);
           }
 
-          for (b_i = 0; b_i < c_loop_ub; b_i++) {
-            ImKp184Test2_data[j_tmp_data[b_i]] = a__38_data[VdebugVec_size_tmp +
-              id2Bypass_data[0] * b_i];
+          for (i = 0; i < VdebugVec_size_tmp; i++) {
+            ImKp184Test2_data[j_tmp_data[i]] = a__38_data[c_loop_ub +
+              id2Bypass_data[0] * i];
           }
 
-          b_i = (int)SelDual_data[VdebugVec_size_tmp];
-          if (b_i == 0) {
-            d_padArrUint8(prm->cnfg.BattConfigDis1, N_bat_tmp_tmp_tmp,
+          i = (int)SelDual_data[c_loop_ub];
+          if (i == 0) {
+            e_padArrUint8(prm->cnfg.BattConfigDis1, N_bat_tmp_tmp_tmp,
                           N_bat_tmp_tmp_tmp, r3);
             r31 = r3->data;
-            b_i = r->size[0] * r->size[1];
+            i = r->size[0] * r->size[1];
             r->size[0] = r3->size[0];
             r->size[1] = r3->size[1];
-            emxEnsureCapacity_real_T(r, b_i);
+            emxEnsureCapacity_real_T(r, i);
             b_y_data = r->data;
             loop_ub = r3->size[0] * r3->size[1];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              b_y_data[b_i] = r31[b_i];
+            for (i = 0; i < loop_ub; i++) {
+              b_y_data[i] = r31[i];
             }
 
-            for (b_i = 0; b_i < d_loop_ub; b_i++) {
+            for (i = 0; i < d_loop_ub; i++) {
               for (i1 = 0; i1 < d_loop_ub; i1++) {
-                BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp * i1)
-                  + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 + d_loop_ub *
-                  b_i];
+                BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                  b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub * i];
               }
             }
 
             /* nadav coder */
             /*  BattConfigPerIna{k_ina219} = prm.cnfg.BattConfigDis1;%BattConfigPerInaHelp{k_ina219}; */
             /*  BattConfig{k_ina219}       = BattConfigPerIna{k_ina219} + (k_ina219-1)*N_bat; */
-          } else if (b_i == 1) {
-            d_padArrUint8(prm->cnfg.BattConfigChr1, N_bat_tmp_tmp_tmp,
+          } else if (i == 1) {
+            e_padArrUint8(prm->cnfg.BattConfigChr1, N_bat_tmp_tmp_tmp,
                           N_bat_tmp_tmp_tmp, r3);
             r31 = r3->data;
-            b_i = r->size[0] * r->size[1];
+            i = r->size[0] * r->size[1];
             r->size[0] = r3->size[0];
             r->size[1] = r3->size[1];
-            emxEnsureCapacity_real_T(r, b_i);
+            emxEnsureCapacity_real_T(r, i);
             b_y_data = r->data;
             loop_ub = r3->size[0] * r3->size[1];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              b_y_data[b_i] = r31[b_i];
+            for (i = 0; i < loop_ub; i++) {
+              b_y_data[i] = r31[i];
             }
 
-            for (b_i = 0; b_i < d_loop_ub; b_i++) {
+            for (i = 0; i < d_loop_ub; i++) {
               for (i1 = 0; i1 < d_loop_ub; i1++) {
-                BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp * i1)
-                  + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 + d_loop_ub *
-                  b_i];
+                BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                  b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub * i];
               }
             }
 
@@ -4514,7 +3926,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       while ((!exitg1) && keepMeas) {
         /*      try */
         toc00 = toc();
-        b_i = b_changeConfigFlag->size[0] * b_changeConfigFlag->size[1];
+        i = b_changeConfigFlag->size[0] * b_changeConfigFlag->size[1];
         b_changeConfigFlag->size[0] = 1;
         if (switchFlag->size[1] == 1) {
           loop_ub = changeConfigFlag->size[1];
@@ -4523,12 +3935,12 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         }
 
         b_changeConfigFlag->size[1] = loop_ub;
-        emxEnsureCapacity_boolean_T(b_changeConfigFlag, b_i);
+        emxEnsureCapacity_boolean_T(b_changeConfigFlag, i);
         b_changeConfigFlag_data = b_changeConfigFlag->data;
-        partialTrueCount = (changeConfigFlag->size[1] != 1);
-        for (b_i = 0; b_i < loop_ub; b_i++) {
-          id2Bypass_size = b_i * partialTrueCount;
-          b_changeConfigFlag_data[b_i] = (changeConfigFlag_data[id2Bypass_size] ||
+        b_trueCount = (changeConfigFlag->size[1] != 1);
+        for (i = 0; i < loop_ub; i++) {
+          id2Bypass_size = i * b_trueCount;
+          b_changeConfigFlag_data[i] = (changeConfigFlag_data[id2Bypass_size] ||
             switchFlag_data[id2Bypass_size]);
         }
 
@@ -4548,29 +3960,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             y->size[0] = 1;
             y->size[1] = 0;
           } else {
-            b_i = y->size[0] * y->size[1];
+            i = y->size[0] * y->size[1];
             y->size[0] = 1;
             y->size[1] = (int)(Nina219_tmp_tmp - 1.0) + 1;
-            emxEnsureCapacity_real_T(y, b_i);
+            emxEnsureCapacity_real_T(y, i);
             y_data = y->data;
             loop_ub = (int)(Nina219_tmp_tmp - 1.0);
-            for (b_i = 0; b_i <= loop_ub; b_i++) {
-              y_data[b_i] = (double)b_i + 1.0;
+            for (i = 0; i <= loop_ub; i++) {
+              y_data[i] = (double)i + 1.0;
             }
           }
 
-          b_i = b_y->size[0];
+          i = b_y->size[0];
           b_y->size[0] = y->size[1];
-          emxEnsureCapacity_real_T(b_y, b_i);
+          emxEnsureCapacity_real_T(b_y, i);
           b_y_data = b_y->data;
           loop_ub = y->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            b_y_data[b_i] = y_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            b_y_data[i] = y_data[i];
           }
 
           loop_ub = y->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            VecIna219_data[b_i] = b_y_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            VecIna219_data[i] = b_y_data[i];
           }
 
           if (b_size - 1 >= 0) {
@@ -4580,10 +3992,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           for (k_tstState = 0; k_tstState < b_size; k_tstState++) {
             trueCount = 0;
             partialTrueCount = 0;
-            for (i = 0; i <= b_end; i++) {
-              if (k_tstState + 1 == ipos_data[i]) {
+            for (loop_ub = 0; loop_ub <= b_end; loop_ub++) {
+              if (k_tstState + 1 == ipos_data[loop_ub]) {
                 trueCount++;
-                k_tmp_data[partialTrueCount] = (signed char)i;
+                k_tmp_data[partialTrueCount] = (signed char)loop_ub;
                 partialTrueCount++;
               }
             }
@@ -4591,9 +4003,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             /* VecIna219_k = find(k_groups == uGroupId); */
             AllBypassPerGroup_size[0] = 1;
             AllBypassPerGroup_size[1] = trueCount;
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              AllBypassPerGroup_data[b_i] = switchFlag_data[(int)
-                VecIna219_data[k_tmp_data[b_i]] - 1];
+            for (i = 0; i < trueCount; i++) {
+              AllBypassPerGroup_data[i] = switchFlag_data[(int)
+                VecIna219_data[k_tmp_data[i]] - 1];
             }
 
             b_AllBypassPerGroup_data.data = &AllBypassPerGroup_data[0];
@@ -4602,40 +4014,39 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             b_AllBypassPerGroup_data.numDimensions = 2;
             b_AllBypassPerGroup_data.canFreeData = false;
             if (b_any(&b_AllBypassPerGroup_data)) {
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                id2Bypass_data[b_i] = (int)VecIna219_data[k_tmp_data[b_i]];
+              for (i = 0; i < trueCount; i++) {
+                id2Bypass_data[i] = (int)VecIna219_data[k_tmp_data[i]];
               }
 
               loop_ub = trueCount - 1;
-              for (b_i = 0; b_i <= loop_ub; b_i++) {
-                switchFlagHelp_data[id2Bypass_data[b_i] - 1] = true;
+              for (i = 0; i <= loop_ub; i++) {
+                switchFlagHelp_data[id2Bypass_data[i] - 1] = true;
               }
 
               if (N_bat_tmp_tmp_tmp < 1) {
                 y->size[0] = 1;
                 y->size[1] = 0;
               } else {
-                b_i = y->size[0] * y->size[1];
+                i = y->size[0] * y->size[1];
                 y->size[0] = 1;
                 y->size[1] = N_bat_tmp_tmp_tmp;
-                emxEnsureCapacity_real_T(y, b_i);
+                emxEnsureCapacity_real_T(y, i);
                 y_data = y->data;
                 loop_ub = N_bat_tmp_tmp_tmp - 1;
-                for (b_i = 0; b_i <= loop_ub; b_i++) {
-                  y_data[b_i] = (double)b_i + 1.0;
+                for (i = 0; i <= loop_ub; i++) {
+                  y_data[i] = (double)i + 1.0;
                 }
               }
 
               if (trueCount == y->size[1]) {
-                b_i = indVperGrp->size[0];
+                i = indVperGrp->size[0];
                 indVperGrp->size[0] = y->size[1];
-                emxEnsureCapacity_real_T(indVperGrp, b_i);
+                emxEnsureCapacity_real_T(indVperGrp, i);
                 VbusTest2_data = indVperGrp->data;
                 loop_ub = y->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  VbusTest2_data[b_i] = y_data[b_i] +
-                    (VecIna219_data[k_tmp_data[b_i]] - 1.0) * (double)
-                    N_bat_tmp_tmp_tmp;
+                for (i = 0; i < loop_ub; i++) {
+                  VbusTest2_data[i] = y_data[i] + (VecIna219_data[k_tmp_data[i]]
+                    - 1.0) * (double)N_bat_tmp_tmp_tmp;
                 }
               } else {
                 binary_expand_op_3(indVperGrp, y, VecIna219_data, k_tmp_data,
@@ -4643,111 +4054,110 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 VbusTest2_data = indVperGrp->data;
               }
 
-              b_tmp_size[0] = trueCount;
-              b_tmp_size[1] = d_loop_ub;
-              b_tmp_size[2] = d_loop_ub;
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              c_tmp_size[0] = trueCount;
+              c_tmp_size[1] = d_loop_ub;
+              c_tmp_size[2] = d_loop_ub;
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
                   for (i2 = 0; i2 < trueCount; i2++) {
-                    n_tmp_data[(i2 + trueCount * i1) + trueCount * d_loop_ub *
-                      b_i] = BattConfigPerIna_data[(((int)
+                    n_tmp_data[(i2 + trueCount * i1) + trueCount * d_loop_ub * i]
+                      = BattConfigPerIna_data[(((int)
                       VecIna219_data[k_tmp_data[i2]] + b_loop_ub_tmp * i1) +
-                      b_loop_ub_tmp * d_loop_ub * b_i) - 1];
+                      b_loop_ub_tmp * d_loop_ub * i) - 1];
                   }
                 }
               }
 
-              c_tmp_size[0] = 1;
-              c_tmp_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                outVI[b_i] = SelDual_data[(int)VecIna219_data[k_tmp_data[b_i]] -
-                  1];
-              }
-
               d_tmp_size[0] = 1;
               d_tmp_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                o_tmp_data[b_i] = tLastToggle_data[(int)
-                  VecIna219_data[k_tmp_data[b_i]] - 1];
+              for (i = 0; i < trueCount; i++) {
+                outVI[i] = SelDual_data[(int)VecIna219_data[k_tmp_data[i]] - 1];
               }
 
-              e_tmp_size[0] = N_bat_tmp_tmp_tmp;
+              e_tmp_size[0] = 1;
               e_tmp_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
+              for (i = 0; i < trueCount; i++) {
+                o_tmp_data[i] = tLastToggle_data[(int)
+                  VecIna219_data[k_tmp_data[i]] - 1];
+              }
+
+              f_tmp_size[0] = N_bat_tmp_tmp_tmp;
+              f_tmp_size[1] = trueCount;
+              for (i = 0; i < trueCount; i++) {
                 for (i1 = 0; i1 < N_bat_tmp_tmp_tmp; i1++) {
-                  c_VbusTest_data[i1 + N_bat_tmp_tmp_tmp * b_i] =
+                  c_VbusTest_data[i1 + N_bat_tmp_tmp_tmp * i] =
                     BattConfigAct_data[i1 + N_bat_tmp_tmp_tmp * ((int)
-                    VecIna219_data[k_tmp_data[b_i]] - 1)];
+                    VecIna219_data[k_tmp_data[i]] - 1)];
                 }
               }
 
               b_k_t0[0] = (double)(k_t0 + 1) - 1.0;
               b_k_t0[1] = 1.0;
-              b_i = (int)b_maximum(b_k_t0);
-              VdebugVec_size_tmp = indVperGrp->size[0];
+              i = (int)b_maximum(b_k_t0);
+              partialTrueCount = indVperGrp->size[0];
               loop_ub = indVperGrp->size[0];
               for (i1 = 0; i1 < loop_ub; i1++) {
                 c_VmKp184Test_data[i1] = ImKp184Test2_data[((int)
-                  VbusTest2_data[i1] + Vbat->size[0] * (b_i - 1)) - 1];
+                  VbusTest2_data[i1] + Vbat->size[0] * (i - 1)) - 1];
               }
 
               tLastToggle_size[0] = 1;
               tLastToggle_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                i_prm[b_i] = ((float)tLastToggle_data[(int)
-                              VecIna219_data[k_tmp_data[b_i]] - 1] +
-                              prm->cnfg.Ttoggle) + 1.0F;
+              for (i = 0; i < trueCount; i++) {
+                i_prm[i] = ((float)tLastToggle_data[(int)
+                            VecIna219_data[k_tmp_data[i]] - 1] +
+                            prm->cnfg.Ttoggle) + 1.0F;
               }
 
-              b_i = (int)prm->seq.vth[state_k] - 1;
-              showVdiff = c_Esp32StepSwitchToggleCombAll_(outVI, c_tmp_size,
-                prm->bat.CutOffChrV[b_i], prm->bat.CutOffDisV[b_i], n_tmp_data,
-                b_tmp_size, c_VmKp184Test_data, VdebugVec_size_tmp, trueCount,
+              i = (int)prm->seq.vth[state_k] - 1;
+              showVdiff = c_Esp32StepSwitchToggleCombAll_(outVI, d_tmp_size,
+                prm->bat.CutOffChrV[i], prm->bat.CutOffDisV[i], n_tmp_data,
+                c_tmp_size, c_VmKp184Test_data, partialTrueCount, trueCount,
                 prm->brd.Nbat, prm->brd.spi.disconnect, prm->brd.spi.bypass,
                 prm->cnfg.Ttoggle, prm->cnfg.NtoggleDrop, prm->cnfg.minLenIna219,
                 prm->seq.pwr, prm->seq.pwr.VthFlag[state_k], i_prm,
-                tLastToggle_size, o_tmp_data, d_tmp_size, c_VbusTest_data,
-                e_tmp_size, AllBypassPerGroup_data, AllBypassPerGroup_size);
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                id2Bypass_data[b_i] = (int)VecIna219_data[k_tmp_data[b_i]] - 1;
+                tLastToggle_size, o_tmp_data, e_tmp_size, c_VbusTest_data,
+                f_tmp_size, AllBypassPerGroup_data, AllBypassPerGroup_size);
+              for (i = 0; i < trueCount; i++) {
+                id2Bypass_data[i] = (int)VecIna219_data[k_tmp_data[i]] - 1;
               }
 
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
                   for (i2 = 0; i2 < trueCount; i2++) {
                     BattConfigPerInaHelp_data[(id2Bypass_data[i2] +
-                      b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i] =
+                      b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * i] =
                       n_tmp_data[(i2 + trueCount * i1) + trueCount * d_loop_ub *
-                      b_i];
+                      i];
                   }
                 }
               }
 
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                id2Bypass_data[b_i] = (int)VecIna219_data[k_tmp_data[b_i]];
+              for (i = 0; i < trueCount; i++) {
+                id2Bypass_data[i] = (int)VecIna219_data[k_tmp_data[i]];
               }
 
               c_loop_ub_tmp = trueCount - 1;
-              for (b_i = 0; b_i <= c_loop_ub_tmp; b_i++) {
-                SelDualHelp_data[id2Bypass_data[b_i] - 1] = outVI[b_i];
+              for (i = 0; i <= c_loop_ub_tmp; i++) {
+                SelDualHelp_data[id2Bypass_data[i] - 1] = outVI[i];
               }
 
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                id2Bypass_data[b_i] = (int)VecIna219_data[k_tmp_data[b_i]];
+              for (i = 0; i < trueCount; i++) {
+                id2Bypass_data[i] = (int)VecIna219_data[k_tmp_data[i]];
               }
 
-              for (b_i = 0; b_i <= c_loop_ub_tmp; b_i++) {
-                switchFlagHelp_data[id2Bypass_data[b_i] - 1] = showVdiff;
+              for (i = 0; i <= c_loop_ub_tmp; i++) {
+                switchFlagHelp_data[id2Bypass_data[i] - 1] = showVdiff;
               }
 
               Nina219[0] = N_bat_tmp_tmp_tmp;
               Nina219[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                id2Bypass_data[b_i] = (int)VecIna219_data[k_tmp_data[b_i]] - 1;
+              for (i = 0; i < trueCount; i++) {
+                id2Bypass_data[i] = (int)VecIna219_data[k_tmp_data[i]] - 1;
                 loop_ub = Nina219[0];
                 for (i1 = 0; i1 < loop_ub; i1++) {
-                  BattConfigAct_data[i1 + N_bat_tmp_tmp_tmp * id2Bypass_data[b_i]]
-                    = c_VbusTest_data[i1 + Nina219[0] * b_i];
+                  BattConfigAct_data[i1 + N_bat_tmp_tmp_tmp * id2Bypass_data[i]]
+                    = c_VbusTest_data[i1 + Nina219[0] * i];
                 }
               }
 
@@ -4766,119 +4176,119 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           }
 
           if (b_isequal(SelDualHelp, SelDual)) {
-            b_i = x->size[0] * x->size[1];
+            i = x->size[0] * x->size[1];
             x->size[0] = 1;
             x->size[1] = switchFlagHelp->size[1];
-            emxEnsureCapacity_boolean_T(x, b_i);
+            emxEnsureCapacity_boolean_T(x, i);
             b_changeConfigFlag_data = x->data;
             loop_ub = switchFlagHelp->size[1];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              b_changeConfigFlag_data[b_i] = !switchFlagHelp_data[b_i];
+            for (i = 0; i < loop_ub; i++) {
+              b_changeConfigFlag_data[i] = !switchFlagHelp_data[i];
             }
 
             showVdiff = true;
-            partialTrueCount = 1;
+            b_trueCount = 1;
             exitg2 = false;
-            while ((!exitg2) && (partialTrueCount <= x->size[1])) {
-              if (!b_changeConfigFlag_data[partialTrueCount - 1]) {
+            while ((!exitg2) && (b_trueCount <= x->size[1])) {
+              if (!b_changeConfigFlag_data[b_trueCount - 1]) {
                 showVdiff = false;
                 exitg2 = true;
               } else {
-                partialTrueCount++;
+                b_trueCount++;
               }
             }
 
             if (showVdiff) {
-              for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp <
-                   VbusTest_size_idx_0; VdebugVec_size_tmp++) {
+              for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++)
+              {
                 /* Start new mode */
-                if (switchFlag_data[VdebugVec_size_tmp]) {
+                if (switchFlag_data[c_loop_ub]) {
                   /* nadav Coder */
-                  d_tmp_data = SelDual_data[VdebugVec_size_tmp];
+                  d_tmp_data = SelDual_data[c_loop_ub];
                   if (d_tmp_data == 0.0) {
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                          BattConfigPerInaHelp_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                          BattConfigPerInaHelp_data[(c_loop_ub + b_loop_ub_tmp *
+                          i1) + b_loop_ub_tmp * d_loop_ub * i];
                       }
                     }
 
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        BattConfigPerIna_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i]
-                          = b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i];
+                        BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                          b_loop_ub_tmp * d_loop_ub * i] =
+                          b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i];
                       }
                     }
                   } else if (d_tmp_data == 1.0) {
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                          BattConfigPerInaHelp_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                          BattConfigPerInaHelp_data[(c_loop_ub + b_loop_ub_tmp *
+                          i1) + b_loop_ub_tmp * d_loop_ub * i];
                       }
                     }
 
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        BattConfigPerIna_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i]
-                          = b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i];
+                        BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                          b_loop_ub_tmp * d_loop_ub * i] =
+                          b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i];
                       }
                     }
                   } else if (d_tmp_data == 1.5) {
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                          BattConfigPerInaHelp_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                          BattConfigPerInaHelp_data[(c_loop_ub + b_loop_ub_tmp *
+                          i1) + b_loop_ub_tmp * d_loop_ub * i];
                       }
                     }
 
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        BattConfigPerIna_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i]
-                          = b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i];
+                        BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                          b_loop_ub_tmp * d_loop_ub * i] =
+                          b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i];
                       }
                     }
                   } else if (d_tmp_data == 1.6) {
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                          BattConfigPerInaHelp_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                        b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                          BattConfigPerInaHelp_data[(c_loop_ub + b_loop_ub_tmp *
+                          i1) + b_loop_ub_tmp * d_loop_ub * i];
                       }
                     }
 
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        BattConfigPerIna_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i]
-                          = b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i];
+                        BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                          b_loop_ub_tmp * d_loop_ub * i] =
+                          b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i];
                       }
                     }
                   } else if (d_tmp_data == prm->brd.spi.disconnect) {
                     b_padArr(prm->brd.spi.disconnect, N_bat_tmp_tmp_tmp,
                              N_bat_tmp_tmp_tmp, r);
                     b_y_data = r->data;
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        BattConfigPerIna_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i]
-                          = b_y_data[i1 + d_loop_ub * b_i];
+                        BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                          b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 +
+                          d_loop_ub * i];
                       }
                     }
                   } else if (d_tmp_data == prm->brd.spi.bypass) {
                     b_padArr(prm->brd.spi.bypass, N_bat_tmp_tmp_tmp,
                              N_bat_tmp_tmp_tmp, r);
                     b_y_data = r->data;
-                    for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                    for (i = 0; i < d_loop_ub; i++) {
                       for (i1 = 0; i1 < d_loop_ub; i1++) {
-                        BattConfigPerIna_data[(VdebugVec_size_tmp +
-                          b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i]
-                          = b_y_data[i1 + d_loop_ub * b_i];
+                        BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                          b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 +
+                          d_loop_ub * i];
                       }
                     }
                   }
@@ -4914,135 +4324,134 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             exitg1 = true;
           }
         } else {
-          for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < VbusTest_size_idx_0;
-               VdebugVec_size_tmp++) {
+          for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++) {
             /* Start new mode */
-            if (switchFlag_data[VdebugVec_size_tmp]) {
-              d_tmp_data = SelDual_data[VdebugVec_size_tmp];
+            if (switchFlag_data[c_loop_ub]) {
+              d_tmp_data = SelDual_data[c_loop_ub];
               if (d_tmp_data == 0.0) {
-                d_padArrUint8(prm->cnfg.BattConfigDis1, N_bat_tmp_tmp_tmp,
+                e_padArrUint8(prm->cnfg.BattConfigDis1, N_bat_tmp_tmp_tmp,
                               N_bat_tmp_tmp_tmp, r3);
                 r31 = r3->data;
-                b_i = r->size[0] * r->size[1];
+                i = r->size[0] * r->size[1];
                 r->size[0] = r3->size[0];
                 r->size[1] = r3->size[1];
-                emxEnsureCapacity_real_T(r, b_i);
+                emxEnsureCapacity_real_T(r, i);
                 b_y_data = r->data;
                 loop_ub = r3->size[0] * r3->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  b_y_data[b_i] = r31[b_i];
+                for (i = 0; i < loop_ub; i++) {
+                  b_y_data[i] = r31[i];
                 }
 
-                for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                for (i = 0; i < d_loop_ub; i++) {
                   for (i1 = 0; i1 < d_loop_ub; i1++) {
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                      i1) + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 +
-                      d_loop_ub * b_i];
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                      b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub *
+                      i];
                   }
                 }
               } else if (d_tmp_data == 1.0) {
-                d_padArrUint8(prm->cnfg.BattConfigChr1, N_bat_tmp_tmp_tmp,
+                e_padArrUint8(prm->cnfg.BattConfigChr1, N_bat_tmp_tmp_tmp,
                               N_bat_tmp_tmp_tmp, r3);
                 r31 = r3->data;
-                b_i = r->size[0] * r->size[1];
+                i = r->size[0] * r->size[1];
                 r->size[0] = r3->size[0];
                 r->size[1] = r3->size[1];
-                emxEnsureCapacity_real_T(r, b_i);
+                emxEnsureCapacity_real_T(r, i);
                 b_y_data = r->data;
                 loop_ub = r3->size[0] * r3->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  b_y_data[b_i] = r31[b_i];
+                for (i = 0; i < loop_ub; i++) {
+                  b_y_data[i] = r31[i];
                 }
 
-                for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                for (i = 0; i < d_loop_ub; i++) {
                   for (i1 = 0; i1 < d_loop_ub; i1++) {
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                      i1) + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 +
-                      d_loop_ub * b_i];
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                      b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub *
+                      i];
                   }
                 }
               } else if (d_tmp_data == 1.5) {
-                d_padArrUint8(prm->cnfg.BattConfigChr2, N_bat_tmp_tmp_tmp,
+                e_padArrUint8(prm->cnfg.BattConfigChr2, N_bat_tmp_tmp_tmp,
                               N_bat_tmp_tmp_tmp, r3);
                 r31 = r3->data;
-                b_i = r->size[0] * r->size[1];
+                i = r->size[0] * r->size[1];
                 r->size[0] = r3->size[0];
                 r->size[1] = r3->size[1];
-                emxEnsureCapacity_real_T(r, b_i);
+                emxEnsureCapacity_real_T(r, i);
                 b_y_data = r->data;
                 loop_ub = r3->size[0] * r3->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  b_y_data[b_i] = r31[b_i];
+                for (i = 0; i < loop_ub; i++) {
+                  b_y_data[i] = r31[i];
                 }
 
-                for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                for (i = 0; i < d_loop_ub; i++) {
                   for (i1 = 0; i1 < d_loop_ub; i1++) {
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                      i1) + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 +
-                      d_loop_ub * b_i];
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                      b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub *
+                      i];
                   }
                 }
               } else if (d_tmp_data == 1.6) {
-                d_padArrUint8(prm->cnfg.BattConfigChr3, N_bat_tmp_tmp_tmp,
+                e_padArrUint8(prm->cnfg.BattConfigChr3, N_bat_tmp_tmp_tmp,
                               N_bat_tmp_tmp_tmp, r3);
                 r31 = r3->data;
-                b_i = r->size[0] * r->size[1];
+                i = r->size[0] * r->size[1];
                 r->size[0] = r3->size[0];
                 r->size[1] = r3->size[1];
-                emxEnsureCapacity_real_T(r, b_i);
+                emxEnsureCapacity_real_T(r, i);
                 b_y_data = r->data;
                 loop_ub = r3->size[0] * r3->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  b_y_data[b_i] = r31[b_i];
+                for (i = 0; i < loop_ub; i++) {
+                  b_y_data[i] = r31[i];
                 }
 
-                for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                for (i = 0; i < d_loop_ub; i++) {
                   for (i1 = 0; i1 < d_loop_ub; i1++) {
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                      i1) + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 +
-                      d_loop_ub * b_i];
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                      b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub *
+                      i];
                   }
                 }
               } else if (d_tmp_data == prm->brd.spi.disconnect) {
-                e_padArrUint8(prm->brd.spi.disconnect, N_bat_tmp_tmp_tmp,
+                f_padArrUint8(prm->brd.spi.disconnect, N_bat_tmp_tmp_tmp,
                               N_bat_tmp_tmp_tmp, r3);
                 r31 = r3->data;
-                b_i = r->size[0] * r->size[1];
+                i = r->size[0] * r->size[1];
                 r->size[0] = r3->size[0];
                 r->size[1] = r3->size[1];
-                emxEnsureCapacity_real_T(r, b_i);
+                emxEnsureCapacity_real_T(r, i);
                 b_y_data = r->data;
                 loop_ub = r3->size[0] * r3->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  b_y_data[b_i] = r31[b_i];
+                for (i = 0; i < loop_ub; i++) {
+                  b_y_data[i] = r31[i];
                 }
 
-                for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                for (i = 0; i < d_loop_ub; i++) {
                   for (i1 = 0; i1 < d_loop_ub; i1++) {
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                      i1) + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 +
-                      d_loop_ub * b_i];
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                      b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub *
+                      i];
                   }
                 }
               } else if (d_tmp_data == prm->brd.spi.bypass) {
-                e_padArrUint8(prm->brd.spi.bypass, N_bat_tmp_tmp_tmp,
+                f_padArrUint8(prm->brd.spi.bypass, N_bat_tmp_tmp_tmp,
                               N_bat_tmp_tmp_tmp, r3);
                 r31 = r3->data;
-                b_i = r->size[0] * r->size[1];
+                i = r->size[0] * r->size[1];
                 r->size[0] = r3->size[0];
                 r->size[1] = r3->size[1];
-                emxEnsureCapacity_real_T(r, b_i);
+                emxEnsureCapacity_real_T(r, i);
                 b_y_data = r->data;
                 loop_ub = r3->size[0] * r3->size[1];
-                for (b_i = 0; b_i < loop_ub; b_i++) {
-                  b_y_data[b_i] = r31[b_i];
+                for (i = 0; i < loop_ub; i++) {
+                  b_y_data[i] = r31[i];
                 }
 
-                for (b_i = 0; b_i < d_loop_ub; b_i++) {
+                for (i = 0; i < d_loop_ub; i++) {
                   for (i1 = 0; i1 < d_loop_ub; i1++) {
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                      i1) + b_loop_ub_tmp * d_loop_ub * b_i] = b_y_data[i1 +
-                      d_loop_ub * b_i];
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                      b_loop_ub_tmp * d_loop_ub * i] = b_y_data[i1 + d_loop_ub *
+                      i];
                   }
                 }
               }
@@ -5073,8 +4482,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         }
 
         if (b_guard1) {
-          for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < VbusTest_size_idx_0;
-               VdebugVec_size_tmp++) {
+          for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++) {
             /*              %Start new mode */
             /*              if switchFlag(k_ina219) */
             /*                  if SelDual(k_ina219)==0 */
@@ -5098,18 +4506,18 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             /*                  end */
             /*              end */
             /* Start new mode - End */
-            if (changeConfigFlag_data[VdebugVec_size_tmp] ||
-                switchFlag_data[VdebugVec_size_tmp]) {
+            if (changeConfigFlag_data[c_loop_ub] || switchFlag_data[c_loop_ub])
+            {
               /* [SpiPortRow0,ina219State,Pac2Vid0] = CalcPortSpi(SwitchMat_esp,SwitchMat_esp2,PortSpiRow_esp,PortSpiRow_esp2,Pac2Vid,Pac2Vid2,BattConfigPerIna{k_ina219}); */
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
-                  b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                    i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                  b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                    b_loop_ub_tmp * d_loop_ub * i];
                 }
               }
 
-              partialTrueCount = prm->Nmax.NbatMax;
+              b_trueCount = prm->Nmax.NbatMax;
               Nina219[0] = prm->Nmax.NbatMax;
               Nina219[1] = prm->Nmax.NbatMax;
               c_BattConfigPerInaHelp_data.data = &b_BattConfigPerInaHelp_data[0];
@@ -5117,19 +4525,18 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               c_BattConfigPerInaHelp_data.allocatedSize = 256;
               c_BattConfigPerInaHelp_data.numDimensions = 2;
               c_BattConfigPerInaHelp_data.canFreeData = false;
-              c_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+              d_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
                                prm->brd.spi.PortSpiRow_esp,
                                prm->brd.spi.SwitchMat_esp,
                                prm->brd.spi.PortSpiRow_esp2,
                                prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
                                prm->brd.spi.Pac2Vid2,
-                               &c_BattConfigPerInaHelp_data, disConAll,
+                               &c_BattConfigPerInaHelp_data, SpiPortRowBypass,
                                a__1_data, a__1_size, id0_data);
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
-                  Pac2Vid0All_data[(VdebugVec_size_tmp + Pac2Vid0All_size[0] *
-                                    i1) + Pac2Vid0All_size[0] * d_loop_ub * b_i]
-                    = id0_data[i1 + (b_i << 4)];
+                  Pac2Vid0All_data[(c_loop_ub + Pac2Vid0All_size[0] * i1) +
+                    Pac2Vid0All_size[0] * d_loop_ub * i] = id0_data[i1 + (i << 4)];
                 }
               }
 
@@ -5139,58 +4546,21 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   break;
 
                  case 3:
-                  /* UNTITLED Summary of this function goes here */
-                  /*    Detailed explanation goes here */
-                  /*  if coder.target('MATLAB') */
-                  /*  read current */
-                  /*   chip1     |   chip2     |   chip3 */
-                  /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                  /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                  /*  */
-                  /*  for k_row = 1:N_row */
-                  /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                  /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                  /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                  /*  end */
-                  /* mask current */
-                  /* write current mask */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  pause(0.001);
-
-                  /* mask new */
-                  /* write mask new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  /* write new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRow(k_row,:)); */
-                  /*  end */
-                  /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                  /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                  /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                  /* mask current */
-                  /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                  /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                  /* %chip1 Port20-23 NC */
-                  /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                  /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                  /*  end */
+                  writePortToSpi4RowMask_ser(SpiPortRowBypass);
                   break;
                 }
 
                 /*                      disp([sprintf('%d',int32(k_ina219)) ':',num2str(Pac2Vid0(:,1)')]); */
-                if ((unsigned int)VdebugVec_size_tmp + 1U < 2147483648U) {
-                  b_i = VdebugVec_size_tmp + 1;
+                if ((unsigned int)c_loop_ub + 1U < 2147483648U) {
+                  i = c_loop_ub + 1;
                 } else {
-                  b_i = MAX_int32_T;
+                  i = MAX_int32_T;
                 }
 
-                b_sprintf(b_i, r19);
-                for (k_ina219_ = 0; k_ina219_ < partialTrueCount; k_ina219_++) {
-                  NstTst_tmp_tmp = id0_data[k_ina219_];
+                b_sprintf(i, r19);
+                for (id2Bypass_size = 0; id2Bypass_size < b_trueCount;
+                     id2Bypass_size++) {
+                  NstTst_tmp_tmp = id0_data[id2Bypass_size];
                   if (NstTst_tmp_tmp > 127) {
                     NstTst_tmp_tmp = 127U;
                   }
@@ -5199,8 +4569,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   fflush(stdout);
                 }
 
-                changeConfigFlag_data[VdebugVec_size_tmp] = false;
-                switchFlag_data[VdebugVec_size_tmp] = false;
+                changeConfigFlag_data[c_loop_ub] = false;
+                switchFlag_data[c_loop_ub] = false;
                 pause(0.05);
               }
             }
@@ -5215,10 +4585,22 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           /*  k0 = 1; */
           b_meanIbrd0 = 0.0;
           N0 = 0.0;
-          for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < VbusTest_size_idx_0;
-               VdebugVec_size_tmp++) {
-            d_tmp_data = SelDual_data[VdebugVec_size_tmp];
+          for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++) {
+            d_tmp_data = SelDual_data[c_loop_ub];
             if ((d_tmp_data >= 1.0) && (d_tmp_data < 2.0)) {
+              bitCnfg_size[0] = 1;
+              bitCnfg_size[1] = d_loop_ub;
+              bitCnfg_size[2] = Pac2Vid0All_size[2];
+              for (i = 0; i < d_loop_ub; i++) {
+                for (i1 = 0; i1 < d_loop_ub; i1++) {
+                  b_bitCnfg_data[i1 + d_loop_ub * i] = Pac2Vid0All_data
+                    [(c_loop_ub + Pac2Vid0All_size[0] * i1) + Pac2Vid0All_size[0]
+                    * d_loop_ub * i];
+                }
+              }
+
+              c_squeeze(b_bitCnfg_data, bitCnfg_size, id0_data, id2Bypass_data);
+
               /* Pac2Vid3(:,1); */
               if (k_t0 >= 1) {
                 k_ina219_ = k_t0;
@@ -5227,24 +4609,23 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               }
 
               /* ins */
+              id2Bypass_size = id2Bypass_data[0] * id2Bypass_data[1] - 1;
               trueCount = 0;
               partialTrueCount = 0;
-              for (i = 0; i < d_loop_ub; i++) {
-                if (Pac2Vid0All_data[VdebugVec_size_tmp + Pac2Vid0All_size[0] *
-                    i] > 0) {
+              for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
+                if (id0_data[loop_ub] > 0) {
                   trueCount++;
-                  l_tmp_data[partialTrueCount] = (signed char)i;
+                  l_tmp_data[partialTrueCount] = (unsigned char)loop_ub;
                   partialTrueCount++;
                 }
               }
 
               VmKp184Test_size[0] = 1;
               VmKp184Test_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                c_VmKp184Test_data[b_i] = VbatMat0_data[(VdebugVec_size_tmp +
-                  VbatMat0->size[0] * (Pac2Vid0All_data[VdebugVec_size_tmp +
-                  b_loop_ub_tmp * l_tmp_data[b_i]] - 1)) + VbatMat0->size[0] *
-                  VbatMat0->size[1] * (k_ina219_ - 1)];
+              for (i = 0; i < trueCount; i++) {
+                c_VmKp184Test_data[i] = VbatMat0_data[(c_loop_ub +
+                  VbatMat0->size[0] * (id0_data[l_tmp_data[i]] - 1)) +
+                  VbatMat0->size[0] * VbatMat0->size[1] * (k_ina219_ - 1)];
               }
 
               b_dv0 += c_sum(c_VmKp184Test_data, VmKp184Test_size);
@@ -5255,43 +4636,41 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               BattConfigPerInaHelp_size[0] = 1;
               BattConfigPerInaHelp_size[1] = d_loop_ub;
               BattConfigPerInaHelp_size[2] = d_loop_ub;
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
-                  b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                    i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                  b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                    b_loop_ub_tmp * d_loop_ub * i];
                 }
               }
 
               remPadArr(b_BattConfigPerInaHelp_data, BattConfigPerInaHelp_size,
-                        VbusTest0_data, b_VmV_size);
-              N0 += (double)(unsigned short)b_VmV_size[0];
+                        VmV_data, b_tmp_size);
+              N0 += (double)(unsigned short)b_tmp_size[0];
 
               /* size(BattConfigPerIna{k_ina0},1);%N_row(ina219StateAll(k_ina0)); */
               /*  end */
               IbatMat_size[0] = 1;
               IbatMat_size[1] = IbatMat->size[1];
               loop_ub = IbatMat->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                b_VmV_data[b_i] = Iacs758_cal_data[(VdebugVec_size_tmp +
-                  IbatMat->size[0] * b_i) + IbatMat->size[0] * IbatMat->size[1] *
-                  (k_ina219_ - 1)];
+              for (i = 0; i < loop_ub; i++) {
+                b_VmV_data[i] = Iacs758_cal_data[(c_loop_ub + IbatMat->size[0] *
+                  i) + IbatMat->size[0] * IbatMat->size[1] * (k_ina219_ - 1)];
               }
 
               b_abs(b_VmV_data, IbatMat_size, c_VmKp184Test_data,
                     VmKp184Test_size);
               d_tmp_data = 0.0;
               loop_ub = VmKp184Test_size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                a__4_data = c_VmKp184Test_data[b_i];
+              for (i = 0; i < loop_ub; i++) {
+                a__4_data = c_VmKp184Test_data[i];
                 if ((g_IchargeAct >= a__4_data) || rtIsNaN(a__4_data)) {
                   d = g_IchargeAct;
                 } else {
                   d = a__4_data;
                 }
 
-                d_tmp_data += d * Rwire_data[VdebugVec_size_tmp + Rwire_size[0] *
-                  b_i];
+                d_tmp_data += d * Rwire_data[c_loop_ub + Rwire_size[0] * i];
               }
 
               b_meanIbrd0 += d_tmp_data;
@@ -5299,33 +4678,45 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               /* prm.brd.Rint; */
             }
 
-            d_tmp_data = SelDual_data[VdebugVec_size_tmp];
+            d_tmp_data = SelDual_data[c_loop_ub];
             if ((d_tmp_data >= 0.0) && (d_tmp_data < 1.0)) {
-              /* Pac2Vid3(:,1); */
-              if (k_t0 >= 1) {
-                id2Bypass_size = k_t0;
-              } else {
-                id2Bypass_size = 1;
+              bitCnfg_size[0] = 1;
+              bitCnfg_size[1] = d_loop_ub;
+              bitCnfg_size[2] = Pac2Vid0All_size[2];
+              for (i = 0; i < d_loop_ub; i++) {
+                for (i1 = 0; i1 < d_loop_ub; i1++) {
+                  b_bitCnfg_data[i1 + d_loop_ub * i] = Pac2Vid0All_data
+                    [(c_loop_ub + Pac2Vid0All_size[0] * i1) + Pac2Vid0All_size[0]
+                    * d_loop_ub * i];
+                }
               }
 
+              c_squeeze(b_bitCnfg_data, bitCnfg_size, id0_data, id2Bypass_data);
+
+              /* Pac2Vid3(:,1); */
+              if (k_t0 >= 1) {
+                b_trueCount = k_t0;
+              } else {
+                b_trueCount = 1;
+              }
+
+              id2Bypass_size = id2Bypass_data[0] * id2Bypass_data[1] - 1;
               trueCount = 0;
               partialTrueCount = 0;
-              for (i = 0; i < d_loop_ub; i++) {
-                if (Pac2Vid0All_data[VdebugVec_size_tmp + Pac2Vid0All_size[0] *
-                    i] > 0) {
+              for (loop_ub = 0; loop_ub <= id2Bypass_size; loop_ub++) {
+                if (id0_data[loop_ub] > 0) {
                   trueCount++;
-                  m_tmp_data[partialTrueCount] = (signed char)i;
+                  m_tmp_data[partialTrueCount] = (unsigned char)loop_ub;
                   partialTrueCount++;
                 }
               }
 
               VmKp184Test_size[0] = 1;
               VmKp184Test_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                c_VmKp184Test_data[b_i] = VbatMat0_data[(VdebugVec_size_tmp +
-                  VbatMat0->size[0] * (Pac2Vid0All_data[VdebugVec_size_tmp +
-                  b_loop_ub_tmp * m_tmp_data[b_i]] - 1)) + VbatMat0->size[0] *
-                  VbatMat0->size[1] * (id2Bypass_size - 1)];
+              for (i = 0; i < trueCount; i++) {
+                c_VmKp184Test_data[i] = VbatMat0_data[(c_loop_ub +
+                  VbatMat0->size[0] * (id0_data[m_tmp_data[i]] - 1)) +
+                  VbatMat0->size[0] * VbatMat0->size[1] * (b_trueCount - 1)];
               }
 
               V_dis_all += c_sum(c_VmKp184Test_data, VmKp184Test_size);
@@ -5348,13 +4739,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           /* calc max I allowed & V discharge - End */
           b_dv0 = toc();
           f = b_mod(b_dv0, prm->bat.T);
-          for (k_ina219_ = 0; k_ina219_ < 1024; k_ina219_++) {
-            varargin_1[k_ina219_] = (float)fabs(prm->bat.t[k_ina219_] - f);
+          for (id2Bypass_size = 0; id2Bypass_size < 1024; id2Bypass_size++) {
+            varargin_1[id2Bypass_size] = (float)fabs(prm->bat.t[id2Bypass_size]
+              - f);
           }
 
-          c_minimum(varargin_1, &partialTrueCount);
-          c_vSumMax = rt_roundf_snf(1000.0F * prm->bat.i_in[partialTrueCount - 1])
-            / 1000.0F;
+          c_minimum(varargin_1, &b_trueCount);
+          c_vSumMax = rt_roundf_snf(1000.0F * prm->bat.i_in[b_trueCount - 1]) /
+            1000.0F;
 
           /* calc I to discharge- End */
           if (onPowerFlag) {
@@ -5364,36 +4756,35 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             /*  if prm.ins.ka6005p */
             /*      ControlKa6005P(prm.ser.s_ka6005p,'On'); */
             /*  end */
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 1);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 1);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /* prm.ins.kp184 */
               pause(0.05);
             }
 
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 2);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 2);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /* prm.ins.ka6005p */
-              VdebugVec_size_tmp = 0;
+              c_loop_ub = 0;
               exitg2 = false;
-              while ((!exitg2) && (VdebugVec_size_tmp <= (int)Nina219_tmp_tmp -
-                                   1)) {
-                if (SelDual_data[VdebugVec_size_tmp] == 1.0) {
-                  partialTrueCount = 0;
-                } else if (SelDual_data[VdebugVec_size_tmp] == 1.5) {
-                  partialTrueCount = 1;
-                } else if (SelDual_data[VdebugVec_size_tmp] == 1.6) {
-                  partialTrueCount = 2;
+              while ((!exitg2) && (c_loop_ub <= (int)Nina219_tmp_tmp - 1)) {
+                if (SelDual_data[c_loop_ub] == 1.0) {
+                  b_trueCount = 0;
+                } else if (SelDual_data[c_loop_ub] == 1.5) {
+                  b_trueCount = 1;
+                } else if (SelDual_data[c_loop_ub] == 1.6) {
+                  b_trueCount = 2;
                 } else {
-                  partialTrueCount = -1;
+                  b_trueCount = -1;
                 }
 
-                switch (partialTrueCount) {
+                switch (b_trueCount) {
                  case 0:
                   g_IchargeAct = Icharge;
                   exitg2 = true;
@@ -5410,7 +4801,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   break;
 
                  default:
-                  VdebugVec_size_tmp++;
+                  c_loop_ub++;
                   break;
                 }
               }
@@ -5427,27 +4818,26 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               pause(0.05);
             }
 
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 3);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 3);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /*  3-juntek+ACDC */
-              VdebugVec_size_tmp = 0;
+              c_loop_ub = 0;
               exitg2 = false;
-              while ((!exitg2) && (VdebugVec_size_tmp <= (int)Nina219_tmp_tmp -
-                                   1)) {
-                if (SelDual_data[VdebugVec_size_tmp] == 1.0) {
-                  partialTrueCount = 0;
-                } else if (SelDual_data[VdebugVec_size_tmp] == 1.5) {
-                  partialTrueCount = 1;
-                } else if (SelDual_data[VdebugVec_size_tmp] == 1.6) {
-                  partialTrueCount = 2;
+              while ((!exitg2) && (c_loop_ub <= (int)Nina219_tmp_tmp - 1)) {
+                if (SelDual_data[c_loop_ub] == 1.0) {
+                  b_trueCount = 0;
+                } else if (SelDual_data[c_loop_ub] == 1.5) {
+                  b_trueCount = 1;
+                } else if (SelDual_data[c_loop_ub] == 1.6) {
+                  b_trueCount = 2;
                 } else {
-                  partialTrueCount = -1;
+                  b_trueCount = -1;
                 }
 
-                switch (partialTrueCount) {
+                switch (b_trueCount) {
                  case 0:
                   g_IchargeAct = Icharge;
                   exitg2 = true;
@@ -5464,7 +4854,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   break;
 
                  default:
-                  VdebugVec_size_tmp++;
+                  c_loop_ub++;
                   break;
                 }
               }
@@ -5476,17 +4866,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               d_tmp_data = rt_roundd_snf(g_IchargeAct * 1000.0);
               if (d_tmp_data < 2.147483648E+9) {
                 if (d_tmp_data >= -2.147483648E+9) {
-                  b_i = (int)d_tmp_data;
+                  i = (int)d_tmp_data;
                 } else {
-                  b_i = MIN_int32_T;
+                  i = MIN_int32_T;
                 }
               } else if (d_tmp_data >= 2.147483648E+9) {
-                b_i = MAX_int32_T;
+                i = MAX_int32_T;
               } else {
-                b_i = 0;
+                i = 0;
               }
 
-              g_sprintf(b_i, r23);
+              g_sprintf(i, r23);
 
               /* [':',juntek_address,'w11=',num2str(uint32(Val*1000),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
               d_sprintf(g_IchargeAct, d_IchargeAct);
@@ -5494,44 +4884,43 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               f = rt_roundf_snf(e_Vcharge0 * 100.0F);
               if (f < 2.14748365E+9F) {
                 if (f >= -2.14748365E+9F) {
-                  b_i = (int)f;
+                  i = (int)f;
                 } else {
-                  b_i = MIN_int32_T;
+                  i = MIN_int32_T;
                 }
               } else if (f >= 2.14748365E+9F) {
-                b_i = MAX_int32_T;
+                i = MAX_int32_T;
               } else {
-                b_i = 0;
+                i = 0;
               }
 
-              g_sprintf(b_i, r26);
+              g_sprintf(i, r26);
 
               /* [':',juntek_address,'w10=',num2str(uint32(Val*100),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
               k_sprintf(e_Vcharge0, c_Vcharge0);
               pause(0.1);
             }
 
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 4);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 4);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /*  4-juntek B2B */
-              VdebugVec_size_tmp = 0;
+              c_loop_ub = 0;
               exitg2 = false;
-              while ((!exitg2) && (VdebugVec_size_tmp <= (int)Nina219_tmp_tmp -
-                                   1)) {
-                if (SelDual_data[VdebugVec_size_tmp] == 1.0) {
-                  partialTrueCount = 0;
-                } else if (SelDual_data[VdebugVec_size_tmp] == 1.5) {
-                  partialTrueCount = 1;
-                } else if (SelDual_data[VdebugVec_size_tmp] == 1.6) {
-                  partialTrueCount = 2;
+              while ((!exitg2) && (c_loop_ub <= (int)Nina219_tmp_tmp - 1)) {
+                if (SelDual_data[c_loop_ub] == 1.0) {
+                  b_trueCount = 0;
+                } else if (SelDual_data[c_loop_ub] == 1.5) {
+                  b_trueCount = 1;
+                } else if (SelDual_data[c_loop_ub] == 1.6) {
+                  b_trueCount = 2;
                 } else {
-                  partialTrueCount = -1;
+                  b_trueCount = -1;
                 }
 
-                switch (partialTrueCount) {
+                switch (b_trueCount) {
                  case 0:
                   g_IchargeAct = c_vSumMax;
                   exitg2 = true;
@@ -5548,7 +4937,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   break;
 
                  default:
-                  VdebugVec_size_tmp++;
+                  c_loop_ub++;
                   break;
                 }
               }
@@ -5560,17 +4949,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               d_tmp_data = rt_roundd_snf(g_IchargeAct * 1000.0);
               if (d_tmp_data < 2.147483648E+9) {
                 if (d_tmp_data >= -2.147483648E+9) {
-                  b_i = (int)d_tmp_data;
+                  i = (int)d_tmp_data;
                 } else {
-                  b_i = MIN_int32_T;
+                  i = MIN_int32_T;
                 }
               } else if (d_tmp_data >= 2.147483648E+9) {
-                b_i = MAX_int32_T;
+                i = MAX_int32_T;
               } else {
-                b_i = 0;
+                i = 0;
               }
 
-              g_sprintf(b_i, r25);
+              g_sprintf(i, r25);
 
               /* [':',juntek_address,'w11=',num2str(uint32(Val*1000),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
               d_sprintf(g_IchargeAct, f_IchargeAct);
@@ -5578,17 +4967,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               f = rt_roundf_snf(e_Vcharge0 * 100.0F);
               if (f < 2.14748365E+9F) {
                 if (f >= -2.14748365E+9F) {
-                  b_i = (int)f;
+                  i = (int)f;
                 } else {
-                  b_i = MIN_int32_T;
+                  i = MIN_int32_T;
                 }
               } else if (f >= 2.14748365E+9F) {
-                b_i = MAX_int32_T;
+                i = MAX_int32_T;
               } else {
-                b_i = 0;
+                i = 0;
               }
 
-              g_sprintf(b_i, r28);
+              g_sprintf(i, r28);
 
               /* [':',juntek_address,'w10=',num2str(uint32(Val*100),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
               k_sprintf(e_Vcharge0, d_Vcharge0);
@@ -5596,42 +4985,41 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             }
           } else {
             /*  if onPowerFlag == true; */
-            for (b_i = 0; b_i < 8; b_i++) {
-              k_groups_tmp = prm->seq.ins[b_i + (state_k << 3)];
-              iv[b_i] = k_groups_tmp;
-              b_VbusTest0_data[b_i] = (k_groups_tmp == 3);
+            for (i = 0; i < 8; i++) {
+              k_groups_tmp = prm->seq.ins[i + (state_k << 3)];
+              iv[i] = k_groups_tmp;
+              VbusTest0_data[i] = (k_groups_tmp == 3);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /*  3-juntek ACDC */
-              b_i = b_changeConfigFlag->size[0] * b_changeConfigFlag->size[1];
+              i = b_changeConfigFlag->size[0] * b_changeConfigFlag->size[1];
               b_changeConfigFlag->size[0] = 1;
               b_changeConfigFlag->size[1] = SelDual->size[1];
-              emxEnsureCapacity_boolean_T(b_changeConfigFlag, b_i);
+              emxEnsureCapacity_boolean_T(b_changeConfigFlag, i);
               b_changeConfigFlag_data = b_changeConfigFlag->data;
               loop_ub = SelDual->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                d_tmp_data = SelDual_data[b_i];
-                b_changeConfigFlag_data[b_i] = ((d_tmp_data >= 1.0) &&
-                  (d_tmp_data < 2.0));
+              for (i = 0; i < loop_ub; i++) {
+                d_tmp_data = SelDual_data[i];
+                b_changeConfigFlag_data[i] = ((d_tmp_data >= 1.0) && (d_tmp_data
+                  < 2.0));
               }
 
               if (b_any(b_changeConfigFlag)) {
-                VdebugVec_size_tmp = 0;
+                c_loop_ub = 0;
                 exitg2 = false;
-                while ((!exitg2) && (VdebugVec_size_tmp <= (int)Nina219_tmp_tmp
-                                     - 1)) {
-                  if (SelDual_data[VdebugVec_size_tmp] == 1.0) {
-                    partialTrueCount = 0;
-                  } else if (SelDual_data[VdebugVec_size_tmp] == 1.5) {
-                    partialTrueCount = 1;
-                  } else if (SelDual_data[VdebugVec_size_tmp] == 1.6) {
-                    partialTrueCount = 2;
+                while ((!exitg2) && (c_loop_ub <= (int)Nina219_tmp_tmp - 1)) {
+                  if (SelDual_data[c_loop_ub] == 1.0) {
+                    b_trueCount = 0;
+                  } else if (SelDual_data[c_loop_ub] == 1.5) {
+                    b_trueCount = 1;
+                  } else if (SelDual_data[c_loop_ub] == 1.6) {
+                    b_trueCount = 2;
                   } else {
-                    partialTrueCount = -1;
+                    b_trueCount = -1;
                   }
 
-                  switch (partialTrueCount) {
+                  switch (b_trueCount) {
                    case 0:
                     g_IchargeAct = Icharge;
                     exitg2 = true;
@@ -5648,7 +5036,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                     break;
 
                    default:
-                    VdebugVec_size_tmp++;
+                    c_loop_ub++;
                     break;
                   }
                 }
@@ -5661,33 +5049,33 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 f = rt_roundf_snf(e_Vcharge0 * 100.0F);
                 if (f < 2.14748365E+9F) {
                   if (f >= -2.14748365E+9F) {
-                    b_i = (int)f;
+                    i = (int)f;
                   } else {
-                    b_i = MIN_int32_T;
+                    i = MIN_int32_T;
                   }
                 } else if (f >= 2.14748365E+9F) {
-                  b_i = MAX_int32_T;
+                  i = MAX_int32_T;
                 } else {
-                  b_i = 0;
+                  i = 0;
                 }
 
-                g_sprintf(b_i, r20);
+                g_sprintf(i, r20);
 
                 /* [':',juntek_address,'w10=',num2str(uint32(Val*100),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
                 d_tmp_data = rt_roundd_snf(g_IchargeAct * 1000.0);
                 if (d_tmp_data < 2.147483648E+9) {
                   if (d_tmp_data >= -2.147483648E+9) {
-                    b_i = (int)d_tmp_data;
+                    i = (int)d_tmp_data;
                   } else {
-                    b_i = MIN_int32_T;
+                    i = MIN_int32_T;
                   }
                 } else if (d_tmp_data >= 2.147483648E+9) {
-                  b_i = MAX_int32_T;
+                  i = MAX_int32_T;
                 } else {
-                  b_i = 0;
+                  i = 0;
                 }
 
-                g_sprintf(b_i, r22);
+                g_sprintf(i, r22);
 
                 /* [':',juntek_address,'w11=',num2str(uint32(Val*1000),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
                 d_sprintf(g_IchargeAct, c_IchargeAct);
@@ -5695,22 +5083,22 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               }
             }
 
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (iv[b_i] == 4);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (iv[i] == 4);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /*  4-juntek B2B */
-              b_i = b_changeConfigFlag->size[0] * b_changeConfigFlag->size[1];
+              i = b_changeConfigFlag->size[0] * b_changeConfigFlag->size[1];
               b_changeConfigFlag->size[0] = 1;
               b_changeConfigFlag->size[1] = SelDual->size[1];
-              emxEnsureCapacity_boolean_T(b_changeConfigFlag, b_i);
+              emxEnsureCapacity_boolean_T(b_changeConfigFlag, i);
               b_changeConfigFlag_data = b_changeConfigFlag->data;
               loop_ub = SelDual->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                d_tmp_data = SelDual_data[b_i];
-                b_changeConfigFlag_data[b_i] = ((d_tmp_data >= 1.0) &&
-                  (d_tmp_data < 2.0));
+              for (i = 0; i < loop_ub; i++) {
+                d_tmp_data = SelDual_data[i];
+                b_changeConfigFlag_data[i] = ((d_tmp_data >= 1.0) && (d_tmp_data
+                  < 2.0));
               }
 
               if (b_any(b_changeConfigFlag)) {
@@ -5722,33 +5110,33 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 f = rt_roundf_snf(e_Vcharge0 * 100.0F);
                 if (f < 2.14748365E+9F) {
                   if (f >= -2.14748365E+9F) {
-                    b_i = (int)f;
+                    i = (int)f;
                   } else {
-                    b_i = MIN_int32_T;
+                    i = MIN_int32_T;
                   }
                 } else if (f >= 2.14748365E+9F) {
-                  b_i = MAX_int32_T;
+                  i = MAX_int32_T;
                 } else {
-                  b_i = 0;
+                  i = 0;
                 }
 
-                g_sprintf(b_i, r21);
+                g_sprintf(i, r21);
 
                 /* [':',juntek_address,'w10=',num2str(uint32(Val*100),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
                 d_tmp_data = rt_roundd_snf(g_IchargeAct * 1000.0);
                 if (d_tmp_data < 2.147483648E+9) {
                   if (d_tmp_data >= -2.147483648E+9) {
-                    b_i = (int)d_tmp_data;
+                    i = (int)d_tmp_data;
                   } else {
-                    b_i = MIN_int32_T;
+                    i = MIN_int32_T;
                   }
                 } else if (d_tmp_data >= 2.147483648E+9) {
-                  b_i = MAX_int32_T;
+                  i = MAX_int32_T;
                 } else {
-                  b_i = 0;
+                  i = 0;
                 }
 
-                g_sprintf(b_i, r24);
+                g_sprintf(i, r24);
 
                 /* [':',juntek_address,'w11=',num2str(uint32(Val*1000),'%04d'),',',newline];%['VSET',num2str(ch),':',num2str(Val)];%[V] */
                 d_sprintf(g_IchargeAct, e_IchargeAct);
@@ -5756,11 +5144,11 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               }
             }
 
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (iv[b_i] == 1);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (iv[i] == 1);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               /* prm.ins.kp184 */
               pause(0.05);
 
@@ -5770,18 +5158,17 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
           onPowerFlag = false;
           pause(0.1);
-          for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < VbusTest_size_idx_0;
-               VdebugVec_size_tmp++) {
+          for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++) {
             if (!prm->seq.BrdBeforePSflag[state_k]) {
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
-                  b_BattConfigPerInaHelp_data[i1 + d_loop_ub * b_i] =
-                    BattConfigPerIna_data[(VdebugVec_size_tmp + b_loop_ub_tmp *
-                    i1) + b_loop_ub_tmp * d_loop_ub * b_i];
+                  b_BattConfigPerInaHelp_data[i1 + d_loop_ub * i] =
+                    BattConfigPerIna_data[(c_loop_ub + b_loop_ub_tmp * i1) +
+                    b_loop_ub_tmp * d_loop_ub * i];
                 }
               }
 
-              partialTrueCount = prm->Nmax.NbatMax;
+              b_trueCount = prm->Nmax.NbatMax;
               Nina219[0] = prm->Nmax.NbatMax;
               Nina219[1] = prm->Nmax.NbatMax;
               d_BattConfigPerInaHelp_data.data = &b_BattConfigPerInaHelp_data[0];
@@ -5789,81 +5176,43 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               d_BattConfigPerInaHelp_data.allocatedSize = 256;
               d_BattConfigPerInaHelp_data.numDimensions = 2;
               d_BattConfigPerInaHelp_data.canFreeData = false;
-              c_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
+              d_CalcPortSpiPrm(prm->brd.spi.disconnect, prm->brd.spi.bypass,
                                prm->brd.spi.PortSpiRow_esp,
                                prm->brd.spi.SwitchMat_esp,
                                prm->brd.spi.PortSpiRow_esp2,
                                prm->brd.spi.SwitchMat_esp2, prm->brd.spi.Pac2Vid,
                                prm->brd.spi.Pac2Vid2,
-                               &d_BattConfigPerInaHelp_data, disConAll,
+                               &d_BattConfigPerInaHelp_data, SpiPortRowBypass,
                                a__1_data, a__1_size, id0_data);
-              for (b_i = 0; b_i < d_loop_ub; b_i++) {
+              for (i = 0; i < d_loop_ub; i++) {
                 for (i1 = 0; i1 < d_loop_ub; i1++) {
-                  Pac2Vid0All_data[(VdebugVec_size_tmp + Pac2Vid0All_size[0] *
-                                    i1) + Pac2Vid0All_size[0] * d_loop_ub * b_i]
-                    = id0_data[i1 + (b_i << 4)];
+                  Pac2Vid0All_data[(c_loop_ub + Pac2Vid0All_size[0] * i1) +
+                    Pac2Vid0All_size[0] * d_loop_ub * i] = id0_data[i1 + (i << 4)];
                 }
               }
 
-              if (changeConfigFlag_data[VdebugVec_size_tmp] ||
-                  switchFlag_data[VdebugVec_size_tmp]) {
+              if (changeConfigFlag_data[c_loop_ub] || switchFlag_data[c_loop_ub])
+              {
                 switch (ProjectFlag) {
                  case 2:
                   break;
 
                  case 3:
-                  /* UNTITLED Summary of this function goes here */
-                  /*    Detailed explanation goes here */
-                  /*  if coder.target('MATLAB') */
-                  /*  read current */
-                  /*   chip1     |   chip2     |   chip3 */
-                  /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-                  /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-                  /*  */
-                  /*  for k_row = 1:N_row */
-                  /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-                  /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-                  /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-                  /*  end */
-                  /* mask current */
-                  /* write current mask */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  pause(0.001);
-
-                  /* mask new */
-                  /* write mask new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-                  /*  end */
-                  /* write new */
-                  /*  for k_row = 1:N_row */
-                  /*      write(SPI0,PortSpiRow(k_row,:)); */
-                  /*  end */
-                  /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-                  /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-                  /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-                  /* mask current */
-                  /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-                  /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-                  /* %chip1 Port20-23 NC */
-                  /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-                  /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-                  /*  end */
+                  writePortToSpi4RowMask_ser(SpiPortRowBypass);
                   break;
                 }
 
                 /*  disp([num2str(k_ina219) ':',num2str(Pac2Vid0(:,1)')]); */
-                if ((unsigned int)VdebugVec_size_tmp + 1U < 2147483648U) {
-                  b_i = VdebugVec_size_tmp + 1;
+                if ((unsigned int)c_loop_ub + 1U < 2147483648U) {
+                  i = c_loop_ub + 1;
                 } else {
-                  b_i = MAX_int32_T;
+                  i = MAX_int32_T;
                 }
 
-                b_sprintf(b_i, r27);
-                for (k_ina219_ = 0; k_ina219_ < partialTrueCount; k_ina219_++) {
-                  NstTst_tmp_tmp = id0_data[k_ina219_];
+                b_sprintf(i, r27);
+                for (id2Bypass_size = 0; id2Bypass_size < b_trueCount;
+                     id2Bypass_size++) {
+                  NstTst_tmp_tmp = id0_data[id2Bypass_size];
                   if (NstTst_tmp_tmp > 127) {
                     NstTst_tmp_tmp = 127U;
                   }
@@ -5872,8 +5221,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   fflush(stdout);
                 }
 
-                changeConfigFlag_data[VdebugVec_size_tmp] = false;
-                switchFlag_data[VdebugVec_size_tmp] = false;
+                changeConfigFlag_data[c_loop_ub] = false;
+                switchFlag_data[c_loop_ub] = false;
                 pause(0.05);
               }
             }
@@ -5886,126 +5235,123 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                    kEst_size, Rwire_data, Rwire_size, a__64_data,
                    b_VdebugVec_data, &id2Bypass_size, VbusTest_data, &k_ina219_,
                    Rtot_data, Rtot_size, a__38_data, id2Bypass_data, a__39_data,
-                   a__1_size, a__40_data, b_VmV_size, VmKp184Test_data,
-                   &VdebugVec_size_tmp, a__42_data, tii_size, a__72_data,
-                   &loop_ub, outVI, a__4_size, VdebugVec_data, VdebugVec_size,
-                   &keepMeas, (double *)&b_dv0, errI2C_size);
+                   b_VmV_size, a__40_data, tii_size, VmKp184Test_data,
+                   &c_loop_ub, a__42_data, a__4_size, a__72_data,
+                   &partialTrueCount, outVI, b_tmp_size, VdebugVec_data,
+                   VdebugVec_size, &keepMeas, (double *)&b_dv0, errI2C_size);
           loop_ub = Vbat->size[0];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            ImKp184Test2_data[b_i + Vbat->size[0] * k_t0] = a__64_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            ImKp184Test2_data[i + Vbat->size[0] * k_t0] = a__64_data[i];
           }
 
           Nina219[0] = VbatMat->size[0];
           Nina219[1] = VbatMat->size[1];
           loop_ub = VbatMat->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
+          for (i = 0; i < loop_ub; i++) {
             b_loop_ub = Nina219[0];
             for (i1 = 0; i1 < b_loop_ub; i1++) {
-              VbatMat_data[(i1 + VbatMat->size[0] * b_i) + VbatMat->size[0] *
-                VbatMat->size[1] * k_t0] = Rtot_data[i1 + Nina219[0] * b_i];
+              VbatMat_data[(i1 + VbatMat->size[0] * i) + VbatMat->size[0] *
+                VbatMat->size[1] * k_t0] = Rtot_data[i1 + Nina219[0] * i];
             }
           }
 
           Nina219[0] = VbatMat0->size[0];
           Nina219[1] = VbatMat0->size[1];
           loop_ub = VbatMat0->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
+          for (i = 0; i < loop_ub; i++) {
             b_loop_ub = Nina219[0];
             for (i1 = 0; i1 < b_loop_ub; i1++) {
-              VbatMat0_data[(i1 + VbatMat0->size[0] * b_i) + VbatMat0->size[0] *
-                VbatMat0->size[1] * k_t0] = a__38_data[i1 + Nina219[0] * b_i];
+              VbatMat0_data[(i1 + VbatMat0->size[0] * i) + VbatMat0->size[0] *
+                VbatMat0->size[1] * k_t0] = a__38_data[i1 + Nina219[0] * i];
             }
           }
 
           Nina219[0] = IbatMat->size[0];
           Nina219[1] = IbatMat->size[1];
           loop_ub = IbatMat->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
+          for (i = 0; i < loop_ub; i++) {
             b_loop_ub = Nina219[0];
             for (i1 = 0; i1 < b_loop_ub; i1++) {
-              Iacs758_cal_data[(i1 + IbatMat->size[0] * b_i) + IbatMat->size[0] *
-                IbatMat->size[1] * k_t0] = a__39_data[i1 + Nina219[0] * b_i];
+              Iacs758_cal_data[(i1 + IbatMat->size[0] * i) + IbatMat->size[0] *
+                IbatMat->size[1] * k_t0] = a__39_data[i1 + Nina219[0] * i];
             }
           }
 
           Nina219[0] = tV->size[0];
           Nina219[1] = tV->size[1];
           loop_ub = tV->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
+          for (i = 0; i < loop_ub; i++) {
             b_loop_ub = Nina219[0];
             for (i1 = 0; i1 < b_loop_ub; i1++) {
-              tV_data[(i1 + tV->size[0] * b_i) + tV->size[0] * tV->size[1] *
-                k_t0] = a__40_data[i1 + Nina219[0] * b_i];
+              tV_data[(i1 + tV->size[0] * i) + tV->size[0] * tV->size[1] * k_t0]
+                = a__40_data[i1 + Nina219[0] * i];
             }
           }
 
           loop_ub = tV1->size[0];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            tV1_data[b_i + tV1->size[0] * k_t0] = VmKp184Test_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            tV1_data[i + tV1->size[0] * k_t0] = VmKp184Test_data[i];
           }
 
           /*  read V,I */
-          for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < VbusTest_size_idx_0;
-               VdebugVec_size_tmp++) {
+          for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++) {
             if (kalmanFlag) {
               VmKp184Test_size[0] = 1;
               loop_ub = tV->size[1];
               VmKp184Test_size[1] = tV->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                c_VmKp184Test_data[b_i] = tV_data[(VdebugVec_size_tmp + tV->
-                  size[0] * b_i) + tV->size[0] * tV->size[1] * k_t0];
+              for (i = 0; i < loop_ub; i++) {
+                c_VmKp184Test_data[i] = tV_data[(c_loop_ub + tV->size[0] * i) +
+                  tV->size[0] * tV->size[1] * k_t0];
               }
 
               loop_ub = IbatMat->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                b_VmV_data[b_i] = Iacs758_cal_data[(VdebugVec_size_tmp +
-                  IbatMat->size[0] * b_i) + IbatMat->size[0] * IbatMat->size[1] *
-                  k_t0];
+              for (i = 0; i < loop_ub; i++) {
+                b_VmV_data[i] = Iacs758_cal_data[(c_loop_ub + IbatMat->size[0] *
+                  i) + IbatMat->size[0] * IbatMat->size[1] * k_t0];
               }
 
               loop_ub = VbatMat->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                I_data[b_i] = VbatMat_data[(VdebugVec_size_tmp + VbatMat->size[0]
-                  * b_i) + VbatMat->size[0] * VbatMat->size[1] * k_t0];
+              for (i = 0; i < loop_ub; i++) {
+                I_data[i] = VbatMat_data[(c_loop_ub + VbatMat->size[0] * i) +
+                  VbatMat->size[0] * VbatMat->size[1] * k_t0];
               }
 
-              b_CalcStructKalman(&prm->klm.b_struct[VdebugVec_size_tmp], Ta,
+              b_CalcStructKalman(&prm->klm.b_struct[c_loop_ub], Ta,
                                  c_VmKp184Test_data, VmKp184Test_size,
                                  b_VmV_data, I_data);
             }
           }
 
           /* kalman - End */
-          for (b_i = 0; b_i < 8; b_i++) {
-            b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 3);
+          for (i = 0; i < 8; i++) {
+            VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 3);
           }
 
           guard5 = false;
-          if (vectorAny(b_VbusTest0_data)) {
+          if (vectorAny(VbusTest0_data)) {
             guard5 = true;
           } else {
-            for (b_i = 0; b_i < 8; b_i++) {
-              b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 4);
+            for (i = 0; i < 8; i++) {
+              VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 4);
             }
 
-            if (vectorAny(b_VbusTest0_data)) {
+            if (vectorAny(VbusTest0_data)) {
               guard5 = true;
             } else {
-              for (b_i = 0; b_i < 8; b_i++) {
-                b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] == 1);
+              for (i = 0; i < 8; i++) {
+                VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 1);
               }
 
-              if (vectorAny(b_VbusTest0_data)) {
+              if (vectorAny(VbusTest0_data)) {
                 ControlKp184((double *)&N0, a__3_size, (double *)&a__4_data,
-                             a__4_size, (double *)&d_tmp_data, b_VmV_size,
+                             a__4_size, (double *)&d_tmp_data, b_tmp_size,
                              (double *)&a__16_data, id2Bypass_data);
               } else {
-                for (b_i = 0; b_i < 8; b_i++) {
-                  b_VbusTest0_data[b_i] = (prm->seq.ins[b_i + (state_k << 3)] ==
-                    2);
+                for (i = 0; i < 8; i++) {
+                  VbusTest0_data[i] = (prm->seq.ins[i + (state_k << 3)] == 2);
                 }
 
-                if (vectorAny(b_VbusTest0_data)) {
+                if (vectorAny(VbusTest0_data)) {
                   /* read I */
                   d_rand();
 
@@ -6022,14 +5368,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             b_controlJuntekDPH8920(r30.data, r30.size);
           }
 
-          b_i = SelDual_nm1->size[0] * SelDual_nm1->size[1];
+          i = SelDual_nm1->size[0] * SelDual_nm1->size[1];
           SelDual_nm1->size[0] = 1;
           SelDual_nm1->size[1] = SelDual->size[1];
-          emxEnsureCapacity_real_T(SelDual_nm1, b_i);
+          emxEnsureCapacity_real_T(SelDual_nm1, i);
           IshuntTest2_data = SelDual_nm1->data;
           loop_ub = SelDual->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            IshuntTest2_data[b_i] = SelDual_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            IshuntTest2_data[i] = SelDual_data[i];
           }
 
           /*  BattConfigAct = BattConfigAct(:); */
@@ -6037,29 +5383,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             y->size[0] = 1;
             y->size[1] = 0;
           } else {
-            b_i = y->size[0] * y->size[1];
+            i = y->size[0] * y->size[1];
             y->size[0] = 1;
             y->size[1] = (int)(Nina219_tmp_tmp - 1.0) + 1;
-            emxEnsureCapacity_real_T(y, b_i);
+            emxEnsureCapacity_real_T(y, i);
             y_data = y->data;
             loop_ub = (int)(Nina219_tmp_tmp - 1.0);
-            for (b_i = 0; b_i <= loop_ub; b_i++) {
-              y_data[b_i] = (double)b_i + 1.0;
+            for (i = 0; i <= loop_ub; i++) {
+              y_data[i] = (double)i + 1.0;
             }
           }
 
-          b_i = b_y->size[0];
+          i = b_y->size[0];
           b_y->size[0] = y->size[1];
-          emxEnsureCapacity_real_T(b_y, b_i);
+          emxEnsureCapacity_real_T(b_y, i);
           b_y_data = b_y->data;
           loop_ub = y->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            b_y_data[b_i] = y_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            b_y_data[i] = y_data[i];
           }
 
           loop_ub = y->size[1];
-          for (b_i = 0; b_i < loop_ub; b_i++) {
-            VecIna219_data[b_i] = b_y_data[b_i];
+          for (i = 0; i < loop_ub; i++) {
+            VecIna219_data[i] = b_y_data[i];
           }
 
           if (b_size - 1 >= 0) {
@@ -6069,10 +5415,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           for (k_tstState = 0; k_tstState < b_size; k_tstState++) {
             trueCount = 0;
             partialTrueCount = 0;
-            for (i = 0; i <= c_end; i++) {
-              if (k_tstState + 1 == ipos_data[i]) {
+            for (loop_ub = 0; loop_ub <= c_end; loop_ub++) {
+              if (k_tstState + 1 == ipos_data[loop_ub]) {
                 trueCount++;
-                p_tmp_data[partialTrueCount] = (signed char)i;
+                p_tmp_data[partialTrueCount] = (signed char)loop_ub;
                 partialTrueCount++;
               }
             }
@@ -6082,27 +5428,26 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               y->size[0] = 1;
               y->size[1] = 0;
             } else {
-              b_i = y->size[0] * y->size[1];
+              i = y->size[0] * y->size[1];
               y->size[0] = 1;
               y->size[1] = N_bat_tmp_tmp_tmp;
-              emxEnsureCapacity_real_T(y, b_i);
+              emxEnsureCapacity_real_T(y, i);
               y_data = y->data;
               loop_ub = N_bat_tmp_tmp_tmp - 1;
-              for (b_i = 0; b_i <= loop_ub; b_i++) {
-                y_data[b_i] = (double)b_i + 1.0;
+              for (i = 0; i <= loop_ub; i++) {
+                y_data[i] = (double)i + 1.0;
               }
             }
 
             if (trueCount == y->size[1]) {
-              b_i = indVperGrp->size[0];
+              i = indVperGrp->size[0];
               indVperGrp->size[0] = y->size[1];
-              emxEnsureCapacity_real_T(indVperGrp, b_i);
+              emxEnsureCapacity_real_T(indVperGrp, i);
               VbusTest2_data = indVperGrp->data;
               loop_ub = y->size[1];
-              for (b_i = 0; b_i < loop_ub; b_i++) {
-                VbusTest2_data[b_i] = y_data[b_i] +
-                  (VecIna219_data[p_tmp_data[b_i]] - 1.0) * (double)
-                  N_bat_tmp_tmp_tmp;
+              for (i = 0; i < loop_ub; i++) {
+                VbusTest2_data[i] = y_data[i] + (VecIna219_data[p_tmp_data[i]] -
+                  1.0) * (double)N_bat_tmp_tmp_tmp;
               }
             } else {
               binary_expand_op_3(indVperGrp, y, VecIna219_data, p_tmp_data,
@@ -6112,119 +5457,119 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
             /*          for k_ina219 = 1:Nina219 */
             /*              if SelDual(k_ina219) ~= prm.brd.spi.bypass&&SelDual(k_ina219) ~= prm.brd.spi.disconnect */
-            b_tmp_size[0] = trueCount;
-            b_tmp_size[1] = d_loop_ub;
-            b_tmp_size[2] = d_loop_ub;
-            for (b_i = 0; b_i < d_loop_ub; b_i++) {
+            c_tmp_size[0] = trueCount;
+            c_tmp_size[1] = d_loop_ub;
+            c_tmp_size[2] = d_loop_ub;
+            for (i = 0; i < d_loop_ub; i++) {
               for (i1 = 0; i1 < d_loop_ub; i1++) {
                 for (i2 = 0; i2 < trueCount; i2++) {
-                  n_tmp_data[(i2 + trueCount * i1) + trueCount * d_loop_ub * b_i]
-                    = BattConfigPerIna_data[(((int)VecIna219_data[p_tmp_data[i2]]
-                    + b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * b_i) - 1];
+                  n_tmp_data[(i2 + trueCount * i1) + trueCount * d_loop_ub * i] =
+                    BattConfigPerIna_data[(((int)VecIna219_data[p_tmp_data[i2]]
+                    + b_loop_ub_tmp * i1) + b_loop_ub_tmp * d_loop_ub * i) - 1];
                 }
               }
-            }
-
-            c_tmp_size[0] = 1;
-            c_tmp_size[1] = trueCount;
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              outVI[b_i] = SelDual_data[(int)VecIna219_data[p_tmp_data[b_i]] - 1];
             }
 
             d_tmp_size[0] = 1;
             d_tmp_size[1] = trueCount;
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              o_tmp_data[b_i] = tLastToggle_data[(int)
-                VecIna219_data[p_tmp_data[b_i]] - 1];
+            for (i = 0; i < trueCount; i++) {
+              outVI[i] = SelDual_data[(int)VecIna219_data[p_tmp_data[i]] - 1];
             }
 
-            e_tmp_size[0] = N_bat_tmp_tmp_tmp;
+            e_tmp_size[0] = 1;
             e_tmp_size[1] = trueCount;
-            for (b_i = 0; b_i < trueCount; b_i++) {
+            for (i = 0; i < trueCount; i++) {
+              o_tmp_data[i] = tLastToggle_data[(int)VecIna219_data[p_tmp_data[i]]
+                - 1];
+            }
+
+            f_tmp_size[0] = N_bat_tmp_tmp_tmp;
+            f_tmp_size[1] = trueCount;
+            for (i = 0; i < trueCount; i++) {
               for (i1 = 0; i1 < N_bat_tmp_tmp_tmp; i1++) {
-                c_VbusTest_data[i1 + N_bat_tmp_tmp_tmp * b_i] =
+                c_VbusTest_data[i1 + N_bat_tmp_tmp_tmp * i] =
                   BattConfigAct_data[i1 + N_bat_tmp_tmp_tmp * ((int)
-                  VecIna219_data[p_tmp_data[b_i]] - 1)];
+                  VecIna219_data[p_tmp_data[i]] - 1)];
               }
             }
 
             loop_ub = indVperGrp->size[0];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              indVperGrp_data[b_i] = (int)VbusTest2_data[b_i];
+            for (i = 0; i < loop_ub; i++) {
+              indVperGrp_data[i] = (int)VbusTest2_data[i];
             }
 
-            VdebugVec_size_tmp = indVperGrp->size[0];
+            partialTrueCount = indVperGrp->size[0];
             loop_ub = indVperGrp->size[0];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              c_VmKp184Test_data[b_i] = ImKp184Test2_data[(indVperGrp_data[b_i]
-                + Vbat->size[0] * k_t0) - 1];
+            for (i = 0; i < loop_ub; i++) {
+              c_VmKp184Test_data[i] = ImKp184Test2_data[(indVperGrp_data[i] +
+                Vbat->size[0] * k_t0) - 1];
             }
 
-            b_i = (int)prm->seq.vth[state_k] - 1;
-            showVdiff = d_Esp32StepSwitchToggleCombAll_(outVI, c_tmp_size,
-              prm->bat.CutOffChrV[b_i], prm->bat.CutOffDisV[b_i], n_tmp_data,
-              b_tmp_size, c_VmKp184Test_data, VdebugVec_size_tmp, trueCount,
+            i = (int)prm->seq.vth[state_k] - 1;
+            showVdiff = d_Esp32StepSwitchToggleCombAll_(outVI, d_tmp_size,
+              prm->bat.CutOffChrV[i], prm->bat.CutOffDisV[i], n_tmp_data,
+              c_tmp_size, c_VmKp184Test_data, partialTrueCount, trueCount,
               prm->brd.Nbat, prm->brd.spi.disconnect, prm->brd.spi.bypass,
               prm->cnfg.Ttoggle, prm->cnfg.NtoggleDrop, prm->cnfg.minLenIna219,
               prm->seq.pwr, prm->seq.pwr.VthFlag[state_k], tV_data[tV->size[0] *
-              tV->size[1] * k_t0], o_tmp_data, d_tmp_size, c_VbusTest_data,
-              e_tmp_size, AllBypassPerGroup_data, AllBypassPerGroup_size);
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              id2Bypass_data[b_i] = (int)VecIna219_data[p_tmp_data[b_i]];
+              tV->size[1] * k_t0], o_tmp_data, e_tmp_size, c_VbusTest_data,
+              f_tmp_size, AllBypassPerGroup_data, AllBypassPerGroup_size);
+            for (i = 0; i < trueCount; i++) {
+              id2Bypass_data[i] = (int)VecIna219_data[p_tmp_data[i]];
             }
 
             c_loop_ub_tmp = trueCount - 1;
-            for (b_i = 0; b_i <= c_loop_ub_tmp; b_i++) {
-              changeConfigFlag_data[id2Bypass_data[b_i] - 1] =
-                AllBypassPerGroup_data[b_i];
+            for (i = 0; i <= c_loop_ub_tmp; i++) {
+              changeConfigFlag_data[id2Bypass_data[i] - 1] =
+                AllBypassPerGroup_data[i];
             }
 
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              id2Bypass_data[b_i] = (int)VecIna219_data[p_tmp_data[b_i]] - 1;
+            for (i = 0; i < trueCount; i++) {
+              id2Bypass_data[i] = (int)VecIna219_data[p_tmp_data[i]] - 1;
             }
 
-            for (b_i = 0; b_i < d_loop_ub; b_i++) {
+            for (i = 0; i < d_loop_ub; i++) {
               for (i1 = 0; i1 < d_loop_ub; i1++) {
                 for (i2 = 0; i2 < trueCount; i2++) {
                   BattConfigPerIna_data[(id2Bypass_data[i2] + b_loop_ub_tmp * i1)
-                    + b_loop_ub_tmp * d_loop_ub * b_i] = n_tmp_data[(i2 +
-                    trueCount * i1) + trueCount * d_loop_ub * b_i];
+                    + b_loop_ub_tmp * d_loop_ub * i] = n_tmp_data[(i2 +
+                    trueCount * i1) + trueCount * d_loop_ub * i];
                 }
               }
             }
 
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              id2Bypass_data[b_i] = (int)VecIna219_data[p_tmp_data[b_i]];
+            for (i = 0; i < trueCount; i++) {
+              id2Bypass_data[i] = (int)VecIna219_data[p_tmp_data[i]];
             }
 
-            for (b_i = 0; b_i <= c_loop_ub_tmp; b_i++) {
-              SelDual_data[id2Bypass_data[b_i] - 1] = outVI[b_i];
+            for (i = 0; i <= c_loop_ub_tmp; i++) {
+              SelDual_data[id2Bypass_data[i] - 1] = outVI[i];
             }
 
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              id2Bypass_data[b_i] = (int)VecIna219_data[p_tmp_data[b_i]];
+            for (i = 0; i < trueCount; i++) {
+              id2Bypass_data[i] = (int)VecIna219_data[p_tmp_data[i]];
             }
 
-            for (b_i = 0; b_i <= c_loop_ub_tmp; b_i++) {
-              switchFlag_data[id2Bypass_data[b_i] - 1] = showVdiff;
+            for (i = 0; i <= c_loop_ub_tmp; i++) {
+              switchFlag_data[id2Bypass_data[i] - 1] = showVdiff;
             }
 
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              id2Bypass_data[b_i] = (int)VecIna219_data[p_tmp_data[b_i]];
+            for (i = 0; i < trueCount; i++) {
+              id2Bypass_data[i] = (int)VecIna219_data[p_tmp_data[i]];
             }
 
-            for (b_i = 0; b_i <= c_loop_ub_tmp; b_i++) {
-              tLastToggle_data[id2Bypass_data[b_i] - 1] = o_tmp_data[b_i];
+            for (i = 0; i <= c_loop_ub_tmp; i++) {
+              tLastToggle_data[id2Bypass_data[i] - 1] = o_tmp_data[i];
             }
 
             Nina219[0] = N_bat_tmp_tmp_tmp;
             Nina219[1] = trueCount;
-            for (b_i = 0; b_i < trueCount; b_i++) {
-              id2Bypass_data[b_i] = (int)VecIna219_data[p_tmp_data[b_i]] - 1;
+            for (i = 0; i < trueCount; i++) {
+              id2Bypass_data[i] = (int)VecIna219_data[p_tmp_data[i]] - 1;
               loop_ub = Nina219[0];
               for (i1 = 0; i1 < loop_ub; i1++) {
-                BattConfigAct_data[i1 + N_bat_tmp_tmp_tmp * id2Bypass_data[b_i]]
-                  = c_VbusTest_data[i1 + Nina219[0] * b_i];
+                BattConfigAct_data[i1 + N_bat_tmp_tmp_tmp * id2Bypass_data[i]] =
+                  c_VbusTest_data[i1 + Nina219[0] * i];
               }
             }
 
@@ -6259,10 +5604,9 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           /*          SelDualVsT(:,k_t) = SelDual; */
           /*  test toggle - End */
           newState = false;
-          for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < VbusTest_size_idx_0;
-               VdebugVec_size_tmp++) {
-            if (switchFlag_data[VdebugVec_size_tmp]) {
-              SelDual_data[VdebugVec_size_tmp] = prm->brd.spi.bypass;
+          for (c_loop_ub = 0; c_loop_ub < VbusTest_size_idx_0; c_loop_ub++) {
+            if (switchFlag_data[c_loop_ub]) {
+              SelDual_data[c_loop_ub] = prm->brd.spi.bypass;
 
               /* bypass (short) */
               /*  BattConfigPerIna{k_ina219} = prm.brd.spi.bypass; */
@@ -6276,56 +5620,57 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           for (id2Bypass_size = 0; id2Bypass_size < b_size; id2Bypass_size++) {
             AllBypassPerGroup_data[id2Bypass_size] = false;
             trueCount = 0;
-            for (i = 0; i <= end_tmp; i++) {
-              if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]]) {
+            for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+              if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[loop_ub]])
+              {
                 trueCount++;
               }
             }
 
-            b_i = x->size[0] * x->size[1];
+            i = x->size[0] * x->size[1];
             x->size[0] = 1;
             x->size[1] = trueCount;
-            emxEnsureCapacity_boolean_T(x, b_i);
+            emxEnsureCapacity_boolean_T(x, i);
             b_changeConfigFlag_data = x->data;
             partialTrueCount = 0;
-            for (i = 0; i <= end_tmp; i++) {
-              if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]]) {
-                b_changeConfigFlag_data[partialTrueCount] = (SelDual_data[i] ==
-                  prm->brd.spi.bypass);
+            for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+              if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[loop_ub]])
+              {
+                b_changeConfigFlag_data[partialTrueCount] =
+                  (SelDual_data[loop_ub] == prm->brd.spi.bypass);
                 partialTrueCount++;
               }
             }
 
             showVdiff = true;
-            partialTrueCount = 1;
+            b_trueCount = 1;
             exitg2 = false;
-            while ((!exitg2) && (partialTrueCount <= x->size[1])) {
-              if (!b_changeConfigFlag_data[partialTrueCount - 1]) {
+            while ((!exitg2) && (b_trueCount <= x->size[1])) {
+              if (!b_changeConfigFlag_data[b_trueCount - 1]) {
                 showVdiff = false;
                 exitg2 = true;
               } else {
-                partialTrueCount++;
+                b_trueCount++;
               }
             }
 
             if (showVdiff) {
               trueCount = 0;
               partialTrueCount = 0;
-              for (i = 0; i <= end_tmp; i++) {
+              for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                 i4 = b_data[id2Bypass_size];
-                b_i = prm->ser.com.grp[tmp_data[i]];
-                if (i4 == b_i) {
+                i = prm->ser.com.grp[tmp_data[loop_ub]];
+                if (i4 == i) {
                   trueCount++;
-                  q_tmp_data[partialTrueCount] = (signed char)i;
+                  q_tmp_data[partialTrueCount] = (signed char)loop_ub;
                   partialTrueCount++;
                 }
               }
 
               SelDual_nm1_size[0] = 1;
               SelDual_nm1_size[1] = trueCount;
-              for (b_i = 0; b_i < trueCount; b_i++) {
-                SelDual_nm1_data[b_i] = (IshuntTest2_data[q_tmp_data[b_i]] ==
-                  0.0);
+              for (i = 0; i < trueCount; i++) {
+                SelDual_nm1_data[i] = (IshuntTest2_data[q_tmp_data[i]] == 0.0);
               }
 
               b_SelDual_nm1_data.data = &SelDual_nm1_data[0];
@@ -6336,29 +5681,29 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               if (b_any(&b_SelDual_nm1_data)) {
                 AllBypassPerGroup_data[id2Bypass_size] = true;
                 prm->seq.ins[id2Bypass_size + (state_k << 3)] = 0;
-                for (i = 0; i <= end_tmp; i++) {
-                  if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]]) {
-                    SelDual_data[i] = prm->brd.spi.disconnect;
+                for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+                  if (b_data[id2Bypass_size] == prm->
+                      ser.com.grp[tmp_data[loop_ub]]) {
+                    SelDual_data[loop_ub] = prm->brd.spi.disconnect;
                   }
                 }
               } else {
                 trueCount = 0;
                 partialTrueCount = 0;
-                for (i = 0; i <= end_tmp; i++) {
+                for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                   i4 = b_data[id2Bypass_size];
-                  b_i = prm->ser.com.grp[tmp_data[i]];
-                  if (i4 == b_i) {
+                  i = prm->ser.com.grp[tmp_data[loop_ub]];
+                  if (i4 == i) {
                     trueCount++;
-                    r_tmp_data[partialTrueCount] = (signed char)i;
+                    r_tmp_data[partialTrueCount] = (signed char)loop_ub;
                     partialTrueCount++;
                   }
                 }
 
                 SelDual_nm1_size[0] = 1;
                 SelDual_nm1_size[1] = trueCount;
-                for (b_i = 0; b_i < trueCount; b_i++) {
-                  SelDual_nm1_data[b_i] = (IshuntTest2_data[r_tmp_data[b_i]] ==
-                    1.0);
+                for (i = 0; i < trueCount; i++) {
+                  SelDual_nm1_data[i] = (IshuntTest2_data[r_tmp_data[i]] == 1.0);
                 }
 
                 c_SelDual_nm1_data.data = &SelDual_nm1_data[0];
@@ -6367,10 +5712,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 c_SelDual_nm1_data.numDimensions = 2;
                 c_SelDual_nm1_data.canFreeData = false;
                 if (b_any(&c_SelDual_nm1_data)) {
-                  for (i = 0; i <= end_tmp; i++) {
-                    if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]])
-                    {
-                      SelDual_data[i] = 1.5;
+                  for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+                    if (b_data[id2Bypass_size] == prm->
+                        ser.com.grp[tmp_data[loop_ub]]) {
+                      SelDual_data[loop_ub] = 1.5;
                     }
                   }
 
@@ -6378,20 +5723,20 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                 } else {
                   trueCount = 0;
                   partialTrueCount = 0;
-                  for (i = 0; i <= end_tmp; i++) {
+                  for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                     i4 = b_data[id2Bypass_size];
-                    b_i = prm->ser.com.grp[tmp_data[i]];
-                    if (i4 == b_i) {
+                    i = prm->ser.com.grp[tmp_data[loop_ub]];
+                    if (i4 == i) {
                       trueCount++;
-                      s_tmp_data[partialTrueCount] = (signed char)i;
+                      s_tmp_data[partialTrueCount] = (signed char)loop_ub;
                       partialTrueCount++;
                     }
                   }
 
                   SelDual_nm1_size[0] = 1;
                   SelDual_nm1_size[1] = trueCount;
-                  for (b_i = 0; b_i < trueCount; b_i++) {
-                    SelDual_nm1_data[b_i] = (IshuntTest2_data[s_tmp_data[b_i]] ==
+                  for (i = 0; i < trueCount; i++) {
+                    SelDual_nm1_data[i] = (IshuntTest2_data[s_tmp_data[i]] ==
                       1.5);
                   }
 
@@ -6403,40 +5748,40 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                   if (b_any(&d_SelDual_nm1_data)) {
                     IchargePhase2t -= prm->bat.dIphase2;
                     if (IchargePhase2t < prm->bat.minIphase2) {
-                      for (i = 0; i <= end_tmp; i++) {
+                      for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                         if (b_data[id2Bypass_size] == prm->
-                            ser.com.grp[tmp_data[i]]) {
-                          SelDual_data[i] = 1.6;
+                            ser.com.grp[tmp_data[loop_ub]]) {
+                          SelDual_data[loop_ub] = 1.6;
                         }
                       }
 
                       IchargePhase2t = IchargePhase2_tmp_tmp;
                     } else {
-                      for (i = 0; i <= end_tmp; i++) {
+                      for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                         if (b_data[id2Bypass_size] == prm->
-                            ser.com.grp[tmp_data[i]]) {
-                          SelDual_data[i] = 1.5;
+                            ser.com.grp[tmp_data[loop_ub]]) {
+                          SelDual_data[loop_ub] = 1.5;
                         }
                       }
                     }
                   } else {
                     trueCount = 0;
                     partialTrueCount = 0;
-                    for (i = 0; i <= end_tmp; i++) {
+                    for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                       i4 = b_data[id2Bypass_size];
-                      b_i = prm->ser.com.grp[tmp_data[i]];
-                      if (i4 == b_i) {
+                      i = prm->ser.com.grp[tmp_data[loop_ub]];
+                      if (i4 == i) {
                         trueCount++;
-                        t_tmp_data[partialTrueCount] = (signed char)i;
+                        t_tmp_data[partialTrueCount] = (signed char)loop_ub;
                         partialTrueCount++;
                       }
                     }
 
                     SelDual_nm1_size[0] = 1;
                     SelDual_nm1_size[1] = trueCount;
-                    for (b_i = 0; b_i < trueCount; b_i++) {
-                      SelDual_nm1_data[b_i] = (IshuntTest2_data[t_tmp_data[b_i]]
-                        == 1.6);
+                    for (i = 0; i < trueCount; i++) {
+                      SelDual_nm1_data[i] = (IshuntTest2_data[t_tmp_data[i]] ==
+                        1.6);
                     }
 
                     e_SelDual_nm1_data.data = &SelDual_nm1_data[0];
@@ -6447,10 +5792,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                     if (b_any(&e_SelDual_nm1_data)) {
                       AllBypassPerGroup_data[id2Bypass_size] = true;
                       prm->seq.ins[id2Bypass_size + (state_k << 3)] = 0;
-                      for (i = 0; i <= end_tmp; i++) {
+                      for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
                         if (b_data[id2Bypass_size] == prm->
-                            ser.com.grp[tmp_data[i]]) {
-                          SelDual_data[i] = prm->brd.spi.disconnect;
+                            ser.com.grp[tmp_data[loop_ub]]) {
+                          SelDual_data[loop_ub] = prm->brd.spi.disconnect;
                         }
                       }
                     }
@@ -6461,14 +5806,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           }
 
           showVdiff = true;
-          partialTrueCount = 1;
+          b_trueCount = 1;
           exitg2 = false;
-          while ((!exitg2) && (partialTrueCount <= AllBypassPerGroup_size[1])) {
-            if (!AllBypassPerGroup_data[partialTrueCount - 1]) {
+          while ((!exitg2) && (b_trueCount <= AllBypassPerGroup_size[1])) {
+            if (!AllBypassPerGroup_data[b_trueCount - 1]) {
               showVdiff = false;
               exitg2 = true;
             } else {
-              partialTrueCount++;
+              b_trueCount++;
             }
           }
 
@@ -6477,26 +5822,26 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
                             (prm->seq.VminDisFlag[state_k] != 0.0F))) {
             guard5 = true;
           } else {
-            b_i = x->size[0] * x->size[1];
+            i = x->size[0] * x->size[1];
             x->size[0] = 1;
             x->size[1] = SelDual->size[1];
-            emxEnsureCapacity_boolean_T(x, b_i);
+            emxEnsureCapacity_boolean_T(x, i);
             b_changeConfigFlag_data = x->data;
             loop_ub = SelDual->size[1];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              b_changeConfigFlag_data[b_i] = (SelDual_data[b_i] ==
+            for (i = 0; i < loop_ub; i++) {
+              b_changeConfigFlag_data[i] = (SelDual_data[i] ==
                 prm->brd.spi.disconnect);
             }
 
             showVdiff = true;
-            partialTrueCount = 1;
+            b_trueCount = 1;
             exitg2 = false;
-            while ((!exitg2) && (partialTrueCount <= x->size[1])) {
-              if (!b_changeConfigFlag_data[partialTrueCount - 1]) {
+            while ((!exitg2) && (b_trueCount <= x->size[1])) {
+              if (!b_changeConfigFlag_data[b_trueCount - 1]) {
                 showVdiff = false;
                 exitg2 = true;
               } else {
-                partialTrueCount++;
+                b_trueCount++;
               }
             }
 
@@ -6516,15 +5861,18 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           } else if (newState) {
             for (id2Bypass_size = 0; id2Bypass_size < b_size; id2Bypass_size++)
             {
-              for (i = 0; i <= end_tmp; i++) {
-                if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]]) {
-                  SelDual_data[i] = prm->seq.chr[id2Bypass_size + (state_k << 3)];
+              for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+                if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[loop_ub]])
+                {
+                  SelDual_data[loop_ub] = prm->seq.chr[id2Bypass_size + (state_k
+                    << 3)];
                 }
               }
 
-              for (i = 0; i <= end_tmp; i++) {
-                if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[i]]) {
-                  switchFlag_data[i] = true;
+              for (loop_ub = 0; loop_ub <= end_tmp; loop_ub++) {
+                if (b_data[id2Bypass_size] == prm->ser.com.grp[tmp_data[loop_ub]])
+                {
+                  switchFlag_data[loop_ub] = true;
                 }
               }
             }
@@ -6541,14 +5889,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
           if (k_t == prm->run.Nt) {
             keepMeas = false;
           } else {
-            partialTrueCount = tV1->size[0];
+            b_trueCount = tV1->size[0];
             loop_ub = tV1->size[0];
-            for (b_i = 0; b_i < loop_ub; b_i++) {
-              c_VbusTest_data[b_i] = (tV1_data[b_i + tV1->size[0] * k_t0] >
-                prm->run.MaxTime);
+            for (i = 0; i < loop_ub; i++) {
+              c_VbusTest_data[i] = (tV1_data[i + tV1->size[0] * k_t0] >
+                                    prm->run.MaxTime);
             }
 
-            if (ifWhileCond(c_VbusTest_data, partialTrueCount)) {
+            if (ifWhileCond(c_VbusTest_data, b_trueCount)) {
               keepMeas = false;
             }
           }
@@ -6559,14 +5907,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             d_tmp_data = rt_roundd_snf(dateVec[0]);
             if (d_tmp_data < 2.147483648E+9) {
               if (d_tmp_data >= -2.147483648E+9) {
-                b_i = (int)d_tmp_data;
+                i = (int)d_tmp_data;
               } else {
-                b_i = MIN_int32_T;
+                i = MIN_int32_T;
               }
             } else if (d_tmp_data >= 2.147483648E+9) {
-              b_i = MAX_int32_T;
+              i = MAX_int32_T;
             } else {
-              b_i = 0;
+              i = 0;
             }
 
             d_tmp_data = rt_roundd_snf(dateVec[1]);
@@ -6634,16 +5982,16 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
               id2Bypass_size = 0;
             }
 
-            m_sprintf(b_i, i1, i2, i3, c_loop_ub_tmp, id2Bypass_size, r29);
+            m_sprintf(i, i1, i2, i3, c_loop_ub_tmp, id2Bypass_size, r29);
 
             /* char(dateStr); */
-            b_i = (int)(Nina219_tmp_tmp * (double)N_bat_tmp_tmp_tmp);
+            i = (int)(Nina219_tmp_tmp * (double)N_bat_tmp_tmp_tmp);
             i1 = c_Vbat->size[0] * c_Vbat->size[1];
-            c_Vbat->size[0] = b_i;
+            c_Vbat->size[0] = i;
             c_Vbat->size[1] = N_bitCnfg;
             emxEnsureCapacity_int8_T(c_Vbat, i1);
             Vbat_data = c_Vbat->data;
-            c_loop_ub_tmp = b_i * N_bitCnfg;
+            c_loop_ub_tmp = i * N_bitCnfg;
             for (i1 = 0; i1 < c_loop_ub_tmp; i1++) {
               Vbat_data[i1] = 0;
             }
@@ -6683,31 +6031,31 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
             }
 
             i1 = c_Vbat->size[0] * c_Vbat->size[1];
-            c_Vbat->size[0] = b_i;
+            c_Vbat->size[0] = i;
             c_Vbat->size[1] = N_bitCnfg;
             emxEnsureCapacity_int8_T(c_Vbat, i1);
             Vbat_data = c_Vbat->data;
-            for (b_i = 0; b_i < c_loop_ub_tmp; b_i++) {
-              Vbat_data[b_i] = 0;
+            for (i = 0; i < c_loop_ub_tmp; i++) {
+              Vbat_data[i] = 0;
             }
 
-            b_i = tV1->size[0] * tV1->size[1];
+            i = tV1->size[0] * tV1->size[1];
             tV1->size[0] = c_Vbat->size[0];
             tV1->size[1] = c_Vbat->size[1];
-            emxEnsureCapacity_real_T(tV1, b_i);
+            emxEnsureCapacity_real_T(tV1, i);
             tV1_data = tV1->data;
-            for (b_i = 0; b_i < c_loop_ub_tmp; b_i++) {
-              tV1_data[b_i] = 0.0;
+            for (i = 0; i < c_loop_ub_tmp; i++) {
+              tV1_data[i] = 0.0;
             }
 
-            b_i = tV->size[0] * tV->size[1] * tV->size[2];
+            i = tV->size[0] * tV->size[1] * tV->size[2];
             tV->size[0] = (int)Nina219_tmp_tmp;
             tV->size[1] = N_bat_tmp_tmp_tmp;
             tV->size[2] = N_bitCnfg;
-            emxEnsureCapacity_real_T(tV, b_i);
+            emxEnsureCapacity_real_T(tV, i);
             tV_data = tV->data;
-            for (b_i = 0; b_i < end; b_i++) {
-              tV_data[b_i] = 0.0;
+            for (i = 0; i < end; i++) {
+              tV_data[i] = 0.0;
             }
 
             /*  Ishunt = zeros(Nina219,N_bat,Nt); */
@@ -6723,9 +6071,8 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       }
 
       /*  End function */
-      b_i = (int)prm->brd.Nina219;
-      for (VdebugVec_size_tmp = 0; VdebugVec_size_tmp < b_i; VdebugVec_size_tmp
-           ++) {
+      i = (int)prm->brd.Nina219;
+      for (c_loop_ub = 0; c_loop_ub < i; c_loop_ub++) {
         switch (ProjectFlag) {
          case 2:
           /* esp32 */
@@ -6733,45 +6080,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
 
          case 3:
           /* esp32 ser */
-          /* UNTITLED Summary of this function goes here */
-          /*    Detailed explanation goes here */
-          /*  if coder.target('MATLAB') */
-          /*  read current */
-          /*   chip1     |   chip2     |   chip3 */
-          /* %comN2 Port4 chip1,comN1 Port11 chip1 */
-          /* %comP1 Port18 chip1 ,comP2 Port18 chip3 */
-          /*  */
-          /*  for k_row = 1:N_row */
-          /*      out123(k_row,:) = readSPI(SPI,PortSpiRow(k_row,1),N_chip); */
-          /*      oldPortSpiRow(k_row,1:2:end) = PortSpiRow(k_row,1:2:end); */
-          /*      oldPortSpiRow(k_row,2:2:end) = out123(k_row,2:2:end); */
-          /*  end */
-          /* mask current */
-          /* write current mask */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI,oldPortSpiRowMask(k_row,:)); */
-          /*  end */
-          pause(0.001);
-
-          /* mask new */
-          /* write mask new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRowMask(k_row,:)); */
-          /*  end */
-          /* write new */
-          /*  for k_row = 1:N_row */
-          /*      write(SPI0,PortSpiRow(k_row,:)); */
-          /*  end */
-          /*  Rmsg = SPI_writeread(SPI0, PortSpiRow); */
-          /*  ReadPortSpiRow = RmsgData([[2:4] , 1] ,:); */
-          /*  ReadPortSpiRow(:,1:2:end) = ReadPortSpiRow(:,1:2:end);% - 128; */
-          /* mask current */
-          /* %chip1 Port6 Alert1, chip1 port 7 Alert3, chip1 port 8 Alert8, chip1 port 9 Alert6 */
-          /* %chip1 Port12 Alert7, chip1 Port13 Alert5, chip 1 port19 NC */
-          /* %chip1 Port20-23 NC */
-          /* chip1 Port28 Alert1, chip1 Port29 Alert2 */
-          /*  if sum(sum(sum(abs(double(PortSpiRow)-double(ReadPortSpiRow)))))>0 */
-          /*  end */
+          writePortToSpi4RowMask_ser(disConAll);
           break;
         }
       }
@@ -6781,14 +6090,14 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
       d_tmp_data = rt_roundd_snf(dateVec[0]);
       if (d_tmp_data < 2.147483648E+9) {
         if (d_tmp_data >= -2.147483648E+9) {
-          b_i = (int)d_tmp_data;
+          i = (int)d_tmp_data;
         } else {
-          b_i = MIN_int32_T;
+          i = MIN_int32_T;
         }
       } else if (d_tmp_data >= 2.147483648E+9) {
-        b_i = MAX_int32_T;
+        i = MAX_int32_T;
       } else {
-        b_i = 0;
+        i = 0;
       }
 
       d_tmp_data = rt_roundd_snf(dateVec[1]);
@@ -6856,7 +6165,7 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
         id2Bypass_size = 0;
       }
 
-      m_sprintf(b_i, i1, i2, i3, c_loop_ub_tmp, id2Bypass_size, r18);
+      m_sprintf(i, i1, i2, i3, c_loop_ub_tmp, id2Bypass_size, r18);
 
       /* char(dateStr); */
       /*  ind0 = strfind((dateStr),':'); */
@@ -6897,10 +6206,10 @@ void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   emxFree_char_T(&r13);
   emxFree_char_T(&r12);
   emxFree_char_T(&b_IshuntTest2);
-  emxFree_char_T(&d_prm);
   emxFree_char_T(&b_k_Ttest);
-  emxFree_char_T(&b_vSumMax);
+  emxFree_char_T(&d_prm);
   emxFree_char_T(&b_VbusTest2);
+  emxFree_char_T(&b_vSumMax);
   emxFree_char_T(&k_Ttest);
   emxFree_char_T(&r11);
   emxFree_char_T(&r10);

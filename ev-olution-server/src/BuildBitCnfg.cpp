@@ -5,7 +5,7 @@
  * File: BuildBitCnfg.c
  *
  * MATLAB Coder version            : 23.2
- * C/C++ source code generated on  : 12-Apr-2024 17:40:22
+ * C/C++ source code generated on  : 17-Apr-2024 18:20:59
  */
 
 /* Include Files */

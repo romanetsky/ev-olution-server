@@ -357,6 +357,29 @@ void loop() {
   Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229((struct0_T*)&r, &outStruct);
 }
 
+void init_r(struct0_T& r)
+{
+  r.Nmax = {32,2,8,32,16,32,16,32,256,1024,31,38};
+  r.run = {13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+          1,
+          false,
+          false,
+          false,
+          true,
+          false,
+          true,
+          1500,
+          1,
+          100,
+          100,
+          512,
+          false,
+          2,
+          2,4,2,4,2,4,0,0,0,0,0,0,0,0,0,0,
+        };
+
+}
+
 #pragma region argInit functions
 /* Function Definitions */
 /*

@@ -18,46 +18,46 @@
 #ifndef typedef_struct1_T
 #define typedef_struct1_T
 typedef struct {
-  short NswRepMax;
-  short NbrdMax;
-  short NgrpMax;
-  short NseqMax;
-  short NstateMax;
-  short NitstMax;
-  short NbatMax;
-  short NstrRowMax;
-  short NstrColMax;
-  short NtimeMax;
-  short NkalmanBatState;
-  short NkalmanBatParams;
+  short NswRepMax = 32;
+  short NbrdMax = 2;
+  short NgrpMax = 8;
+  short NseqMax = 32;
+  short NstateMax = 16;
+  short NitstMax = 32;
+  short NbatMax = 16;
+  short NstrRowMax = 32;
+  short NstrColMax = 256;
+  short NtimeMax = 1024;
+  short NkalmanBatState = 31;
+  short NkalmanBatParams = 38;
 } struct1_T;
 #endif /* typedef_struct1_T */
 
 #ifndef typedef_struct2_T
 #define typedef_struct2_T
 typedef struct {
-  short SwRepId[32];
-  short Nrep;
-  boolean_T PlotSocFlag;
-  boolean_T PlotItFlag;
-  boolean_T PlotTempFlag;
-  boolean_T PlotVFlag;
-  boolean_T PlotIFlag;
-  boolean_T PlotIacsFlag;
-  float MaxTime;
-  float dt;
-  short T2Show;
-  short Nt;
-  short Nt0;
-  boolean_T testVreset;
-  short seq;
+  short SwRepId[32] = {13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+  short Nrep = 1;
+  boolean_T PlotSocFlag = false;
+  boolean_T PlotItFlag = false;
+  boolean_T PlotTempFlag = false;
+  boolean_T PlotVFlag = true;
+  boolean_T PlotIFlag = false;
+  boolean_T PlotIacsFlag = true;
+  float MaxTime = 15000;
+  float dt = 1;
+  short T2Show = 100;
+  short Nt = 100;
+  short Nt0 = 512;
+  boolean_T testVreset = 0;
+  short seq = 2;
 } struct2_T;
 #endif /* typedef_struct2_T */
 
 #ifndef typedef_struct12_T
 #define typedef_struct12_T
 typedef struct {
-  short ip;
+  short ip = 0;
 } struct12_T;
 #endif /* typedef_struct12_T */
 
@@ -158,13 +158,13 @@ typedef struct {
 #ifndef typedef_struct4_T
 #define typedef_struct4_T
 typedef struct {
-  float VthDis;
-  float VthChr;
-  float VthOvDis;
-  float VthOvChr;
-  float VthUnDis;
-  float VthUnChr;
-  signed char VthFlag[16];
+  float VthDis = 48;
+  float VthChr = 31;
+  float VthOvDis = 50;
+  float VthOvChr = 32;
+  float VthUnDis = 46;
+  float VthUnChr = 30;
+  signed char VthFlag[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 } struct4_T;
 #endif /* typedef_struct4_T */
 
@@ -220,19 +220,19 @@ typedef struct {
 #ifndef typedef_struct11_T
 #define typedef_struct11_T
 typedef struct {
-  char COM_esp32[12];
-  short N_COM_esp32;
-  short grp[2];
-  short Ngrp;
-  short Nbrd;
-  short uGroups[8];
-  short NuGrp;
-  char COM_kp184[6];
-  char COM_ka6005P[6];
-  char COM_juntek[6];
-  char COM_swm[6];
-  char COM_sw16to1[6];
-  char COM_swOut[6];
+  char COM_esp32[12] = {0};
+  short N_COM_esp32 = {0};
+  short grp[2] = {0};
+  short Ngrp = {0};
+  short Nbrd = {0};
+  short uGroups[8] = {0};
+  short NuGrp = {0};
+  char COM_kp184[6] = {0};
+  char COM_ka6005P[6] = {0};
+  char COM_juntek[6] = {0};
+  char COM_swm[6] = {0};
+  char COM_sw16to1[6] = {0};
+  char COM_swOut[6] = {0};
 } struct11_T;
 #endif /* typedef_struct11_T */
 
@@ -479,13 +479,13 @@ typedef struct emxArray_uint16_T emxArray_uint16_T;
 typedef struct {
   struct11_T com;
   struct12_T wifi;
-  boolean_T kp184_Flag;
-  boolean_T ka6005p_Flag;
-  boolean_T juntek_Flag;
-  boolean_T swm_Flag;
-  boolean_T sw16to1_Flag;
-  boolean_T swOut_Flag;
-  double Esp32_v1[2];
+  boolean_T kp184_Flag = false;
+  boolean_T ka6005p_Flag = false;
+  boolean_T juntek_Flag = false;
+  boolean_T swm_Flag = false;
+  boolean_T sw16to1_Flag = false;
+  boolean_T swOut_Flag = false;
+  double Esp32_v1[2] = { 0, 0 };
 } struct10_T;
 #endif /* typedef_struct10_T */
 
@@ -518,15 +518,15 @@ typedef struct {
 #ifndef typedef_struct3_T
 #define typedef_struct3_T
 typedef struct {
-  signed char mod[16];
-  signed char chr[128];
-  float vth[16];
-  signed char ins[128];
-  signed char Nst;
-  signed char swm[16];
-  signed char sw16to1[16];
-  float VminDisFlag[16];
-  boolean_T BrdBeforePSflag[16];
+  signed char mod[16] = { 2, 4, 2, 4, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  signed char chr[128] = { 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  float vth[16] = { 1, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  signed char ins[128]= { 4, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  signed char Nst = 6;
+  signed char swm[16] = { -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  signed char sw16to1[16] = { 2, 0, 3, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  float VminDisFlag[16] = { 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  boolean_T BrdBeforePSflag[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   struct4_T pwr;
   struct5_T tst;
   struct8_T bit;

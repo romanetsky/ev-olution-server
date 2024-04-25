@@ -8,6 +8,10 @@
 //#include "CommunicatorFactory.h"
 #include "argInitRoutines.h"
 
+#include "rapidjson/document.h"
+#include "rapidjson/error/en.h"
+//#include "prm.h"
+
 #ifndef SerialBaudRate
 #define SerialBaudRate 115200
 #endif
@@ -75,6 +79,16 @@ const int sizeof_struct28_T = sizeof(struct28_T); //2328
 const int sizeof_struct29_T = sizeof(struct29_T); //24
 const int sizeof_struct30_T = sizeof(struct30_T); //24
 
+// void prm_init_nmax(struct0_T& r);
+// void prm_init_run(struct0_T& r);
+// void prm_init_seq(struct0_T& r);
+// void prm_init_ser(struct0_T& r);
+// void prm_init_ins(struct0_T& r);
+// void prm_init_klm(struct0_T& r);
+// void prm_init_bat(struct0_T& r);
+// void prm_init_brd(struct0_T& r);
+// void prm_init_cnfg(struct0_T& r);
+
 void setup() {
 //  log_d("begin setup...");
 //Serial.begin(SerialBaudRate);
@@ -115,14 +129,14 @@ void setup() {
   // SPI library init
   if (spi_lib.Init() == false)
   {
-    Serial.printf("failed init spi_lib...");
+    Serial.println("failed init spi_lib...");
     while(1);
 //    send_error(communicator, tx_buffer, OPCODE_ERROR_SPI);
   }
   // I2C library init
   if (i2c_lib.Init() == false)
   {
-    Serial.printf("failed init i2c_lib...");
+    Serial.println("failed init i2c_lib...");
     while(1);
 //    send_error(communicator, tx_buffer, OPCODE_ERROR_I2C);
   }
@@ -137,7 +151,7 @@ void setup() {
 
 //  emxInit_struct30_T(&outStruct);
 //  argInit_struct0_T(&r);
-  Serial.printf("setup finished...");
+  Serial.println("setup finished...");
 }
 
 void loop() {
@@ -348,36 +362,439 @@ void loop() {
   // // Serial.flush();
 
 //  log_d("end main loop (elapsed time %f)...", difference);
-  struct0_T r{};
-  struct30_T outStruct{};
-  Serial.printf("init input/output structures...");
-  argInit_struct0_T(&r);
+  struct0_T r;
+  struct30_T outStruct = { 0 };
+  Serial.println("init input/output structures...");
+//  argInit_struct0_T(&r);
+while(1);
+/*
+rapidjson::Document doc;
+doc.Parse(prm);
+if (doc.HasParseError())
+{
+  Serial.println(rapidjson::GetParseError_En(doc.GetParseError()));
+  delay(10);
+  while(1);
+}
+else
+{
+  // Nmax
+  if (false == doc.HasMember("Nmax"))
+  {
+    Serial.println("faile dto find 'Nmax' in prm");
+    delay(10);
+    while(1);
+  }
+  else
+  {
+    r.Nmax.NbatMax          = (short)doc["Nmax"]["NbatMax"].GetInt();
+    r.Nmax.NbrdMax          = (short)doc["Nmax"]["NbrdMax"].GetInt();
+    r.Nmax.NgrpMax          = (short)doc["Nmax"]["NgrpMax"].GetInt();
+    r.Nmax.NitstMax         = (short)doc["Nmax"]["NitstMax"].GetInt();
+    r.Nmax.NkalmanBatParams = (short)doc["Nmax"]["NkalmanBatParams"].GetInt();
+    r.Nmax.NkalmanBatState  = (short)doc["Nmax"]["NkalmanBatState"].GetInt();
+    r.Nmax.NseqMax          = (short)doc["Nmax"]["NseqMax"].GetInt();
+    r.Nmax.NstateMax        = (short)doc["Nmax"]["NstateMax"].GetInt();
+    r.Nmax.NstrColMax       = (short)doc["Nmax"]["NstrColMax"].GetInt();
+    r.Nmax.NstrRowMax       = (short)doc["Nmax"]["NstrRowMax"].GetInt();
+    r.Nmax.NswRepMax        = (short)doc["Nmax"]["NswRepMax"].GetInt();
+    r.Nmax.NtimeMax         = (short)doc["Nmax"]["NtimeMax"].GetInt();
+  }
+  // run
+  if (false == doc.HasMember("run"))
+  {
+    Serial.println("faile dto find 'run' in prm");
+    delay(10);
+    while(1);
+  }
+  else
+  {
+    r.run.Nrep			    = (short)doc["run"]["Nrep"].GetInt();
+    r.run.PlotSocFlag	  = doc["run"]["PlotSocFlag"].GetBool();
+    r.run.PlotItFlag	  = doc["run"]["PlotItFlag"].GetBool();
+    r.run.PlotTempFlag	= doc["run"]["PlotTempFlag"].GetBool();
+    r.run.PlotVFlag		  = doc["run"]["PlotVFlag"].GetBool();
+    r.run.PlotIFlag		  = doc["run"]["PlotIFlag"].GetBool();
+    r.run.PlotIacsFlag	= doc["run"]["PlotIacsFlag"].GetBool();
+    r.run.MaxTime		    = doc["run"]["MaxTime"].GetFloat();
+    r.run.dt			      = doc["run"]["dt"].GetFloat();
+    r.run.T2Show		    = (short)doc["run"]["T2Show"].GetInt();
+    r.run.Nt			      = (short)doc["run"]["Nt"].GetInt();
+    r.run.Nt0			      = (short)doc["run"]["Nt0"].GetInt();
+    r.run.testVreset	  = doc["run"]["testVreset"].GetBool();
+    r.run.seq			      = (short)doc["run"]["seq"].GetInt();
+
+    auto a = doc["run"]["SwRepId"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.run.SwRepId[k] = (short)a[k].GetInt();
+    }
+  }
+  // seq
+  if (false == doc.HasMember("seq"))
+  {
+    Serial.println("faile dto find 'seq' in prm");
+    delay(10);
+    while(1);
+  }
+  else
+  {
+    r.seq.Nst = (char)doc["seq"]["Nst"].GetInt();
+    auto a = doc["seq"]["mod"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.mod[k] = (char)a[k].GetInt();
+    }
+    a = doc["seq"]["chr"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.chr[k] = (char)a[k].GetInt();
+    }
+    a = doc["seq"]["vth"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.vth[k] = a[k].GetFloat();
+    }
+    a = doc["seq"]["ins"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.ins[k] = (char)a[k].GetInt();
+    }
+    a = doc["seq"]["swm"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.swm[k] = (char)a[k].GetInt();
+    }
+    a = doc["seq"]["sw16to1"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.sw16to1[k] = (char)a[k].GetInt();
+    }
+    a = doc["seq"]["VminDisFlag"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.VminDisFlag[k] = a[k].GetFloat();
+    }
+    a = doc["seq"]["BrdBeforePSflag"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.BrdBeforePSflag[k] = a[k].GetBool();
+    }
+    auto obj = doc["seq"]["pwr"].GetObject();
+    r.seq.pwr.VthDis = obj["VthDis"].GetFloat();
+    r.seq.pwr.VthChr = obj["VthChr"].GetFloat();
+    r.seq.pwr.VthOvDis = obj["VthOvDis"].GetFloat();
+    r.seq.pwr.VthOvChr = obj["VthOvChr"].GetFloat();
+    r.seq.pwr.VthUnDis = obj["VthUnDis"].GetFloat();
+    r.seq.pwr.VthUnChr = obj["VthUnChr"].GetFloat();
+    a = obj["VthFlag"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.pwr.VthFlag[k] = (char)a[k].GetInt();
+    }
+    obj = doc["seq"]["tst"].GetObject();
+    r.seq.tst.savePrmFlag = obj["savePrmFlag"].GetBool();
+    r.seq.tst.v.isTest = obj["v"]["isTest"].GetBool();
+    r.seq.tst.v.isPrm = obj["v"]["isPrm"].GetBool();
+    r.seq.tst.v.Nst = (char)obj["v"]["Nst"].GetInt();
+    a = obj["v"]["ins"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.v.ins[k] = (char)a[k].GetInt();
+    }
+    a = obj["v"]["swm"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.v.swm[k] = (char)a[k].GetInt();
+    }
+    a = obj["v"]["sw16to1"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.v.sw16to1[k] = (char)a[k].GetInt();
+    }
+    a = obj["v"]["grp"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.v.grp[k] = (char)a[k].GetInt();
+    }
+
+    r.seq.tst.i.isTest = obj["i"]["isTest"].GetBool();
+    r.seq.tst.i.NTtest = (char)obj["i"]["NTtest"].GetInt();
+    r.seq.tst.i.minI = obj["i"]["minI"].GetFloat();
+    r.seq.tst.i.maxI = obj["i"]["maxI"].GetFloat();
+    r.seq.tst.i.Nitst = (char)obj["i"]["Nitst"].GetInt();
+    r.seq.tst.i.pauseOff = obj["i"]["maxI"].GetFloat();
+    r.seq.tst.i.measRintR = obj["i"]["measRintR"].GetBool();
+    r.seq.tst.i.useRwireFlag = obj["i"]["useRwireFlag"].GetBool();
+    r.seq.tst.i.RintBatId = (char)obj["i"]["RintBatId"].GetInt();
+    r.seq.tst.i.Rload = obj["i"]["Rload"].GetFloat();
+    r.seq.tst.i.Nst = (char)obj["i"]["Nst"].GetInt();
+
+    a = obj["i"]["BrdBeforePSflag"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.BrdBeforePSflag[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["NegIflag"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.NegIflag[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["ins"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.ins[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["meas"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.meas[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["swm"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.swm[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["sw16to1"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.sw16to1[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["grp"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.grp[k] = (char)a[k].GetInt();
+    }
+    a = obj["i"]["Rin"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.Rin[k] = a[k].GetFloat();
+    }
+    a = obj["i"]["i_in_test"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.i_in_test[k] = a[k].GetFloat();
+    }
+    a = obj["i"]["ItestSwitch"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.tst.i.ItestSwitch[k] = (char)a[k].GetInt();
+    }
+
+    obj = doc["seq"]["bit"].GetObject();
+    r.seq.bit.bit_flag = obj["bit_flag"].GetBool();
+    r.seq.bit.Nst = (char)obj["Nst"].GetInt();
+    r.seq.bit.dIthr = obj["dIthr"].GetFloat();
+    r.seq.bit.dVthr = obj["dVthr"].GetFloat();
+    a = obj["BrdBeforePSflag"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.BrdBeforePSflag[k] = (char)a[k].GetInt();
+    }
+    a = obj["chr"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.chr[k] = (char)a[k].GetInt();
+    }
+    a = obj["IdisChr"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.IdisChr[k] = a[k].GetFloat();
+    }
+    a = obj["ins"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.ins[k] = (char)a[k].GetInt();
+    }
+    a = obj["swm"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.swm[k] = (char)a[k].GetInt();
+    }
+    a = obj["sw16to1"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.sw16to1[k] = (char)a[k].GetInt();
+    }
+    a = obj["meas"]["V"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.meas.V[k] = (char)a[k].GetInt();
+    }
+    a = obj["meas"]["b_I"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.meas.b_I[k] = (char)a[k].GetInt();
+    }
+    a = obj["meas"]["Vd"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.seq.bit.meas.Vd[k] = a[k].GetFloat();
+    }
+  }
+  // ser
+  if (false == doc.HasMember("ser"))
+  {
+    Serial.println("faile dto find 'ser' in prm");
+    delay(10);
+    while(1);
+  }
+  else
+  {
+    r.ser.kp184_Flag	  = doc["ser"]["kp184_Flag"].GetBool();
+    r.ser.ka6005p_Flag  = doc["ser"]["ka6005p_Flag"].GetBool();
+    r.ser.juntek_Flag   = doc["ser"]["juntek_Flag"].GetBool();
+    r.ser.swm_Flag      = doc["ser"]["swm_Flag"].GetBool();
+    r.ser.sw16to1_Flag  = doc["ser"]["sw16to1_Flag"].GetBool();
+    r.ser.swOut_Flag    = doc["ser"]["swOut_Flag"].GetBool();
+    auto a = doc["ser"]["Esp32_v1"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.Esp32_v1[k] = a[k].GetDouble();
+    }
+    auto obj = doc["ser"]["com"].GetObject();
+    r.ser.com.N_COM_esp32 = (short)obj["N_COM_esp32"].GetInt();
+    r.ser.com.Ngrp = (short)obj["Ngrp"].GetInt();
+    r.ser.com.Nbrd = (short)obj["Nbrd"].GetInt();
+    r.ser.com.NuGrp = (short)obj["NuGrp"].GetInt();
+    a = obj["COM_esp32"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_esp32[k] = (char)a[k].GetInt();
+    }
+    a = obj["grp"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.grp[k] = (short)a[k].GetInt();
+    }
+    a = obj["uGroups"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.uGroups[k] = (short)a[k].GetInt();
+    }
+    a = obj["COM_kp184"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_kp184[k] = (char)a[k].GetInt();
+    }
+    a = obj["COM_ka6005P"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_ka6005P[k] = (char)a[k].GetInt();
+    }
+    a = obj["COM_juntek"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_juntek[k] = (char)a[k].GetInt();
+    }
+    a = obj["COM_swm"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_swm[k] = (char)a[k].GetInt();
+    }
+    a = obj["COM_sw16to1"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_sw16to1[k] = (char)a[k].GetInt();
+    }
+    a = obj["COM_swOut"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k ++)
+    {
+      r.ser.com.COM_swOut[k] = (char)a[k].GetInt();
+    }
+    obj = doc["ser"]["wifi"].GetObject();
+    r.ser.wifi.ip = (short)obj["ip"].GetInt();
+  }
+  // ins
+  if (false == doc.HasMember("ins"))
+  {
+    Serial.println("faile dto find 'ins' in prm");
+    delay(10);
+    while(1);
+  }
+  else
+  {
+    r.ins.juntek	    = doc["ins"]["juntek"].GetBool();
+    r.ins.ka6005p		  = doc["ins"]["ka6005p"].GetBool();
+    r.ins.kp184		    = doc["ins"]["kp184"].GetBool();
+    r.ins.swm		      = doc["ins"]["swm"].GetBool();
+    r.ins.sw16to1		  = doc["ins"]["sw16to1"].GetBool();
+    r.ins.swOut		    = doc["ins"]["swOut"].GetBool();
+    r.ins.ProjectFlag = (char)doc["ins"]["ProjectFlag"].GetInt();
+    auto obj = doc["ins"]["prm"].GetObject();
+    auto obj1 = obj["jun"].GetObject();
+    r.ins.prm.jun.ImaxAcDC = obj1["ImaxAcDC"].GetFloat();
+    r.ins.prm.jun.minVjuntekInput = obj1["minVjuntekInput"].GetFloat();
+    r.ins.prm.jun.juntekEfficencyFactor = obj1["juntekEfficencyFactor"].GetFloat();
+    r.ins.prm.jun.baudrate = obj1["baudrate"].GetFloat();
+    obj1 = obj["sw16to1"].GetObject();
+    r.ins.prm.sw16to1.Ntry = (char)obj1["Ntry"].GetInt();
+    obj1 = obj["swOut"].GetObject();
+    r.ins.prm.swOut.IfromVdivR_flag = obj1["IfromVdivR_flag"].GetBool();
+    r.ins.prm.swOut.Rshunt = obj1["Rshunt"].GetFloat();
+    r.ins.prm.swOut.Vratio = obj1["Vratio"].GetFloat();;
+  }
+  // klm
+  if (false == doc.HasMember("klm"))
+  {
+    Serial.println("faile dto find 'klm' in prm");
+    delay(10);
+    while(1);
+  }
+  else
+  {
+    r.klm.kalmanFlag	    = doc["klm"]["kalmanFlag"].GetBool();
+    r.klm.Ta              = doc["klm"]["Ta"].GetFloat();
+    auto a = doc["klm"]["BatParamsCell"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k++)
+    {
+      auto obj = a[k].GetObject();
+      auto arr = obj["BatState"].GetArray();
+      for (rapidjson::SizeType n = 0; n < arr.Size(); n++)
+      {
+        r.klm.BatParamsCell[k].BatState[n] = arr[n].GetFloat();
+      }
+      arr = obj["BatParams"].GetArray();
+      for (rapidjson::SizeType n = 0; n < arr.Size(); n++)
+      {
+        r.klm.BatParamsCell[k].BatParams[n] = arr[n].GetFloat();
+      }
+      arr = obj["BatStateOrg"].GetArray();
+      for (rapidjson::SizeType n = 0; n < arr.Size(); n++)
+      {
+        r.klm.BatParamsCell[k].BatStateOrg[n] = arr[n].GetFloat();
+      }
+    }
+    a = doc["klm"]["b_struct"].GetArray();
+    for (rapidjson::SizeType k = 0; k < a.Size(); k++)
+    {
+      auto obj = a[k].GetObject();
+      r.klm.b_struct[k].eps1 = obj["eps1"].GetFloat();
+      r.klm.b_struct[k].Qkalman = obj["Qkalman"].GetFloat();
+      r.klm.b_struct[k].Rkalman = obj["Rkalman"].GetFloat();
+      r.klm.b_struct[k].N_bat = (short)obj["Rkalman"].GetInt();
+      auto arr = obj["P_k_k"].GetArray();
+      for (rapidjson::SizeType n = 0; n < arr.Size(); n++)
+      {
+        r.klm.b_struct[k].P_k_k[n] = arr[n].GetFloat();
+      }
+      arr = obj["BatState_k_k"].GetArray();
+      for (rapidjson::SizeType n = 0; n < arr.Size(); n++)
+      {
+        r.klm.b_struct[k].BatState_k_k[n] = arr[n].GetFloat();
+      }
+      arr = obj["BatParams"].GetArray();
+      for (rapidjson::SizeType n = 0; n < arr.Size(); n++)
+      {
+        r.klm.b_struct[k].BatParams[n] = arr[n].GetFloat();
+      }
+    }
+  }
+}
+*/
   emxInit_struct30_T(&outStruct);
   Serial.printf("enter main procedure...");
   Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229((struct0_T*)&r, &outStruct);
-}
-
-void init_r(struct0_T& r)
-{
-  r.Nmax = {32,2,8,32,16,32,16,32,256,1024,31,38};
-  r.run = {13,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-          1,
-          false,
-          false,
-          false,
-          true,
-          false,
-          true,
-          1500,
-          1,
-          100,
-          100,
-          512,
-          false,
-          2,
-          2,4,2,4,2,4,0,0,0,0,0,0,0,0,0,0,
-        };
-
 }
 
 #pragma region argInit functions

@@ -1,0 +1,17 @@
+#include "Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229_types.h"
+
+void prm_init_nmax(struct0_T& r)
+{
+r.Nmax.NswRepMax = 32;
+r.Nmax.NbrdMax = 2;
+r.Nmax.NgrpMax = 8;
+r.Nmax.NseqMax = 32;
+r.Nmax.NstateMax = 16;
+r.Nmax.NitstMax = 32;
+r.Nmax.NbatMax = 16;
+r.Nmax.NstrRowMax = 32;
+r.Nmax.NstrColMax = 256;
+r.Nmax.NtimeMax = 1024;
+r.Nmax.NkalmanBatState = 31;
+r.Nmax.NkalmanBatParams = 38;
+}

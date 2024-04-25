@@ -1,0 +1,14 @@
+#include "Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229_types.h"
+
+void prm_init_ser(struct0_T& r)
+{
+r.ser.wifi.ip = 0;
+r.ser.kp184_Flag = 0;
+r.ser.ka6005p_Flag = 0;
+r.ser.juntek_Flag = 0;
+r.ser.swm_Flag = 0;
+r.ser.sw16to1_Flag = 0;
+r.ser.swOut_Flag = 0;
+r.ser.Esp32_v1[0] = 0;
+r.ser.Esp32_v1[1] = 0;
+}

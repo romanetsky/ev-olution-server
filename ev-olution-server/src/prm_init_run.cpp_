@@ -1,0 +1,51 @@
+#include "Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229_types.h"
+
+void prm_init_run(struct0_T& r)
+{
+r.run.SwRepId[0] = 13;
+r.run.SwRepId[1] = -1;
+r.run.SwRepId[2] = -1;
+r.run.SwRepId[3] = -1;
+r.run.SwRepId[4] = -1;
+r.run.SwRepId[5] = -1;
+r.run.SwRepId[6] = -1;
+r.run.SwRepId[7] = -1;
+r.run.SwRepId[8] = -1;
+r.run.SwRepId[9] = -1;
+r.run.SwRepId[10] = -1;
+r.run.SwRepId[11] = -1;
+r.run.SwRepId[12] = -1;
+r.run.SwRepId[13] = -1;
+r.run.SwRepId[14] = -1;
+r.run.SwRepId[15] = -1;
+r.run.SwRepId[16] = -1;
+r.run.SwRepId[17] = -1;
+r.run.SwRepId[18] = -1;
+r.run.SwRepId[19] = -1;
+r.run.SwRepId[20] = -1;
+r.run.SwRepId[21] = -1;
+r.run.SwRepId[22] = -1;
+r.run.SwRepId[23] = -1;
+r.run.SwRepId[24] = -1;
+r.run.SwRepId[25] = -1;
+r.run.SwRepId[26] = -1;
+r.run.SwRepId[27] = -1;
+r.run.SwRepId[28] = -1;
+r.run.SwRepId[29] = -1;
+r.run.SwRepId[30] = -1;
+r.run.SwRepId[31] = -1;
+r.run.Nrep = 1;
+r.run.PlotSocFlag = 0;
+r.run.PlotItFlag = 0;
+r.run.PlotTempFlag = 0;
+r.run.PlotVFlag = 1;
+r.run.PlotIFlag = 0;
+r.run.PlotIacsFlag = 1;
+r.run.MaxTime = 15000;
+r.run.dt = 1;
+r.run.T2Show = 100;
+r.run.Nt = 100;
+r.run.Nt0 = 512;
+r.run.testVreset = 0;
+r.run.seq = 2;
+}

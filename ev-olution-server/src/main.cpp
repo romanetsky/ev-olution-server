@@ -362,11 +362,13 @@ void loop() {
   // // Serial.flush();
 
 //  log_d("end main loop (elapsed time %f)...", difference);
-  struct0_T r;
+  struct0_T* r = new struct0_T;
   struct30_T outStruct = { 0 };
   Serial.println("init input/output structures...");
 //  argInit_struct0_T(&r);
-while(1);
+// delay(10);
+// while(1);
+
 /*
 rapidjson::Document doc;
 doc.Parse(prm);
@@ -794,7 +796,11 @@ else
 */
   emxInit_struct30_T(&outStruct);
   Serial.printf("enter main procedure...");
-  Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229((struct0_T*)&r, &outStruct);
+  delay(10);
+
+  Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(r, &outStruct);
+  
+  delete r;
 }
 
 #pragma region argInit functions

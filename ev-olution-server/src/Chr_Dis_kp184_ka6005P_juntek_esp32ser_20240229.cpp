@@ -280,9 +280,9 @@ static float rt_roundf_snf(float u)
 void Chr_Dis_kp184_ka6005P_juntek_esp32ser_20240229(struct0_T *prm, struct30_T
   *outStruct)
 {
-  static unsigned char bitCnfg_data[32768];
-  static unsigned char c_y_data[32767];
-  static signed char j_tmp_data[32767];
+  /*static */unsigned char bitCnfg_data[32768];
+  /*static */unsigned char c_y_data[32767];
+  /*static */signed char j_tmp_data[32767];
   emxArray_boolean_T b_AllBypassPerGroup_data;
   emxArray_boolean_T b_SelDual_nm1_data;
   emxArray_boolean_T c_SelDual_nm1_data;
